@@ -78,6 +78,7 @@ public class ElasticSearchIndexerDao implements Closeable {
     createIndexRequestBuilder
         .addMapping(config.getElasticsearchDocType(), config.getDocumentMapping(),
             XContentType.JSON);
+
     CreateIndexRequest indexRequest = createIndexRequestBuilder.request();
     getClient().admin().indices().create(indexRequest).actionGet();
   }
