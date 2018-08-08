@@ -78,8 +78,6 @@ public class ElasticSearchIndexerDao implements Closeable {
     createIndexRequestBuilder
         .addMapping(config.getElasticsearchDocType(), config.getDocumentMapping(),
             XContentType.JSON);
-    LOGGER.warn("  createIndex index settings [{}]", config.getIndexSettings());
-    LOGGER.warn("  createIndex with document mapping [{}]", config.getDocumentMapping());
     CreateIndexRequest indexRequest = createIndexRequestBuilder.request();
     getClient().admin().indices().create(indexRequest).actionGet();
   }
@@ -99,7 +97,7 @@ public class ElasticSearchIndexerDao implements Closeable {
       try {
         // Give Elasticsearch a moment to catch its breath.
         // Thread.currentThread().wait(2000L); // thread monitor error
-        Thread.sleep(100000L);
+        Thread.sleep(20000L);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         LOGGER.warn("Interrupted!");
