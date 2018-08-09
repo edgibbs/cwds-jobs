@@ -98,7 +98,7 @@ public class ElasticSearchIndexerDao implements Closeable {
       try {
         // Give Elasticsearch a moment to catch its breath.
         // Thread.currentThread().wait(2000L); // thread monitor error
-        Thread.sleep(2000L);
+        Thread.sleep(20000L);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         LOGGER.warn("Interrupted!");
