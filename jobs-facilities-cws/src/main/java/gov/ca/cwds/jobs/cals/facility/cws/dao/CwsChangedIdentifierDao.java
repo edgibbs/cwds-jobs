@@ -43,6 +43,36 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
         pageRequest);
   }
 
+  public LocalDateTime getFirstChangedTimestampForInitialLoad(LocalDateTime timeStampAfter) {
+    return getFirstChangedTimestamp(
+        timeStampAfter,
+        CwsChangedIdentifier.CWSCMS_INITIAL_LOAD_GET_FIRST_CHANGED_TIMESTAMP_QUERY_NAME);
+  }
+
+  public LocalDateTime getFirstChangedTimestampForIncrementalLoad(LocalDateTime timeStampAfter) {
+    return getFirstChangedTimestamp(
+        timeStampAfter,
+        CwsChangedIdentifier.CWSCMS_INCREMENTAL_LOAD_GET_FIRST_CHANGED_TIMESTAMP_QUERY_NAME);
+  }
+
+  public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>>
+      getIdentifiersBeforeTimestampForInitialLoad(LocalDateTime timeStampBefore, int offset) {
+    return getIdentifiersBeforeTimestamp(
+        timeStampBefore,
+        offset,
+        CwsChangedIdentifier
+            .CWSCMS_INITIAL_LOAD_GET_IDENTIFIERS_BEFORE_CHANGED_TIMESTAMP_QUERY_NAME);
+  }
+
+  public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>>
+      getIdentifiersBeforeTimestampForIncrementalLoad(LocalDateTime timeStampBefore, int offset) {
+    return getIdentifiersBeforeTimestamp(
+        timeStampBefore,
+        offset,
+        CwsChangedIdentifier
+            .CWSCMS_INCREMENTAL_LOAD_GET_IDENTIFIERS_BEFORE_CHANGED_TIMESTAMP_QUERY_NAME);
+  }
+
   @SuppressWarnings("unchecked")
   private List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getCwsChangedIdentifiers(
       LocalDateTime timeStampAfter,
@@ -51,7 +81,26 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
         .setParameter("dateAfter", timeStampAfter)
         .setMaxResults(pageRequest.getLimit())
         .setFirstResult(pageRequest.getOffset())
-        .setReadOnly(true).list();
+        .setReadOnly(true)
+        .list();
   }
 
+  private LocalDateTime getFirstChangedTimestamp(LocalDateTime timeStampAfter, final String query) {
+    return currentSession()
+        .createNamedQuery(query, LocalDateTime.class)
+        .setParameter("dateAfter", timeStampAfter)
+        .setReadOnly(true)
+        .uniqueResult();
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>>
+      getIdentifiersBeforeTimestamp(LocalDateTime timeStampBefore, int offset, String query) {
+    return currentSession()
+        .createNamedQuery(query)
+        .setParameter("dateBefore", timeStampBefore)
+        .setFirstResult(offset)
+        .setReadOnly(true)
+        .list();
+  }
 }

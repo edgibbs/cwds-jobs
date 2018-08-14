@@ -6,6 +6,7 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.cals.Constants;
 import gov.ca.cwds.cals.Constants.UnitOfWork;
+import gov.ca.cwds.cals.inject.AbstractInjectProvider;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.cals.inject.CwsFacilityServiceProvider;
 import gov.ca.cwds.cals.service.CwsFacilityService;
@@ -65,21 +66,18 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
   protected void configure() {
     super.configure();
     bind(Job.class).to(CwsFacilityJob.class);
-    bind(new TypeLiteral<JobModeService<DefaultJobMode>>() {
-    }).to(LocalDateTimeDefaultJobModeService.class);
+    bind(new TypeLiteral<JobModeService<DefaultJobMode>>() {})
+        .to(LocalDateTimeDefaultJobModeService.class);
     bindJobModeImplementor();
-    bind(
-        new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
-        }).to(LocalDateTimeSavePointContainerService.class);
-    bind(new TypeLiteral<SavePointService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
-    }).toProvider(CwsTimestampSavePointServiceProvider.class);
+    bind(new TypeLiteral<SavePointContainerService<
+        TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {})
+        .to(LocalDateTimeSavePointContainerService.class);
+    bind(new TypeLiteral<SavePointService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {})
+        .toProvider(CwsTimestampSavePointServiceProvider.class);
     bind(CwsTimestampSavePointService.class).toProvider(CwsTimestampSavePointServiceProvider.class);
-    bind(
-        new TypeLiteral<ChangedEntitiesIdentifiersService<TimestampSavePoint<LocalDateTime>>>() {
-        }).toProvider(CwsChangedIdentifiersServiceProvider.class);
     bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
-    bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {
-    }).to(CwsChangedFacilityService.class);
+    bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {})
+        .to(CwsChangedFacilityService.class);
     bind(CountyOwnershipMapper.class).to(CountyOwnershipMapper.INSTANCE.getClass())
         .asEagerSingleton();
     bind(ExternalInterfaceMapper.class).to(ExternalInterfaceMapper.INSTANCE.getClass())
@@ -89,7 +87,12 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
   }
 
   private void bindJobModeImplementor() {
-    Class<? extends JobModeImplementor<ChangedFacilityDto, TimestampSavePoint<LocalDateTime>, DefaultJobMode>> clazz = null;
+    Class<? extends JobModeImplementor<
+                    ChangedFacilityDto, TimestampSavePoint<LocalDateTime>, DefaultJobMode>>
+        jobImplementorClass = null;
+    Class<? extends AbstractInjectProvider<
+                    ? extends ChangedEntitiesIdentifiersService<TimestampSavePoint<LocalDateTime>>>>
+        cwsChangedIdentifiersServiceProviderClass = null;
 
     LocalDateTimeDefaultJobModeService timestampDefaultJobModeService =
         new LocalDateTimeDefaultJobModeService();
@@ -98,18 +101,26 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
     timestampDefaultJobModeService.setSavePointContainerService(savePointContainerService);
     switch (timestampDefaultJobModeService.getCurrentJobMode()) {
       case INITIAL_LOAD:
-        clazz = CwsJobInitialModeImplementor.class;
+        jobImplementorClass = CwsJobInitialModeImplementor.class;
+        cwsChangedIdentifiersServiceProviderClass =
+            CwsInitialLoadChangedIdentifiersServiceProvider.class;
         break;
       case INITIAL_LOAD_RESUME:
-        clazz = CwsJobInitialResumeModeImplementor.class;
+        jobImplementorClass = CwsJobInitialResumeModeImplementor.class;
+        cwsChangedIdentifiersServiceProviderClass =
+            CwsInitialResumeLoadChangedIdentifiersServiceProvider.class;
         break;
       case INCREMENTAL_LOAD:
-        clazz = CwsJobIncrementalModeImplementor.class;
+        jobImplementorClass = CwsJobIncrementalModeImplementor.class;
+        cwsChangedIdentifiersServiceProviderClass =
+            CwsIncrementalLoadChangedIdentifiersServiceProvider.class;
         break;
     }
-    bind(
-        new TypeLiteral<JobModeImplementor<ChangedFacilityDto, TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
-        }).to(clazz);
+    bind(new TypeLiteral<JobModeImplementor<
+                ChangedFacilityDto, TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {})
+        .to(jobImplementorClass);
+    bind(new TypeLiteral<ChangedEntitiesIdentifiersService<TimestampSavePoint<LocalDateTime>>>() {})
+        .toProvider(cwsChangedIdentifiersServiceProviderClass);
   }
 
   @Provides

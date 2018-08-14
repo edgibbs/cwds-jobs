@@ -26,8 +26,7 @@ public class TimestampInitialResumeModeImplementor<E> extends
       PageRequest pageRequest) {
     TimestampSavePoint<LocalDateTime> savePoint = loadSavePoint(
         LocalDateTimeSavePointContainer.class);
-    return changedEntitiesIdentifiersService
-        .getIdentifiersForResumingInitialLoad(savePoint, pageRequest);
+    return changedEntitiesIdentifiersService.getIdentifiers(savePoint, pageRequest);
   }
 
   @Override
