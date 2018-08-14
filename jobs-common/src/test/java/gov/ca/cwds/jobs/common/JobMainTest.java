@@ -43,21 +43,17 @@ public class JobMainTest {
 
   private static final String BROKEN_ENTITY_ID = "brokenEntityId";
 
-  private ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> id1 = new TimestampIdentifier<>(
-      "1",
-      new LocalDateTimeSavePoint(FIRST_TIMESTAMP));
-  private ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> id2 = new TimestampIdentifier<>(
-      "2",
-      new LocalDateTimeSavePoint(SECOND_TIMESTAMP));
-  private ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> id3 = new TimestampIdentifier<>(
-      "3",
-      new LocalDateTimeSavePoint(THIRD_TIMESTAMP));
-  private ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> id4 = new TimestampIdentifier<>(
-      "4",
-      new LocalDateTimeSavePoint(FOURTH_TIMESTAMP));
-  private ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> brokenEntityId = new TimestampIdentifier<>(
-      BROKEN_ENTITY_ID,
-      new LocalDateTimeSavePoint(LocalDateTime.of(2017, 1, 1, 1, 1)));
+  private ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> id1 =
+      new TimestampIdentifier<>("1", new LocalDateTimeSavePoint(FIRST_TIMESTAMP));
+  private ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> id2 =
+      new TimestampIdentifier<>("2", new LocalDateTimeSavePoint(SECOND_TIMESTAMP));
+  private ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> id3 =
+      new TimestampIdentifier<>("3", new LocalDateTimeSavePoint(THIRD_TIMESTAMP));
+  private ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> id4 =
+      new TimestampIdentifier<>("4", new LocalDateTimeSavePoint(FOURTH_TIMESTAMP));
+  private ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> brokenEntityId =
+      new TimestampIdentifier<>(
+          BROKEN_ENTITY_ID, new LocalDateTimeSavePoint(LocalDateTime.of(2014, 1, 1, 1, 1)));
 
   private TestEntity entity1 = new TestEntity("1", FIRST_TIMESTAMP);
   private TestEntity entity2 = new TestEntity("2", SECOND_TIMESTAMP);
@@ -66,8 +62,8 @@ public class JobMainTest {
 
   @Test
   public void happyPathTest() {
-    List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> identifiers = new ArrayList<>(
-        Arrays.asList(id1, id2, id3, id4));
+    List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> identifiers =
+        new ArrayList<>(Arrays.asList(id1, id2, id3, id4));
     List<TestEntity> entities = new ArrayList<>(Arrays.asList(entity1, entity2, entity3, entity4));
     runInitialJob(identifiers, entities);
     assertEquals(4, TestEntityWriter.getItems().size());
@@ -76,15 +72,16 @@ public class JobMainTest {
     assertEquals(entity3, TestEntityWriter.getItems().get(2));
     assertEquals(entity4, TestEntityWriter.getItems().get(3));
     LocalDateTimeSavePointContainer savePointContainer =
-        (LocalDateTimeSavePointContainer) savePointContainerService
-            .readSavePointContainer(LocalDateTimeSavePointContainer.class);
+        (LocalDateTimeSavePointContainer)
+            savePointContainerService.readSavePointContainer(LocalDateTimeSavePointContainer.class);
     assertEquals(FOURTH_TIMESTAMP, savePointContainer.getSavePoint().getTimestamp());
     assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
     System.out.println("-------------------------------------------------------------------------");
     runIncrementalJob(identifiers, entities);
     assertEquals(0, TestEntityWriter.getItems().size());
-    savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
-        .readSavePointContainer(LocalDateTimeSavePointContainer.class);
+    savePointContainer =
+        (LocalDateTimeSavePointContainer)
+            savePointContainerService.readSavePointContainer(LocalDateTimeSavePointContainer.class);
     assertEquals(FOURTH_TIMESTAMP, savePointContainer.getSavePoint().getTimestamp());
     assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
     LocalDateTime now = LocalDateTime.now();
@@ -93,8 +90,9 @@ public class JobMainTest {
     runIncrementalJob(identifiers, entities);
     assertEquals(1, TestEntityWriter.getItems().size());
     assertEquals(new TestEntity("incrementalId", now), TestEntityWriter.getItems().get(0));
-    savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
-        .readSavePointContainer(LocalDateTimeSavePointContainer.class);
+    savePointContainer =
+        (LocalDateTimeSavePointContainer)
+            savePointContainerService.readSavePointContainer(LocalDateTimeSavePointContainer.class);
     assertEquals(now, savePointContainer.getSavePoint().getTimestamp());
     assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
   }
@@ -102,8 +100,8 @@ public class JobMainTest {
   @Test(expected = JobsException.class)
   public void initialModeFailsAtOnceTest() {
     try {
-      List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> identifiers = new ArrayList<>(
-          Collections.singletonList(brokenEntityId));
+      List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> identifiers =
+          new ArrayList<>(Collections.singletonList(brokenEntityId));
       List<TestEntity> entities = Collections.emptyList();
       runInitialJob(identifiers, entities);
     } finally {
@@ -113,16 +111,18 @@ public class JobMainTest {
 
   @Test
   public void initialModeCrushTest() {
-    List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> identifiers = new ArrayList<>(
-        Arrays.asList(id1, id2, brokenEntityId, id3));
+    List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> identifiers =
+        new ArrayList<>(Arrays.asList(id1, id2, brokenEntityId, id3));
     List<TestEntity> entities = new ArrayList<>(Arrays.asList(entity1, entity2, entity3));
     try {
       runInitialJob(identifiers, entities);
     } catch (JobsException e) {
       assertEquals("java.lang.RuntimeException: Broken entity!!!", e.getCause().getMessage());
       assertEquals(2, TestEntityWriter.getItems().size());
-      LocalDateTimeSavePointContainer savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
-          .readSavePointContainer(LocalDateTimeSavePointContainer.class);
+      LocalDateTimeSavePointContainer savePointContainer =
+          (LocalDateTimeSavePointContainer)
+              savePointContainerService.readSavePointContainer(
+                  LocalDateTimeSavePointContainer.class);
       assertEquals(SECOND_TIMESTAMP, savePointContainer.getSavePoint().getTimestamp());
       assertEquals(INITIAL_LOAD, savePointContainer.getJobMode());
       assertEquals(entity1, TestEntityWriter.getItems().get(0));
@@ -130,8 +130,9 @@ public class JobMainTest {
     }
     identifiers.remove(brokenEntityId);
     runResumeInitialJob(identifiers, entities);
-    LocalDateTimeSavePointContainer savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
-        .readSavePointContainer(LocalDateTimeSavePointContainer.class);
+    LocalDateTimeSavePointContainer savePointContainer =
+        (LocalDateTimeSavePointContainer)
+            savePointContainerService.readSavePointContainer(LocalDateTimeSavePointContainer.class);
     assertEquals(THIRD_TIMESTAMP, savePointContainer.getSavePoint().getTimestamp());
     assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
     assertEquals(1, TestEntityWriter.getItems().size());
@@ -140,20 +141,22 @@ public class JobMainTest {
 
   @Test
   public void incrementalModeCrushTest() {
-    List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> identifiers = new ArrayList<>(
-        Collections.singletonList(id2));
+    List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> identifiers =
+        new ArrayList<>(Collections.singletonList(id2));
     List<TestEntity> entities = new ArrayList<>(Arrays.asList(entity1, entity2, entity3, entity4));
     runInitialJob(identifiers, entities);
-    LocalDateTimeSavePointContainer savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
-        .readSavePointContainer(LocalDateTimeSavePointContainer.class);
+    LocalDateTimeSavePointContainer savePointContainer =
+        (LocalDateTimeSavePointContainer)
+            savePointContainerService.readSavePointContainer(LocalDateTimeSavePointContainer.class);
     assertEquals(SECOND_TIMESTAMP, savePointContainer.getSavePoint().getTimestamp());
     assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
     assertEquals(1, TestEntityWriter.getItems().size());
     assertEquals(entity2, TestEntityWriter.getItems().get(0));
     identifiers.add(id3);
     runIncrementalJob(identifiers, entities);
-    savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
-        .readSavePointContainer(LocalDateTimeSavePointContainer.class);
+    savePointContainer =
+        (LocalDateTimeSavePointContainer)
+            savePointContainerService.readSavePointContainer(LocalDateTimeSavePointContainer.class);
     assertEquals(THIRD_TIMESTAMP, savePointContainer.getSavePoint().getTimestamp());
     assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
     assertEquals(1, TestEntityWriter.getItems().size());
@@ -164,8 +167,10 @@ public class JobMainTest {
     } catch (JobsException e) {
       assertEquals("java.lang.RuntimeException: Broken entity!!!", e.getCause().getMessage());
       assertEquals(0, TestEntityWriter.getItems().size());
-      savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
-          .readSavePointContainer(LocalDateTimeSavePointContainer.class);
+      savePointContainer =
+          (LocalDateTimeSavePointContainer)
+              savePointContainerService.readSavePointContainer(
+                  LocalDateTimeSavePointContainer.class);
       assertEquals(THIRD_TIMESTAMP, savePointContainer.getSavePoint().getTimestamp());
       assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
       assertEquals(0, TestEntityWriter.getItems().size());
@@ -174,8 +179,8 @@ public class JobMainTest {
 
   @Test
   public void emptyInitialJobTest() {
-    List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> identifiers = new ArrayList<>(
-        Collections.emptyList());
+    List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> identifiers =
+        new ArrayList<>(Collections.emptyList());
     List<TestEntity> entities = new ArrayList<>(Arrays.asList(entity1, entity2, entity3, entity4));
     runInitialJob(identifiers, entities);
     assertFalse(savePointContainerService.savePointContainerExists());
@@ -217,27 +222,37 @@ public class JobMainTest {
 
   private TestModule createTestJobModule(
       List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> identifiers,
-      List<TestEntity> entities
-  ) {
+      List<TestEntity> entities) {
     TestModule testModule = new TestModule(getModuleArgs());
     testModule.setChangedEntityService(
         identifier -> {
           if (identifier.getId().equals(BROKEN_ENTITY_ID)) {
             throw new RuntimeException("Broken entity!!!");
           }
-          return entities.stream().filter(entity -> entity.getId().equals(identifier.getId()))
-              .findAny().get();
+          return entities
+              .stream()
+              .filter(entity -> entity.getId().equals(identifier.getId()))
+              .findAny()
+              .get();
         });
-    testModule.setChangedEntitiesIdentifiers(new TestChangedIdentifiersService(identifiers));
+    testModule.setInitialLoadChangedEntitiesIdentifiersService(
+        new TestInitialLoadIdentifiersService(identifiers));
+    testModule.setInitialResumeLoadChangedEntitiesIdentifiersService(
+        new TestInitialResumeLoadIdentifiersService(identifiers));
+    testModule.setIncrementalLoadChangedEntitiesIdentifiersService(
+        new TestIncrementalLoadIdentifiersService(identifiers));
     TestEntityWriter.reset();
     return testModule;
   }
 
   private String[] getModuleArgs() {
-    String configFilePath = Paths.get("src", "test", "resources", "config.yaml").normalize()
-        .toAbsolutePath().toString();
-    return new String[]{"-c", configFilePath, "-l",
-        lastRunDirHelper.getSavepointContainerFolder().toString()};
+    String configFilePath =
+        Paths.get("src", "test", "resources", "config.yaml")
+            .normalize()
+            .toAbsolutePath()
+            .toString();
+    return new String[] {
+      "-c", configFilePath, "-l", lastRunDirHelper.getSavepointContainerFolder().toString()
+    };
   }
-
 }
