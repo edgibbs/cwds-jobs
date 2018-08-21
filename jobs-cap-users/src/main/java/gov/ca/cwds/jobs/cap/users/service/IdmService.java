@@ -1,8 +1,10 @@
 package gov.ca.cwds.jobs.cap.users.service;
 
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UsersPage;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -11,5 +13,5 @@ public interface IdmService {
 
   List<User> getUsersByRacfIds(Set<String> racfIds);
 
-  void getCapChanges();
+  List<UserAndOperation> getCapChanges(LocalDateTime savePointTime);
 }
