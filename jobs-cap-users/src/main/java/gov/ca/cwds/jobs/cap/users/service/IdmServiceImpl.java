@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.cap.users.service;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiPassword;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
@@ -17,12 +18,16 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 
 public class IdmServiceImpl implements IdmService {
 
   private static final String PAGINATION_TOKEN = "paginationToken";
+  private static final String DATETIME_PARAM = "date";
+  private static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
 
@@ -73,13 +78,21 @@ public class IdmServiceImpl implements IdmService {
 
     return response.readEntity(new GenericType<List<User>>() {
     });
-
-
   }
 
-  //TODO change after COG-333 is done
   @Override
-  public void getCapChanges() {
-    LOGGER.info("CAP changes to be added");
+  public List<UserAndOperation> getCapChanges(LocalDateTime savePointTime) {
+
+    String dateTime = savePointTime.format(DateTimeFormatter.ofPattern(DATETIME_FORMAT_PATTERN));
+
+    Response response = client
+            .target(apiURL + "/users/failed-operations")
+            .queryParam(DATETIME_PARAM, dateTime)
+            .request(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, basicAuthHeader)
+            .get();
+
+    return response.readEntity(new GenericType<List<UserAndOperation>>() {
+    });
   }
 }

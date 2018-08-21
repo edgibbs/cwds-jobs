@@ -75,6 +75,9 @@ public class CapUsersJobTest {
     addCwsDataForIncrementalLoad(3);
     runJob();
     assertEquals(3, TestCapUserWriter.getItems().size());
+    MockedIdmService.capChanges = true;
+    runJob();
+    assertEquals(2, TestCapUserWriter.getItems().size());
   }
 
 
