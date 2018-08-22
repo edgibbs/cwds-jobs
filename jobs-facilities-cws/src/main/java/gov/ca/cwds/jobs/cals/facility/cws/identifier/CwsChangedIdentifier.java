@@ -23,19 +23,6 @@ import javax.persistence.NamedQuery;
 ), @NamedQuery(
     name = CwsChangedIdentifier.CWSCMS_GET_MAX_TIMESTAMP_QUERY_NAME,
     query = CwsChangedIdentifier.CWS_CMS_GET_MAX_TIMESTAMP_QUERY
-), @NamedQuery(
-    name = CwsChangedIdentifier.CWSCMS_INITIAL_LOAD_GET_FIRST_CHANGED_TIMESTAMP_QUERY_NAME,
-    query = CwsChangedIdentifier.CWS_CMS_INITIAL_LOAD_GET_FIRST_CHANGED_TIMESTAMP_QUERY
-), @NamedQuery(
-    name = CwsChangedIdentifier.CWSCMS_INITIAL_LOAD_GET_IDENTIFIERS_BEFORE_CHANGED_TIMESTAMP_QUERY_NAME,
-    query = CwsChangedIdentifier.CWS_CMS_INITIAL_LOAD_GET_IDENTIFIERS_BEFORE_CHANGED_TIMESTAMP_QUERY
-),
-    @NamedQuery(
-    name = CwsChangedIdentifier.CWSCMS_INCREMENTAL_LOAD_GET_FIRST_CHANGED_TIMESTAMP_QUERY_NAME,
-    query = CwsChangedIdentifier.CWS_CMS_INCREMENTAL_LOAD_GET_FIRST_CHANGED_TIMESTAMP_QUERY
-), @NamedQuery(
-    name = CwsChangedIdentifier.CWSCMS_INCREMENTAL_LOAD_GET_IDENTIFIERS_BEFORE_CHANGED_TIMESTAMP_QUERY_NAME,
-    query = CwsChangedIdentifier.CWS_CMS_INCREMENTAL_LOAD_GET_IDENTIFIERS_BEFORE_CHANGED_TIMESTAMP_QUERY
 )
 })
 @Entity
@@ -51,38 +38,16 @@ public class CwsChangedIdentifier extends
       "select max(home.replicationLastUpdated)"
           + SHARED_PART;
 
-  static final String CWS_CMS_INITIAL_LOAD_GET_FIRST_CHANGED_TIMESTAMP_QUERY =
-      "select min(home.lastUpdatedTime)"
-          + SHARED_PART
-          + " and home.lastUpdatedTime > :dateAfter";
-
-  static final String CWS_CMS_INITIAL_LOAD_GET_IDENTIFIERS_BEFORE_CHANGED_TIMESTAMP_QUERY =
-      "select new CwsChangedIdentifier(home.identifier,"
-          + "home.lastUpdatedTime) "
-          + SHARED_PART
-          + " and home.lastUpdatedTime < :dateBefore "
-          + " order by home.identifier";
-
-  static final String CWS_CMS_INCREMENTAL_LOAD_GET_FIRST_CHANGED_TIMESTAMP_QUERY =
-      "select min(home.replicationLastUpdated)"
-          + SHARED_PART
-          + " and home.replicationLastUpdated > :dateAfter";
-
-  static final String CWS_CMS_INCREMENTAL_LOAD_GET_IDENTIFIERS_BEFORE_CHANGED_TIMESTAMP_QUERY =
-      "select new CwsChangedIdentifier(home.identifier,"
-          + "home.lastUpdatedTime) "
-          + SHARED_PART
-          + " and home.replicationLastUpdated < :dateBefore "
-          + " order by home.identifier";
-
   static final String CWS_CMS_INITIAL_LOAD_QUERY =
-      "select new CwsChangedIdentifier(home.identifier, home.lastUpdatedTime) "
+      "select new CwsChangedIdentifier(home.identifier,"
+          + "home.lastUpdatedTime) "
           + SHARED_PART
           + " and home.lastUpdatedTime > :dateAfter "
           + " order by home.lastUpdatedTime, home.identifier";
 
   static final String CWS_CMS_INCREMENTAL_LOAD_QUERY =
-      "select new CwsChangedIdentifier(home.identifier, home.recordChangeOperation, "
+      "select new CwsChangedIdentifier(home.identifier,"
+          + "home.recordChangeOperation, "
           + "home.replicationLastUpdated) "
           + SHARED_PART
           + " and home.replicationLastUpdated > :dateAfter"
@@ -91,10 +56,6 @@ public class CwsChangedIdentifier extends
   public static final String CWSCMS_INITIAL_LOAD_QUERY_NAME = "RecordChange.cwscmsInitialLoadQuery";
   public static final String CWSCMS_INCREMENTAL_LOAD_QUERY_NAME = "RecordChange.cwscmsIncrementalLoadQuery";
   public static final String CWSCMS_GET_MAX_TIMESTAMP_QUERY_NAME = "RecordChange.cwscmsMaxTimestampQuery";
-  public static final String CWSCMS_INITIAL_LOAD_GET_FIRST_CHANGED_TIMESTAMP_QUERY_NAME = "RecordChange.cwscmsInitialLoadFirstChangedTimestampQuery";
-  public static final String CWSCMS_INITIAL_LOAD_GET_IDENTIFIERS_BEFORE_CHANGED_TIMESTAMP_QUERY_NAME = "RecordChange.cwscmsInitialLoadIdentifiersBeforeChangedTimestampQuery";
-  public static final String CWSCMS_INCREMENTAL_LOAD_GET_FIRST_CHANGED_TIMESTAMP_QUERY_NAME = "RecordChange.cwscmsIncrementalLoadFirstChangedTimestampQuery";
-  public static final String CWSCMS_INCREMENTAL_LOAD_GET_IDENTIFIERS_BEFORE_CHANGED_TIMESTAMP_QUERY_NAME = "RecordChange.cwscmsIncrementalLoadIdentifiersBeforeChangedTimestampQuery";
 
   protected CwsChangedIdentifier() {
   }

@@ -1,11 +1,10 @@
 package gov.ca.cwds.jobs.common.batch;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
-import gov.ca.cwds.jobs.common.TestInitialLoadIdentifiersService;
+import gov.ca.cwds.jobs.common.TestChangedIdentifiersService;
 import gov.ca.cwds.jobs.common.TestEntity;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
@@ -34,7 +33,7 @@ public class TimestampIteratorTest {
   @Test
   public void noRecordsTest() {
     JobBatchIterator<TimestampSavePoint<LocalDateTime>> jobIterator = prepareBatchIterator(1,
-        new TestInitialLoadIdentifiersService(Collections.emptyList()));
+        new TestChangedIdentifiersService(Collections.emptyList()));
     assertTrue(jobIterator.getNextPortion().isEmpty());
   }
 
@@ -60,7 +59,7 @@ public class TimestampIteratorTest {
             differentTimestampIdentifier
         ));
     JobBatchIterator<TimestampSavePoint<LocalDateTime>> jobIterator = prepareBatchIterator(3,
-        new TestInitialLoadIdentifiersService(identifiers));
+        new TestChangedIdentifiersService(identifiers));
     List<JobBatch<TimestampSavePoint<LocalDateTime>>> firstPortion = jobIterator.getNextPortion();
     assertEquals(1, firstPortion.size());
     assertEquals(5, firstPortion.get(0).getSize());
@@ -76,12 +75,12 @@ public class TimestampIteratorTest {
   public void emptyTimestampsLessThenOnePage() {
     ChangedEntityIdentifier emptyTimestampIdentifier = createEmptyIdentifier();
     JobBatchIterator<TimestampSavePoint<LocalDateTime>> jobIterator = prepareBatchIterator(3,
-        new TestInitialLoadIdentifiersService(Arrays.asList(emptyTimestampIdentifier,
+        new TestChangedIdentifiersService(Arrays.asList(emptyTimestampIdentifier,
             emptyTimestampIdentifier)));
     List<JobBatch<TimestampSavePoint<LocalDateTime>>> portion = jobIterator.getNextPortion();
     assertEquals(1, portion.size());
     assertEquals(2, portion.get(0).getSize());
-    assertNull(savePointService.defineSavepoint(portion.get(0)).getTimestamp());
+    assertEquals(null, savePointService.defineSavepoint(portion.get(0)).getTimestamp());
     assertEquals(new LocalDateTimeSavePoint(null),
         portion.get(0).getChangedEntityIdentifiers().get(0).getSavePoint());
     assertEquals(new LocalDateTimeSavePoint(null),
@@ -92,7 +91,7 @@ public class TimestampIteratorTest {
   public void emptyTimestampsExactOnePageSize() {
     ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> emptyTimestampIdentifier = createEmptyIdentifier();
     JobBatchIterator<TimestampSavePoint<LocalDateTime>> jobIterator = prepareBatchIterator(3,
-        new TestInitialLoadIdentifiersService(Arrays.asList(emptyTimestampIdentifier,
+        new TestChangedIdentifiersService(Arrays.asList(emptyTimestampIdentifier,
             emptyTimestampIdentifier, emptyTimestampIdentifier)));
     List<JobBatch<TimestampSavePoint<LocalDateTime>>> portion = jobIterator.getNextPortion();
     assertEquals(1, portion.size());
@@ -113,7 +112,7 @@ public class TimestampIteratorTest {
     LocalDateTime timestamp1 = LocalDateTime.of(2013, 5, 8, 1, 10, 25);
     LocalDateTime timestamp2 = LocalDateTime.of(2014, 6, 1, 2, 10, 13);
     JobBatchIterator<TimestampSavePoint<LocalDateTime>> jobIterator = prepareBatchIterator(3,
-        new TestInitialLoadIdentifiersService(Arrays.asList(
+        new TestChangedIdentifiersService(Arrays.asList(
             emptyTimestampIdentifier,
             emptyTimestampIdentifier,
             new TimestampIdentifier<>("testId2",
@@ -142,7 +141,7 @@ public class TimestampIteratorTest {
         RecordChangeOperation.I,
         new LocalDateTimeSavePoint(timestamp));
     JobBatchIterator<TimestampSavePoint<LocalDateTime>> jobIterator = prepareBatchIterator(2,
-        new TestInitialLoadIdentifiersService(Arrays.asList(
+        new TestChangedIdentifiersService(Arrays.asList(
             sameTimestampIdentifier,
             sameTimestampIdentifier,
             sameTimestampIdentifier,
