@@ -16,19 +16,19 @@ public class TimestampIncrementalModeImplementor<E> extends
     AbstractTimestampJobModeImplementor<E, LocalDateTime, DefaultJobMode> {
 
   @Inject
-  private ChangedEntitiesIdentifiersService<TimestampSavePoint<LocalDateTime>>
-      changedEntitiesIdentifiersService;
+  private ChangedEntitiesIdentifiersService<TimestampSavePoint<LocalDateTime>> changedEntitiesIdentifiersService;
 
   @Override
   protected List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getNextPage(
       PageRequest pageRequest) {
-    TimestampSavePoint<LocalDateTime> savePoint =
-        loadSavePoint(LocalDateTimeSavePointContainer.class);
-    return changedEntitiesIdentifiersService.getIdentifiers(savePoint, pageRequest);
+    TimestampSavePoint<LocalDateTime> savePoint = loadSavePoint(
+        LocalDateTimeSavePointContainer.class);
+    return changedEntitiesIdentifiersService
+        .getIdentifiersForIncrementalLoad(savePoint, pageRequest);
   }
 
   @Override
   public void doFinalizeJob() {
-    // empty
+    //empty
   }
 }

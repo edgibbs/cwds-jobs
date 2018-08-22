@@ -16,21 +16,18 @@ public interface ChangedEntitiesIdentifiersService<T extends SavePoint> {
   /**
    * Fetches next page of target entities' identifiers for initial load.
    */
-  List<ChangedEntityIdentifier<T>> getIdentifiers(T savePoint, PageRequest pageRequest);
+  List<ChangedEntityIdentifier<T>> getIdentifiersForInitialLoad(PageRequest pageRequest);
 
   /**
-   * Fetches the first changed timestamp savePoint after the savePoint.
-   * @param savePoint savePoint
-   * @return savePoint
+   * Fetches next page of target entities' identifiers for resuming initial load.
    */
-  T getFirstChangedTimestamp(T savePoint);
+  List<ChangedEntityIdentifier<T>> getIdentifiersForResumingInitialLoad(T savePoint,
+      PageRequest pageRequest);
 
   /**
-   * Fetches all identifiers before the first changed timestamp savePoint using offset.
-   * @param timestampSavePoint first changed timestamp savePoint
-   * @param offset offset
-   * @return list of identifiers before given savePoint
+   * Fetches next page of target entities' identifiers for incremental load.
    */
-  List<ChangedEntityIdentifier<T>> getIdentifiersBeforeChangedTimestamp(
-      T timestampSavePoint, int offset);
+  List<ChangedEntityIdentifier<T>> getIdentifiersForIncrementalLoad(T savePoint,
+      PageRequest pageRequest);
+
 }

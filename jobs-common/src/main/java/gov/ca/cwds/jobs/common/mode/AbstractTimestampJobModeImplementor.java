@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
 import gov.ca.cwds.jobs.common.batch.JobBatchSize;
 import gov.ca.cwds.jobs.common.batch.PageRequest;
-import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
@@ -32,10 +31,6 @@ public abstract class AbstractTimestampJobModeImplementor<E, T, J extends JobMod
 
   @Inject
   private SavePointService<TimestampSavePoint<T>, J> savePointService;
-
-  @Inject
-  private ChangedEntitiesIdentifiersService<TimestampSavePoint<T>>
-      changedEntitiesIdentifiersService;
 
   @Override
   public TimestampSavePoint<T> loadSavePoint(
@@ -78,25 +73,61 @@ public abstract class AbstractTimestampJobModeImplementor<E, T, J extends JobMod
 
   private List<JobBatch<TimestampSavePoint<T>>> calculateNextPortion(
       List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers) {
+    // it can be several batches in portion when
+    // there are many entities with equal last updated timestamps
+    List<JobBatch<TimestampSavePoint<T>>> batches = findBatchesPriorToBatchWithSavepoint(
+        identifiers);
+    //TODO uncomment when SEAR-319 implemented
+/*
+    List<ChangedEntityIdentifier<TimestampSavePoint<T>>> lastIdentifiersWithSavepoint =
+        findLastIdentifiersPriorToSavepoint(getLastTimestamp(identifiers));
 
-    TimestampSavePoint<T> lastTimestamp = getLastTimestamp(identifiers);
-    TimestampSavePoint<T> firstChangedTimestamp =
-        changedEntitiesIdentifiersService.getFirstChangedTimestamp(lastTimestamp);
-    List<JobBatch<TimestampSavePoint<T>>> batches = new ArrayList<>();
-    batches.add(new JobBatch<>(identifiers));
-    offset += identifiers.size();
-
-    if (firstChangedTimestamp != null) {
-      List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiersBeforeChangedTimestamp =
-          changedEntitiesIdentifiersService.getIdentifiersBeforeChangedTimestamp(
-              firstChangedTimestamp, offset);
-      if (!identifiersBeforeChangedTimestamp.isEmpty()) {
-        batches.add(new JobBatch<>(identifiersBeforeChangedTimestamp));
-        offset += identifiersBeforeChangedTimestamp.size();
-      }
-    }
+    batches.get(batches.size() - 1).getChangedEntityIdentifiers()
+        .addAll(lastIdentifiersWithSavepoint);
+*/
+    LOGGER
+        .info("Found batches to load {}, save point is {}", batches, getLastTimestamp(identifiers));
     return batches;
   }
+
+/*
+  private List<ChangedEntityIdentifier<TimestampSavePoint<T>>> findLastIdentifiersPriorToSavepoint(
+      TimestampSavePoint<T> savePoint) {
+    List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiersWithSavepoint = new ArrayList<>(
+        batchSize);
+    ChangedEntityIdentifier<TimestampSavePoint<T>> nextIdentifier = getNextIdentifier();
+    while (nextIdentifier != null &&
+        (savePoint.equals(nextIdentifier.getSavePoint()))) {
+      offset++;
+      identifiersWithSavepoint.add(nextIdentifier);
+      nextIdentifier = getNextIdentifier();
+    }
+    return identifiersWithSavepoint;
+  }
+*/
+
+  private List<JobBatch<TimestampSavePoint<T>>> findBatchesPriorToBatchWithSavepoint(
+      List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers) {
+    List<JobBatch<TimestampSavePoint<T>>> nextPortion = new ArrayList<>();
+    TimestampSavePoint<T> timestampSavePoint = getLastTimestamp(identifiers);
+    List<ChangedEntityIdentifier<TimestampSavePoint<T>>> nextIdentifiersPage = identifiers;
+    while ((!nextIdentifiersPage.isEmpty() && timestampSavePoint
+        .equals(getLastTimestamp(nextIdentifiersPage)))) {
+      offset += batchSize;
+      nextPortion.add(new JobBatch<>(nextIdentifiersPage));
+      nextIdentifiersPage = getNextPage();
+    }
+    return nextPortion;
+  }
+
+/*
+  private ChangedEntityIdentifier<TimestampSavePoint<T>> getNextIdentifier() {
+    List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers = getNextPage(
+        new PageRequest(offset, 1));
+    assert identifiers.size() == 1 || identifiers.isEmpty();
+    return identifiers.isEmpty() ? null : identifiers.get(0);
+  }
+*/
 
   private static <T> TimestampSavePoint<T> getLastTimestamp(
       List<ChangedEntityIdentifier<TimestampSavePoint<T>>> identifiers) {
