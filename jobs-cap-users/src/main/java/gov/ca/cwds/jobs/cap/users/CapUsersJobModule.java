@@ -1,5 +1,9 @@
 package gov.ca.cwds.jobs.cap.users;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
@@ -21,6 +25,7 @@ import gov.ca.cwds.jobs.common.mode.LocalDateTimeDefaultJobModeService;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
+import javax.ws.rs.core.MediaType;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.slf4j.Logger;
@@ -117,12 +122,18 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
 
   @Provides
   public Client provideClient() {
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.registerModule(new JavaTimeModule());
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
     JerseyClientBuilder clientBuilder = new JerseyClientBuilder()
             .property(ClientProperties.CONNECT_TIMEOUT, getJobsConfiguration(getJobOptions()).getJerseyClientConnectTimeout())
             .property(ClientProperties.READ_TIMEOUT, getJobsConfiguration(getJobOptions()).getJerseyClientReadTimeout())
             // Just ignore host verification, client will call trusted resources only
             .hostnameVerifier((hostName, sslSession) -> true);
-    return clientBuilder.build();
+    Client client = clientBuilder.build();
+    client.register(new JacksonJsonProvider(mapper));
+    return client;
   }
 }
 
