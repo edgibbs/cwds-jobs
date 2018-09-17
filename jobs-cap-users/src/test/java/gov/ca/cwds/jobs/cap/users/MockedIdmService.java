@@ -3,7 +3,7 @@ package gov.ca.cwds.jobs.cap.users;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UsersPage;
-import gov.ca.cwds.idm.persistence.model.OperationType;
+import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.jobs.cap.users.service.IdmService;
 
 import java.time.LocalDateTime;
