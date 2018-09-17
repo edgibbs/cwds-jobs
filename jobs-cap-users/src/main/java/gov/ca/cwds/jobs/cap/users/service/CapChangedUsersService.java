@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.cap.users.service;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.idm.dto.UserAndOperation;
-import gov.ca.cwds.idm.persistence.model.OperationType;
+import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
