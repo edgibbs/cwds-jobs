@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.cap.users;
 
 import com.google.inject.AbstractModule;
-import gov.ca.cwds.jobs.common.BaseJobConfiguration;
+import gov.ca.cwds.jobs.common.configuration.MultiThreadJobConfiguration;
 import gov.ca.cwds.jobs.common.core.JobRunner;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
@@ -158,7 +158,8 @@ public class CapUsersJobTest {
 
   private static CapUsersJobConfiguration getCapUsersJobConfiguration() {
     CapUsersJobConfiguration capUsersJobConfiguration =
-            BaseJobConfiguration.getJobsConfiguration(CapUsersJobConfiguration.class, getConfigFilePath());
+            MultiThreadJobConfiguration
+                .getJobsConfiguration(CapUsersJobConfiguration.class, getConfigFilePath());
     DataSourceFactory dataSourceFactory = capUsersJobConfiguration.getCmsDataSourceFactory();
     dataSourceFactory.setUrl(dataSourceFactory.getProperties().get("hibernate.connection.url"));
     dataSourceFactory

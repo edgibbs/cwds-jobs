@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs.common.elastic;
 
-import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -24,7 +23,7 @@ public final class ElasticUtils {
 
   private ElasticUtils() {}
 
-  public static TransportClient createAndConfigureESClient(BaseJobConfiguration config) {
+  public static TransportClient createAndConfigureESClient(ElasticsearchConfiguration config) {
     TransportClient client = null;
 
     LOGGER.info("Create NEW ES client");
@@ -46,7 +45,8 @@ public final class ElasticUtils {
     return client;
   }
 
-  private static List<InetSocketTransportAddress> getValidatedESNodes(BaseJobConfiguration config) {
+  private static List<InetSocketTransportAddress> getValidatedESNodes(
+      ElasticsearchConfiguration config) {
     List<InetSocketTransportAddress> nodesList = new LinkedList<>();
     String[] params;
     List<String> nodes = config.getNodes();

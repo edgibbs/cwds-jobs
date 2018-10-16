@@ -16,7 +16,7 @@ public class ChangedRFA1aFormsResourceTest /*extends BaseApiTest<TestCalsJobsCon
   @ClassRule
   public static final BaseDropwizardApplication<TestCalsJobsConfiguration> application
       = new BaseDropwizardApplication<>(TestCalsJobsApplication.class,
-      "config/test-application.yml");
+      "configuration/test-application.yml");
 
   @Override
   protected BaseDropwizardApplication<TestCalsJobsConfiguration> getApplication() {

@@ -13,7 +13,7 @@ public interface SavePointService<S extends SavePoint, J extends JobMode> {
    *
    * @return save point
    */
-  S loadSavePoint(Class<? extends SavePointContainer<? extends S, J>> savePointContainerClass);
+  S loadSavePoint();
 
   /**
    * Builds save point
@@ -24,5 +24,10 @@ public interface SavePointService<S extends SavePoint, J extends JobMode> {
    * Saves save point spesific to job mode
    */
   void saveSavePoint(S savePoint);
+
+  /**
+   * Get savepoint container class.
+   */
+  Class<? extends SavePointContainer<? extends S, J>> getSavePointContainerClass();
 
 }

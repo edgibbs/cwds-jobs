@@ -15,17 +15,16 @@ import gov.ca.cwds.jobs.cap.users.job.CapUsersIncrementalJob;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersInitialJob;
 import gov.ca.cwds.jobs.cap.users.service.IdmService;
 import gov.ca.cwds.jobs.cap.users.service.IdmServiceImpl;
-import gov.ca.cwds.jobs.common.BaseJobConfiguration;
+import gov.ca.cwds.jobs.common.configuration.MultiThreadJobConfiguration;
 import gov.ca.cwds.jobs.common.BulkWriter;
-import gov.ca.cwds.jobs.common.config.JobOptions;
+import gov.ca.cwds.jobs.common.configuration.JobOptions;
 import gov.ca.cwds.jobs.common.core.Job;
-import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
+import gov.ca.cwds.jobs.common.inject.JobModule;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.mode.LocalDateTimeDefaultJobModeService;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
-import javax.ws.rs.core.MediaType;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.slf4j.Logger;
@@ -34,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.Client;
 import java.time.LocalDateTime;
 
-public class CapUsersJobModule extends AbstractBaseJobModule {
+public class CapUsersJobModule extends JobModule {
   private static final Logger LOG = LoggerFactory.getLogger(CapUsersJobModule.class);
 
   private Class<? extends BulkWriter<ChangedUserDto>> capElasticWriterClass;
@@ -113,7 +112,8 @@ public class CapUsersJobModule extends AbstractBaseJobModule {
   @Override
   @Inject
   protected CapUsersJobConfiguration getJobsConfiguration(JobOptions jobsOptions) {
-    CapUsersJobConfiguration capUsersJobConfiguration = BaseJobConfiguration.getJobsConfiguration(CapUsersJobConfiguration.class, jobsOptions.getEsConfigLoc());
+    CapUsersJobConfiguration capUsersJobConfiguration = MultiThreadJobConfiguration
+        .getJobsConfiguration(CapUsersJobConfiguration.class, jobsOptions.getEsConfigLoc());
     capUsersJobConfiguration.setIndexSettings("cap.users.settings.json");
     capUsersJobConfiguration.setDocumentMapping("cap.users.mapping.json");
     return capUsersJobConfiguration;

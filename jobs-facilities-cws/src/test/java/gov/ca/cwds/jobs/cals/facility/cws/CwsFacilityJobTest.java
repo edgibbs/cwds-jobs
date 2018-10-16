@@ -112,7 +112,7 @@ public class CwsFacilityJobTest {
 
     LocalDateTimeSavePointContainer savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
         .readSavePointContainer(LocalDateTimeSavePointContainer.class);
-    assertTrue(savePointContainer.getSavePoint().getTimestamp().isAfter(now));
+    assertTrue(savePointContainer.getSavePoint().getTimestamp().equals(LocalDateTimeSavePointContainerService.VERY_FIRST_TIMESTAMP));
     assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
   }
 
@@ -153,7 +153,7 @@ public class CwsFacilityJobTest {
     });
     FacilityTestWriter.reset();
     cwsFacilityJobModule.setFacilityElasticWriterClass(FacilityTestWriter.class);
-    cwsFacilityJobModule.setJobPreparatorClass(jobPreparatorClass);
+    cwsFacilityJobModule.setJobPreparator(jobPreparatorClass);
     return cwsFacilityJobModule;
   }
 

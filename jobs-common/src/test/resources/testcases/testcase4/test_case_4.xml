@@ -1,0 +1,12 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+  <changeSet author="test" id="10130255">
+    <insert tableName="TEST_ENTITY">
+      <column name="ID" value="1"/>
+      <column name="TIMESTAMP" valueDate="2010-01-12 05:25:13"/>
+    </insert>
+  </changeSet>
+</databaseChangeLog>

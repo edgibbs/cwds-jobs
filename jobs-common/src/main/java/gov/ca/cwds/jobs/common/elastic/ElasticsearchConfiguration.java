@@ -2,15 +2,22 @@ package gov.ca.cwds.jobs.common.elastic;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
+import gov.ca.cwds.rest.api.ApiException;
+import java.io.IOException;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Represents the configuration settings for {@link ElasticsearchDao}.
  *
  * @author CWDS API Team
  */
-public class ElasticsearchConfiguration {
+public class ElasticsearchConfiguration implements JobConfiguration {
+
+  private String documentMapping;
+  private String indexSettings;
 
   @NotNull
   @JsonProperty("elasticsearch.cluster")
@@ -132,4 +139,39 @@ public class ElasticsearchConfiguration {
   public String getDocumentMappingFile() {
     return documentMappingFile;
   }
+
+  public String getDocumentMapping() {
+    return documentMapping;
+  }
+
+  public void setDocumentMapping(String documentMappingFilename) {
+    this.documentMapping = getElasticSearchDocumentMapping(documentMappingFilename);
+  }
+
+  public String getIndexSettings() {
+    return indexSettings;
+  }
+
+  public void setIndexSettings(String indexSettingsFilename) {
+    this.indexSettings = getElasticSearchIndexSettings(indexSettingsFilename);
+  }
+
+  private String getElasticSearchDocumentMapping(String documentMappingFilename) {
+    return readElasticSettingsFile(documentMappingFilename,
+        "Can't read elastic search document mapping");
+  }
+
+  private String getElasticSearchIndexSettings(String indexSettingsFilename) {
+    return readElasticSettingsFile(indexSettingsFilename,
+        "Can't read elastic search index settings");
+  }
+
+  private String readElasticSettingsFile(String filename, String errorMessage) {
+    try {
+      return IOUtils.toString(getClass().getClassLoader().getResourceAsStream(filename), "UTF-8");
+    } catch (IOException e) {
+      throw new ApiException(errorMessage, e);
+    }
+  }
+
 }

@@ -3,13 +3,13 @@ package gov.ca.cwds.jobs.cals.facility;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.cals.inject.MappingModule;
 import gov.ca.cwds.jobs.common.BulkWriter;
-import gov.ca.cwds.jobs.common.config.JobOptions;
-import gov.ca.cwds.jobs.common.inject.AbstractBaseJobModule;
+import gov.ca.cwds.jobs.common.configuration.JobOptions;
+import gov.ca.cwds.jobs.common.inject.JobModule;
 
 /**
  * Created by Alexander Serbin on 3/28/2018.
  */
-public abstract class BaseFacilityJobModule extends AbstractBaseJobModule {
+public abstract class BaseFacilityJobModule extends JobModule {
 
   private Class<? extends BulkWriter<ChangedFacilityDto>> facilityElasticWriterClass;
 

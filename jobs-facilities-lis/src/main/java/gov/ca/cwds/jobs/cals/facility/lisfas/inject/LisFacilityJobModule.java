@@ -35,7 +35,7 @@ import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePointSer
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointContainerService;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointService;
 import gov.ca.cwds.jobs.common.api.JobModeImplementor;
-import gov.ca.cwds.jobs.common.config.JobOptions;
+import gov.ca.cwds.jobs.common.configuration.JobOptions;
 import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.exception.JobsException;

@@ -10,9 +10,9 @@ import gov.ca.cwds.jobs.common.batch.JobBatch;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.mode.AbstractJobModeImplementor;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,17 +33,12 @@ public class LisConnx11IncrementaJobModeImplementor extends
   }
 
   @Override
-  public List<JobBatch<TimestampSavePoint<BigInteger>>> getNextPortion() {
+  public JobBatch<TimestampSavePoint<BigInteger>> getNextPortion() {
     LisTimestampSavePoint savePoint = (LisTimestampSavePoint) lisTimestampSavePointService
-        .loadSavePoint(LisTimestampSavePointContainer.class);
-    List<JobBatch<TimestampSavePoint<BigInteger>>> portion = new ArrayList<>();
-    JobBatch<TimestampSavePoint<BigInteger>> batch = new JobBatch<>(
+        .loadSavePoint(getSavePointContainerClass());
+    return new JobBatch<>(
         changedEntitiesIdentifiersService
             .getIdentifiersForIncrementalLoad(savePoint.getTimestamp()));
-    if (!batch.isEmpty()) {
-      portion.add(batch);
-    }
-    return portion;
   }
 
   @Override
@@ -53,5 +48,10 @@ public class LisConnx11IncrementaJobModeImplementor extends
         jobBatch.getChangedEntityIdentifiers();
     return changedEntityIdentifiers
         .get(changedEntityIdentifiers.size() - 1).getSavePoint();
+  }
+
+  @Override
+  public Class<? extends SavePointContainer<? extends TimestampSavePoint<BigInteger>, DefaultJobMode>> getSavePointContainerClass() {
+    return LisTimestampSavePointContainer.class;
   }
 }

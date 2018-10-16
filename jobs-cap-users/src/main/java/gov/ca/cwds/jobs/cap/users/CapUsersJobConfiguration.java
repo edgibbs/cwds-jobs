@@ -1,10 +1,10 @@
 package gov.ca.cwds.jobs.cap.users;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gov.ca.cwds.jobs.common.BaseJobConfiguration;
+import gov.ca.cwds.jobs.common.configuration.MultiThreadJobConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 
-public class CapUsersJobConfiguration extends BaseJobConfiguration {
+public class CapUsersJobConfiguration extends MultiThreadJobConfiguration {
 
   private String perryApiUrl;
   private String perryApiUser;

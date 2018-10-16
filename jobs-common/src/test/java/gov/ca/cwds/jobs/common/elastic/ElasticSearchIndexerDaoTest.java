@@ -5,7 +5,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
-import gov.ca.cwds.jobs.common.BaseJobConfiguration;
+import gov.ca.cwds.jobs.common.configuration.MultiThreadJobConfiguration;
 import java.io.IOException;
 import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
@@ -43,7 +43,7 @@ public class ElasticSearchIndexerDaoTest {
   private Client clientMock;
 
   @Mock
-  private BaseJobConfiguration configMock;
+  private ElasticsearchConfiguration configMock;
 
   @Mock
   private AdminClient adminClientMock;

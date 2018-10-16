@@ -1,12 +1,11 @@
 package gov.ca.cwds.jobs.common.batch;
 
 import com.google.inject.Inject;
-import gov.ca.cwds.jobs.common.api.JobModeImplementor;
-import gov.ca.cwds.jobs.common.elastic.ElasticSearchBulkCollector;
+import gov.ca.cwds.jobs.common.elastic.BulkCollector;
+import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.inject.ReaderThreadsCount;
-import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -21,7 +20,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Alexander Serbin on 3/16/2018.
  */
-public class BatchReadersPool<E, S extends SavePoint, J extends JobMode> {
+public class BatchReadersPool<E, S extends SavePoint> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BatchReadersPool.class);
 
@@ -30,13 +29,13 @@ public class BatchReadersPool<E, S extends SavePoint, J extends JobMode> {
   private int readersThreadsCount;
 
   @Inject
-  private JobModeImplementor<E, S, J> jobModeImplementor;
+  private ChangedEntityService<E> changedEntityService;
 
   private ExecutorService executorService;
 
-  private ElasticSearchBulkCollector<E> elasticSearchBulkCollector;
+  private BulkCollector<E> elasticSearchBulkCollector;
 
-  public void init(ElasticSearchBulkCollector<E> elasticSearchBulkCollector) {
+  public void init(BulkCollector<E> elasticSearchBulkCollector) {
     this.elasticSearchBulkCollector = elasticSearchBulkCollector;
     if (this.executorService != null) {
       this.executorService.shutdown();
@@ -47,7 +46,7 @@ public class BatchReadersPool<E, S extends SavePoint, J extends JobMode> {
   public void loadEntities(List<ChangedEntityIdentifier<S>> changedEntityIdentifiers) {
     List<Future> futures = changedEntityIdentifiers.parallelStream().
         map(identifier -> (Runnable) () -> elasticSearchBulkCollector.addEntity(
-            jobModeImplementor.loadEntity(identifier)))
+            changedEntityService.loadEntity(identifier)))
         .map(executorService::submit)
         .collect(Collectors.toList());
     for (Future future : futures) {

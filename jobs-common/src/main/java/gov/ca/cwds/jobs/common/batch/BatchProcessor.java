@@ -1,14 +1,15 @@
 package gov.ca.cwds.jobs.common.batch;
 
 import com.google.inject.Inject;
-import gov.ca.cwds.jobs.common.api.JobModeImplementor;
-import gov.ca.cwds.jobs.common.elastic.ElasticSearchBulkCollector;
+import gov.ca.cwds.jobs.common.elastic.BulkCollector;
 import gov.ca.cwds.jobs.common.exception.JobExceptionHandler;
 import gov.ca.cwds.jobs.common.exception.JobsException;
+import gov.ca.cwds.jobs.common.iterator.JobBatchIterator;
 import gov.ca.cwds.jobs.common.mode.JobMode;
+import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.savepoint.SavePoint;
+import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 import gov.ca.cwds.jobs.common.timereport.JobTimeReport;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,13 +21,19 @@ public class BatchProcessor<E, S extends SavePoint, J extends JobMode> {
   private static final Logger LOGGER = LoggerFactory.getLogger(BatchProcessor.class);
 
   @Inject
-  private ElasticSearchBulkCollector<E> elasticSearchBulkCollector;
+  private BulkCollector<E> elasticSearchBulkCollector;
 
   @Inject
-  private BatchReadersPool<E, S, J> batchReadersPool;
+  private BatchReadersPool<E, S> batchReadersPool;
 
   @Inject
-  private JobModeImplementor<E, S, J> jobModeImplementor;
+  private JobBatchIterator<S> jobBatchIterator;
+
+  @Inject
+  private JobModeFinalizer jobModeFinalizer;
+
+  @Inject
+  private SavePointService<S, J> savePointService;
 
   public void init() {
     batchReadersPool.init(elasticSearchBulkCollector);
@@ -34,24 +41,22 @@ public class BatchProcessor<E, S extends SavePoint, J extends JobMode> {
 
   public void processBatches() {
     JobTimeReport jobTimeReport = new JobTimeReport();
-    List<JobBatch<S>> portion = jobModeImplementor.getNextPortion();
-    while (!portion.isEmpty()) {
-      for (JobBatch<S> aPortion : portion) {
-        batchReadersPool.loadEntities(aPortion.getChangedEntityIdentifiers());
-      }
-      handleLastBatchInPortion(portion.get(portion.size() - 1));
-      portion = jobModeImplementor.getNextPortion();
+    JobBatch<S> batch = jobBatchIterator.getNextPortion();
+    while (!batch.isEmpty()) {
+      batchReadersPool.loadEntities(batch.getChangedEntityIdentifiers());
+      handleBatchSavepoint(batch);
+      batch = jobBatchIterator.getNextPortion();
     }
-    jobModeImplementor.finalizeJob();
+    jobModeFinalizer.doFinalizeJob();
     jobTimeReport.printTimeSpent();
   }
 
-  private void handleLastBatchInPortion(JobBatch<S> lastJobBatchInPortion) {
-    S savePoint = jobModeImplementor.defineSavepoint(lastJobBatchInPortion);
+  private void handleBatchSavepoint(JobBatch<S> batch) {
+    S savePoint = savePointService.defineSavepoint(batch);
     LOGGER.info("Last batch in portion save point {}", savePoint);
     if (!JobExceptionHandler.isExceptionHappened()) {
       LOGGER.info("Save point has been reached. Batch save point is {}. Trying to save", savePoint);
-      jobModeImplementor.saveSavePoint(savePoint);
+      savePointService.saveSavePoint(savePoint);
       if (LOGGER.isInfoEnabled()) {
         //TODO  jobTimeReport.printTimeReport(portionBatchNumber);
       }

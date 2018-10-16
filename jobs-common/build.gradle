@@ -19,4 +19,9 @@ dependencies {
         exclude group: 'org.glassfish.jersey.core'
     }
 
+    testCompile group: 'com.h2database', name: 'h2', version: '1.4.194'
+    testCompile(group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion) {
+        exclude group: 'gov.ca.cwds.api'
+    }
+
 }

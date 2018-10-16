@@ -42,10 +42,10 @@ public abstract class AbstractLisInitialModeImplementor extends
   private LisJobModeFinalizer jobModeFinalizer;
 
   @Override
-  public List<JobBatch<LicenseNumberSavePoint>> getNextPortion() {
+  public JobBatch<LicenseNumberSavePoint> getNextPortion() {
     List<ChangedEntityIdentifier<LicenseNumberSavePoint>> identifiers = getNextPage();
     if (identifiers.isEmpty()) {
-      return Collections.emptyList();
+      return new JobBatch<>(Collections.emptyList());
     }
     lastId = getLastId(identifiers);
     LOGGER.info("Next page prepared. List size: {}. Last Id: {}", identifiers.size(), lastId);
@@ -55,8 +55,7 @@ public abstract class AbstractLisInitialModeImplementor extends
       LOGGER.info("Next page cut to the batch size. Adjusted list size: {}. Last Id: {}",
           identifiers.size(), lastId);
     }
-    JobBatch<LicenseNumberSavePoint> jobBatch = new JobBatch<>(identifiers);
-    return Collections.singletonList(jobBatch);
+    return new JobBatch<>(identifiers);
   }
 
   private List<ChangedEntityIdentifier<LicenseNumberSavePoint>> getNextPage() {
@@ -79,5 +78,6 @@ public abstract class AbstractLisInitialModeImplementor extends
   public void doFinalizeJob() {
     jobModeFinalizer.doFinalizeJob();
   }
+
 
 }

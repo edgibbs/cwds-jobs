@@ -160,7 +160,7 @@ public class LisFacilityJobTest {
 
       }
     });
-    lisFacilityJobModule.setJobPreparatorClass(LisJobPreparator.class);
+    lisFacilityJobModule.setJobPreparator(LisJobPreparator.class);
     return lisFacilityJobModule;
   }
 
