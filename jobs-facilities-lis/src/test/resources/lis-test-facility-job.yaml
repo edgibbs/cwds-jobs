@@ -1,19 +1,7 @@
-elasticsearch.host: localhost
-elasticsearch.port: 9300
-
-elasticsearch.additional.nodes:
-  - localhost:9300
-
-elasticsearch.cluster: elasticsearch
-elasticsearch.alias: facilities
-elasticsearch.doctype: facility
-#
-elasticsearch.xpack.user: elastic
-elasticsearch.xpack.password: changeme
-
-batchSize: 10
-elasticSearchBulkSize: 10
-readerThreadsCount: 10
+multiThread:
+  batchSize: 10
+  elasticSearchBulkSize: 10
+  readerThreadsCount: 10
 
 lisDataSourceFactory:
   properties:

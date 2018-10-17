@@ -5,9 +5,7 @@ import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
-import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointService;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +19,7 @@ public class CapChangedUsersService {
   private IdmService idmService;
 
   public List<ChangedUserDto> getCapChanges() {
-    LocalDateTime savePointTime = savePointService.loadSavePoint(LocalDateTimeSavePointContainer.class).getTimestamp();
+    LocalDateTime savePointTime = savePointService.loadSavePoint().getTimestamp();
     List<UserAndOperation> userAndOperations = idmService.getCapChanges(savePointTime);
     return userAndOperations.stream()
             .map(e -> new ChangedUserDto(e.getUser(), transformOperation(e.getOperation())))

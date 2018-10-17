@@ -1,23 +1,8 @@
-elasticsearch.host: localhost
-elasticsearch.port: 9300
-
-elasticsearch.additional.nodes:
-  - localhost:9300
-
-elasticsearch.cluster: elasticsearch
-elasticsearch.alias: users
-elasticsearch.doctype: user
-#
-elasticsearch.xpack.user: elastic
-elasticsearch.xpack.password: changeme
-
-batchSize: 10
-elasticSearchBulkSize: 10
-readerThreadsCount: 3
-
 perryApiUrl: ${PERRY_URL:-http://localhost:18080/perry/idm/users}
 perryApiUser: ${PERRY_USER:-user}
 perryApiPassword: ${PERRY_PASS:-pass}
+
+elasticSearchBulkSize: 10
 
 cmsDataSourceFactory:
   properties:

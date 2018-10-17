@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.cals.facility.lisfas.savepoint;
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisJobModeService;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,5 +34,10 @@ public class LicenseNumberSavePointService extends
     } else {
       LOGGER.info("Save point is empty. Ignoring it");
     }
+  }
+
+  @Override
+  public Class<? extends SavePointContainer<? extends LicenseNumberSavePoint, DefaultJobMode>> getSavePointContainerClass() {
+    return LicenseNumberSavePointContainer.class;
   }
 }

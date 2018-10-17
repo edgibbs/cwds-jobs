@@ -1,45 +1,39 @@
 package gov.ca.cwds.jobs.cals.facility.lisfas.mode;
 
 import com.google.inject.Inject;
-import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.cals.facility.lisfas.identifier.LisChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePoint;
-import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePointService;
-import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointContainerService;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
 import gov.ca.cwds.jobs.common.batch.JobBatchSize;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import gov.ca.cwds.jobs.common.mode.AbstractJobModeImplementor;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.iterator.JobBatchIterator;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractLisInitialModeImplementor extends
-    AbstractJobModeImplementor<ChangedFacilityDto, LicenseNumberSavePoint, DefaultJobMode> {
+/**
+ * Created by Alexander Serbin on 10/16/2018
+ */
+public class LisInitialModeIterator implements JobBatchIterator<LicenseNumberSavePoint> {
 
   private static final Logger LOGGER = LoggerFactory
-      .getLogger(AbstractLisInitialModeImplementor.class);
+      .getLogger(LisInitialModeIterator.class);
+
+  protected int lastId;
 
   @Inject
   @JobBatchSize
   private int batchSize;
 
-  protected int lastId;
-
-  @Inject
-  private LicenseNumberSavePointService savePointService;
-
   @Inject
   private LisChangedEntitiesIdentifiersService changedEntitiesIdentifiersService;
 
-  @Inject
-  private LisTimestampSavePointContainerService savePointContainerService;
-
-  @Inject
-  private LisJobModeFinalizer jobModeFinalizer;
+  private List<ChangedEntityIdentifier<LicenseNumberSavePoint>> getNextPage() {
+    return changedEntitiesIdentifiersService
+        .getIdentifiersForInitialLoad(lastId);
+  }
 
   @Override
   public JobBatch<LicenseNumberSavePoint> getNextPortion() {
@@ -58,26 +52,10 @@ public abstract class AbstractLisInitialModeImplementor extends
     return new JobBatch<>(identifiers);
   }
 
-  private List<ChangedEntityIdentifier<LicenseNumberSavePoint>> getNextPage() {
-    return changedEntitiesIdentifiersService
-        .getIdentifiersForInitialLoad(lastId);
-  }
-
   protected static int getLastId(
       List<ChangedEntityIdentifier<LicenseNumberSavePoint>> identifiers) {
     identifiers.sort(Comparator.comparing(ChangedEntityIdentifier::getIntId));
     return identifiers.get(identifiers.size() - 1).getIntId();
   }
-
-  @Override
-  public LicenseNumberSavePoint defineSavepoint(JobBatch<LicenseNumberSavePoint> jobBatch) {
-    return savePointService.defineSavepoint(jobBatch);
-  }
-
-  @Override
-  public void doFinalizeJob() {
-    jobModeFinalizer.doFinalizeJob();
-  }
-
 
 }

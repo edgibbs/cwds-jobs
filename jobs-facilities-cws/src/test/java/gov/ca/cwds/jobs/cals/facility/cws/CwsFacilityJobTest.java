@@ -61,7 +61,6 @@ public class CwsFacilityJobTest {
       lastRunDirHelper.createSavePointContainerFolder();
       testInitialLoad();
       testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD);
-      testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD);
       testIncrementalLoad();
     } finally {
       lastRunDirHelper.deleteSavePointContainerFolder();

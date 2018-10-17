@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.google.inject.Inject;
+import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
@@ -15,39 +15,43 @@ import gov.ca.cwds.jobs.cap.users.job.CapUsersIncrementalJob;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersInitialJob;
 import gov.ca.cwds.jobs.cap.users.service.IdmService;
 import gov.ca.cwds.jobs.cap.users.service.IdmServiceImpl;
-import gov.ca.cwds.jobs.common.configuration.MultiThreadJobConfiguration;
 import gov.ca.cwds.jobs.common.BulkWriter;
-import gov.ca.cwds.jobs.common.configuration.JobOptions;
 import gov.ca.cwds.jobs.common.core.Job;
-import gov.ca.cwds.jobs.common.inject.JobModule;
+import gov.ca.cwds.jobs.common.inject.ElasticsearchBulkSize;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.mode.LocalDateTimeDefaultJobModeService;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
+import java.time.LocalDateTime;
+import javax.ws.rs.client.Client;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.Client;
-import java.time.LocalDateTime;
+public class CapUsersJobModule extends AbstractModule {
 
-public class CapUsersJobModule extends JobModule {
   private static final Logger LOG = LoggerFactory.getLogger(CapUsersJobModule.class);
 
   private Class<? extends BulkWriter<ChangedUserDto>> capElasticWriterClass;
-
   private Class<? extends IdmService> idmService;
+  private CapUsersJobConfiguration configuration;
+  private String lastRunLoc;
 
-  public CapUsersJobModule(String[] args) {
-    super(args);
+  public CapUsersJobModule(CapUsersJobConfiguration jobConfiguration, String lastRunLoc) {
+    this.configuration = jobConfiguration;
+    this.lastRunLoc = lastRunLoc;
     this.capElasticWriterClass = CapUsersWriter.class;
     this.idmService = IdmServiceImpl.class;
   }
 
+  public CapUsersJobConfiguration getConfiguration() {
+    return configuration;
+  }
+
   public void setCapElasticWriterClass(
-          Class<? extends BulkWriter<ChangedUserDto>> capUsersElasticWriterClass) {
+      Class<? extends BulkWriter<ChangedUserDto>> capUsersElasticWriterClass) {
     this.capElasticWriterClass = capUsersElasticWriterClass;
   }
 
@@ -57,20 +61,21 @@ public class CapUsersJobModule extends JobModule {
 
   @Override
   protected void configure() {
-    super.configure();
     configureJobModes();
     bind(new TypeLiteral<BulkWriter<ChangedUserDto>>() {
     }).to(capElasticWriterClass);
+    bindConstant().annotatedWith(ElasticsearchBulkSize.class)
+        .to(configuration.getElasticSearchBulkSize());
     bindConstant().annotatedWith(PerryApiUrl.class)
-            .to(getJobsConfiguration(getJobOptions()).getPerryApiUrl());
+        .to(getConfiguration().getPerryApiUrl());
     bindConstant().annotatedWith(PerryApiUser.class)
-            .to(getJobsConfiguration(getJobOptions()).getPerryApiUser());
+        .to(getJobsConfiguration().getPerryApiUser());
     bindConstant().annotatedWith(PerryApiPassword.class)
-            .to(getJobsConfiguration(getJobOptions()).getPerryApiPassword());
+        .to(getJobsConfiguration().getPerryApiPassword());
     bind(IdmService.class).to(idmService);
     bind(
-            new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
-            }).to(LocalDateTimeSavePointContainerService.class);
+        new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
+        }).to(LocalDateTimeSavePointContainerService.class);
   }
 
   private void configureJobModes() {
@@ -99,25 +104,17 @@ public class CapUsersJobModule extends JobModule {
 
   private DefaultJobMode defineJobMode() {
     LocalDateTimeDefaultJobModeService timestampDefaultJobModeService =
-            new LocalDateTimeDefaultJobModeService();
+        new LocalDateTimeDefaultJobModeService();
     LocalDateTimeSavePointContainerService savePointContainerService =
-            new LocalDateTimeSavePointContainerService(getJobOptions().getLastRunLoc());
+        new LocalDateTimeSavePointContainerService(lastRunLoc);
     timestampDefaultJobModeService.setSavePointContainerService(savePointContainerService);
 
     return timestampDefaultJobModeService.getCurrentJobMode();
   }
 
-
   @Provides
-  @Override
-  @Inject
-  protected CapUsersJobConfiguration getJobsConfiguration(JobOptions jobsOptions) {
-    CapUsersJobConfiguration capUsersJobConfiguration = MultiThreadJobConfiguration
-        .getJobsConfiguration(CapUsersJobConfiguration.class, jobsOptions.getConfigFileLocation());
-    capUsersJobConfiguration.setIndexSettings("cap.users.settings.json");
-    capUsersJobConfiguration.setDocumentMapping("cap.users.mapping.json");
-    return capUsersJobConfiguration;
-
+  protected CapUsersJobConfiguration getJobsConfiguration() {
+    return getConfiguration();
   }
 
   @Provides
@@ -127,10 +124,12 @@ public class CapUsersJobModule extends JobModule {
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     JerseyClientBuilder clientBuilder = new JerseyClientBuilder()
-            .property(ClientProperties.CONNECT_TIMEOUT, getJobsConfiguration(getJobOptions()).getJerseyClientConnectTimeout())
-            .property(ClientProperties.READ_TIMEOUT, getJobsConfiguration(getJobOptions()).getJerseyClientReadTimeout())
-            // Just ignore host verification, client will call trusted resources only
-            .hostnameVerifier((hostName, sslSession) -> true);
+        .property(ClientProperties.CONNECT_TIMEOUT,
+            getConfiguration().getJerseyClientConnectTimeout())
+        .property(ClientProperties.READ_TIMEOUT,
+            getJobsConfiguration().getJerseyClientReadTimeout())
+        // Just ignore host verification, client will call trusted resources only
+        .hostnameVerifier((hostName, sslSession) -> true);
     Client client = clientBuilder.build();
     client.register(new JacksonJsonProvider(mapper));
     return client;

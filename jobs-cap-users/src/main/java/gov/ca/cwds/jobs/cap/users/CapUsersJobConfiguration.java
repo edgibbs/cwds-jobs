@@ -1,17 +1,23 @@
 package gov.ca.cwds.jobs.cap.users;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gov.ca.cwds.jobs.common.configuration.MultiThreadJobConfiguration;
+import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
+import gov.ca.cwds.jobs.common.elastic.ElasticsearchConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 
-public class CapUsersJobConfiguration extends MultiThreadJobConfiguration {
+public class CapUsersJobConfiguration implements JobConfiguration {
 
   private String perryApiUrl;
   private String perryApiUser;
   private String perryApiPassword;
   private int jerseyClientConnectTimeout;
   private int jerseyClientReadTimeout;
+
+  private int elasticSearchBulkSize;
+
   private DataSourceFactory cmsDataSourceFactory;
+
+  private ElasticsearchConfiguration elasticsearch;
 
   public String getPerryApiUrl() {
     return perryApiUrl;
@@ -53,6 +59,14 @@ public class CapUsersJobConfiguration extends MultiThreadJobConfiguration {
     this.jerseyClientReadTimeout = jerseyClientReadTimeout;
   }
 
+  public int getElasticSearchBulkSize() {
+    return elasticSearchBulkSize;
+  }
+
+  public void setElasticSearchBulkSize(int elasticSearchBulkSize) {
+    this.elasticSearchBulkSize = elasticSearchBulkSize;
+  }
+
   @JsonProperty
   public DataSourceFactory getCmsDataSourceFactory() {
     return cmsDataSourceFactory;
@@ -61,4 +75,14 @@ public class CapUsersJobConfiguration extends MultiThreadJobConfiguration {
   public void setCmsDataSourceFactory(DataSourceFactory cmsDataSourceFactory) {
     this.cmsDataSourceFactory = cmsDataSourceFactory;
   }
+
+  @JsonProperty
+  public ElasticsearchConfiguration getElasticsearch() {
+    return elasticsearch;
+  }
+
+  public void setElasticsearch(ElasticsearchConfiguration elasticsearch) {
+    this.elasticsearch = elasticsearch;
+  }
+
 }

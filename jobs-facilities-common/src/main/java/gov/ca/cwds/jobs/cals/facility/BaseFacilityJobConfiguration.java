@@ -34,6 +34,7 @@ public class BaseFacilityJobConfiguration implements JobConfiguration {
     this.multiThread = multiThread;
   }
 
+  @JsonProperty
   public ElasticsearchConfiguration getElasticsearch() {
     return elasticsearch;
   }
