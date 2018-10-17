@@ -64,7 +64,7 @@ public class JobMainTest {
 
   @Test
   public void testCase2_initial_b10() throws IOException {
-    runInitialJob("testCase2", "database_structure.xml");
+    runInitialJob("testcase2", "database_structure.xml");
     assertEquals(0, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
     assertTrue(savePointContainer.getSavePoint().getTimestamp().equals(
@@ -74,7 +74,7 @@ public class JobMainTest {
 
   @Test
   public void testCase3_initial_b1() throws IOException {
-    runInitialJob("testCase3", "database_structure.xml",
+    runInitialJob("testcase3", "database_structure.xml",
         "testcases/testcase3/test_case_3.xml");
     assertEquals(1, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
@@ -85,7 +85,7 @@ public class JobMainTest {
 
   @Test
   public void testCase4_Initial_b10() throws IOException {
-    runInitialJob("testCase4", "database_structure.xml",
+    runInitialJob("testcase4", "database_structure.xml",
         "testcases/testcase4/test_case_4.xml");
     assertEquals(1, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
@@ -96,7 +96,7 @@ public class JobMainTest {
 
   @Test
   public void testCase5_initial_b1() throws IOException {
-    runInitialJob("testCase5", "database_structure.xml",
+    runInitialJob("testcase5", "database_structure.xml",
         "testcases/testcase5/test_case_5.xml");
     assertEquals(3, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
@@ -107,7 +107,7 @@ public class JobMainTest {
 
   @Test
   public void testCase6_initial_b2() throws IOException {
-    runInitialJob("testCase6", "database_structure.xml",
+    runInitialJob("testcase6", "database_structure.xml",
         "testcases/testcase6/test_case_6.xml");
     assertEquals(3, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
@@ -118,7 +118,7 @@ public class JobMainTest {
 
   @Test
   public void testCase7_initial_b1() throws IOException {
-    runInitialJob("testCase7", "database_structure.xml",
+    runInitialJob("testcase7", "database_structure.xml",
         "testcases/testcase7/test_case_7.xml");
     assertEquals(3, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
@@ -129,10 +129,10 @@ public class JobMainTest {
 
   @Test
   public void testCase8_incremental_b1() throws IOException {
-    runInitialJob("testCase7", "database_structure.xml",
+    runInitialJob("testcase7", "database_structure.xml",
         "testcases/testcase7/test_case_7.xml");
     TestEntityWriter.reset();
-    runIncrementalJob("testCase7");
+    runIncrementalJob("testcase7");
     assertEquals(0, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
     assertTrue(savePointContainer.getSavePoint().getTimestamp().equals(
@@ -141,17 +141,17 @@ public class JobMainTest {
 
   @Test
   public void testCase9_incremental_b1() throws IOException {
-    testIncrementalLoad("testCase9");
+    testIncrementalLoad("testcase9");
   }
 
   @Test
   public void testCase10_incremental_b2() throws IOException {
-    testIncrementalLoad("testCase10");
+    testIncrementalLoad("testcase10");
   }
 
   @Test
   public void testCase11_incremental_b10() throws IOException {
-    testIncrementalLoad("testCase11");
+    testIncrementalLoad("testcase11");
   }
 
   @Test
@@ -168,7 +168,7 @@ public class JobMainTest {
       assertEquals(INITIAL_LOAD, savePointContainer.getJobMode());
     }
     TestEntityWriter.reset();
-    runInitialJob("testCase12");
+    runInitialJob("testcase12");
     assertEquals(2, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
         .readSavePointContainer(LocalDateTimeSavePointContainer.class);
@@ -188,7 +188,7 @@ public class JobMainTest {
         new MultiThreadModule(configuration.getMultiThread()),
         new TestDataAccessModule());
     jobModule.setJobPreparator(
-        new TestJobPreparator(getConfigFilePath("testCase12"), "testCase12",
+        new TestJobPreparator(getConfigFilePath("testcase12"), "testcase12",
             "database_structure.xml",
             "testcases/testcase12/test_case_12.xml"));
 
