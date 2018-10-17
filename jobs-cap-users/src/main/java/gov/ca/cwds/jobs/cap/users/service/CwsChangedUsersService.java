@@ -5,15 +5,13 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.jobs.cap.users.dao.CwsUsersDao;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
-import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointService;
-import org.apache.shiro.util.CollectionUtils;
-
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.shiro.util.CollectionUtils;
 
 public class CwsChangedUsersService {
 
@@ -27,7 +25,7 @@ public class CwsChangedUsersService {
   private CwsUsersDao dao;
 
   public List<ChangedUserDto> getCwsChanges() {
-    LocalDateTime savePointTime = savePointService.loadSavePoint(LocalDateTimeSavePointContainer.class).getTimestamp();
+    LocalDateTime savePointTime = savePointService.loadSavePoint().getTimestamp();
     Set<String> changedRacfIds = dao.getChangedRacfIds(savePointTime);
     if (CollectionUtils.isEmpty(changedRacfIds)) {
       return Collections.emptyList();

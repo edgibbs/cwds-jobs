@@ -36,6 +36,8 @@ dependencies {
     testCompile(group: 'gov.ca.cwds.cals', name: 'fas-data-model', version: cwdsModelVersion, changing: true)
     testCompile group: 'org.skyscreamer', name: 'jsonassert', version: jsonAssertVersion
 
+    testCompile project(':jobs-common').sourceSets.test.output
+
 }
 
 jar {

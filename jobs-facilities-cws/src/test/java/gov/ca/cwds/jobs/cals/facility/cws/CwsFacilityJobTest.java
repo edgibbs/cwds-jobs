@@ -7,15 +7,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.inject.AbstractModule;
 import gov.ca.cwds.DataSourceName;
-import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.cals.facility.FacilityTestWriter;
 import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsFacilityJobModule;
 import gov.ca.cwds.jobs.common.TestWriter;
+import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
+import gov.ca.cwds.jobs.common.configuration.JobOptions;
 import gov.ca.cwds.jobs.common.core.JobPreparator;
 import gov.ca.cwds.jobs.common.core.JobRunner;
+import gov.ca.cwds.jobs.common.inject.JobModule;
+import gov.ca.cwds.jobs.common.inject.MultiThreadModule;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
@@ -56,10 +58,9 @@ public class CwsFacilityJobTest {
   public void cwsFacilityJobTest()
       throws IOException, JSONException, InterruptedException, LiquibaseException {
     try {
-      lastRunDirHelper.deleteSavePointContainerFolder();
+      lastRunDirHelper.createSavePointContainerFolder();
       testInitialLoad();
       testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD);
-      testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD_RESUME);
       testIncrementalLoad();
     } finally {
       lastRunDirHelper.deleteSavePointContainerFolder();
@@ -118,8 +119,7 @@ public class CwsFacilityJobTest {
 
   private static CwsFacilityJobConfiguration getFacilityJobConfiguration() {
     CwsFacilityJobConfiguration facilityJobConfiguration =
-        BaseFacilityJobConfiguration
-            .getJobsConfiguration(CwsFacilityJobConfiguration.class, getConfigFilePath());
+        JobConfiguration.getJobsConfiguration(CwsFacilityJobConfiguration.class, getConfigFilePath());
     DataSourceFactoryUtils.fixDatasourceFactory(facilityJobConfiguration.getCmsDataSourceFactory());
     DataSourceFactoryUtils
         .fixDatasourceFactory(facilityJobConfiguration.getCalsnsDataSourceFactory());
@@ -139,22 +139,18 @@ public class CwsFacilityJobTest {
   }
 
   private void runInitialLoad() {
-    JobRunner.run(createCwsFacilityJobModule(CwsJobPreparator.class));
-  }
-
-  private CwsFacilityJobModule createCwsFacilityJobModule(
-      Class<? extends JobPreparator> jobPreparatorClass) {
-    CwsFacilityJobModule cwsFacilityJobModule = new CwsFacilityJobModule(getModuleArgs());
-    cwsFacilityJobModule.setElasticSearchModule(new AbstractModule() {
-      @Override
-      protected void configure() {
-        // Do nothing here
-      }
-    });
+    JobOptions jobOptions = JobOptions.parseCommandLine(getModuleArgs());
+    CwsFacilityJobConfiguration jobConfiguration = JobConfiguration
+        .getJobsConfiguration(CwsFacilityJobConfiguration.class, jobOptions.getConfigFileLocation());
+    JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
+    jobModule.addModules(new MultiThreadModule(jobConfiguration.getMultiThread()));
+    CwsFacilityJobModule cwsFacilityJobModule = new CwsFacilityJobModule(jobConfiguration,
+        jobOptions.getLastRunLoc());
+    jobModule.setJobPreparator(new CwsJobPreparator());
+    jobModule.addModule(cwsFacilityJobModule);
     FacilityTestWriter.reset();
     cwsFacilityJobModule.setFacilityElasticWriterClass(FacilityTestWriter.class);
-    cwsFacilityJobModule.setJobPreparatorClass(jobPreparatorClass);
-    return cwsFacilityJobModule;
+    JobRunner.run(jobModule);
   }
 
   private void runIncrementalLoad() {

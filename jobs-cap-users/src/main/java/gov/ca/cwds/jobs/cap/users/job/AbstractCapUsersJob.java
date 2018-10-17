@@ -28,7 +28,6 @@ public abstract class AbstractCapUsersJob implements Job {
     }
   }
 
-
   abstract void runJob();
 
   void createSavePoint(LocalDateTime dateTime){

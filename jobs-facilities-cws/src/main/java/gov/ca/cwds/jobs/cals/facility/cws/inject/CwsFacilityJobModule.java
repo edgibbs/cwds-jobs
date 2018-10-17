@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs.cals.facility.cws.inject;
 
+import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
@@ -26,18 +28,16 @@ import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.cals.facility.cws.CwsFacilityJob;
 import gov.ca.cwds.jobs.cals.facility.cws.CwsFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.cws.entity.CwsChangedFacilityService;
-import gov.ca.cwds.jobs.cals.facility.cws.mode.CwsJobIncrementalModeImplementor;
-import gov.ca.cwds.jobs.cals.facility.cws.mode.CwsJobInitialModeImplementor;
-import gov.ca.cwds.jobs.cals.facility.cws.mode.CwsJobInitialResumeModeImplementor;
 import gov.ca.cwds.jobs.cals.facility.cws.savepoint.CwsTimestampSavePointService;
-import gov.ca.cwds.jobs.common.api.JobModeImplementor;
-import gov.ca.cwds.jobs.common.api.JobModeService;
-import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
+import gov.ca.cwds.jobs.common.iterator.JobBatchIterator;
+import gov.ca.cwds.jobs.common.iterator.LocalDateTimeJobBatchIterator;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
+import gov.ca.cwds.jobs.common.mode.JobModeService;
 import gov.ca.cwds.jobs.common.mode.LocalDateTimeDefaultJobModeService;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
@@ -53,13 +53,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Alexander Serbin on 3/4/2018.
  */
-public class CwsFacilityJobModule extends BaseFacilityJobModule {
-
-  public CwsFacilityJobModule(String[] args) {
-    super(args);
-  }
+public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobConfiguration> {
 
   private static final Logger LOG = LoggerFactory.getLogger(CwsFacilityJobModule.class);
+
+  public CwsFacilityJobModule(CwsFacilityJobConfiguration jobConfiguration, String lastRunDir) {
+    super(jobConfiguration, lastRunDir);
+  }
 
   @Override
   protected void configure() {
@@ -75,7 +75,7 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
     }).toProvider(CwsTimestampSavePointServiceProvider.class);
     bind(CwsTimestampSavePointService.class).toProvider(CwsTimestampSavePointServiceProvider.class);
     bind(
-        new TypeLiteral<ChangedEntitiesIdentifiersService<TimestampSavePoint<LocalDateTime>>>() {
+        new TypeLiteral<ChangedEntitiesIdentifiersService<LocalDateTime>>() {
         }).toProvider(CwsChangedIdentifiersServiceProvider.class);
     bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
     bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {
@@ -84,45 +84,42 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule {
         .asEagerSingleton();
     bind(ExternalInterfaceMapper.class).to(ExternalInterfaceMapper.INSTANCE.getClass())
         .asEagerSingleton();
+    bind(new TypeLiteral<JobBatchIterator<TimestampSavePoint<LocalDateTime>>>() {
+    }).to(LocalDateTimeJobBatchIterator.class);
 
     install(new CwsCmsRsDataAccessModule());
   }
 
   private void bindJobModeImplementor() {
-    Class<? extends JobModeImplementor<ChangedFacilityDto, TimestampSavePoint<LocalDateTime>, DefaultJobMode>> clazz = null;
-
     LocalDateTimeDefaultJobModeService timestampDefaultJobModeService =
         new LocalDateTimeDefaultJobModeService();
     LocalDateTimeSavePointContainerService savePointContainerService =
-        new LocalDateTimeSavePointContainerService(getJobOptions().getLastRunLoc());
+        new LocalDateTimeSavePointContainerService(getLastRunDir());
     timestampDefaultJobModeService.setSavePointContainerService(savePointContainerService);
-    switch (timestampDefaultJobModeService.getCurrentJobMode()) {
-      case INITIAL_LOAD:
-        clazz = CwsJobInitialModeImplementor.class;
-        break;
-      case INITIAL_LOAD_RESUME:
-        clazz = CwsJobInitialResumeModeImplementor.class;
-        break;
-      case INCREMENTAL_LOAD:
-        clazz = CwsJobIncrementalModeImplementor.class;
-        break;
+    if (timestampDefaultJobModeService.getCurrentJobMode() == INITIAL_LOAD) {
+      bind(JobModeFinalizer.class).toProvider(CwsInitialModeFinalizerProvider.class);
+      bindConstant().annotatedWith(TimestampField.class).to("lastUpdatedTime");
+      bindConstant().annotatedWith(CwsIdentifierCreator.class)
+          .to("new CwsChangedIdentifier(home.identifier, home.lastUpdatedTime)");
+    } else { //incremental load
+      bind(JobModeFinalizer.class).toInstance(() -> {
+      });
+      bindConstant().annotatedWith(TimestampField.class).to("replicationLastUpdated");
+      bindConstant().annotatedWith(CwsIdentifierCreator.class)
+          .to("new CwsChangedIdentifier(home.identifier, "
+              + "home.recordChangeOperation, home.replicationLastUpdated)");
     }
-    bind(
-        new TypeLiteral<JobModeImplementor<ChangedFacilityDto, TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
-        }).to(clazz);
   }
 
   @Provides
-  @Override
-  @Inject
-  public CwsFacilityJobConfiguration getJobsConfiguration(JobOptions jobOptions) {
-    return super.getJobsConfiguration(jobOptions, CwsFacilityJobConfiguration.class);
+  public CwsFacilityJobConfiguration getJobsConfiguration() {
+    return getJobConfiguration();
   }
 
   @Provides
   @Inject
-  public BaseFacilityJobConfiguration getBaseConfiguration(JobOptions jobOptions) {
-    return getJobsConfiguration(jobOptions);
+  public BaseFacilityJobConfiguration getBaseConfiguration() {
+    return getJobsConfiguration();
   }
 
   @Provides

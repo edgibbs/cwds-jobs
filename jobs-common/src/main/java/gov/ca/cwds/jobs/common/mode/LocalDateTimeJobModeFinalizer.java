@@ -27,7 +27,7 @@ public class LocalDateTimeJobModeFinalizer implements JobModeFinalizer {
   @Override
   public void doFinalizeJob() {
     LocalDateTimeSavePoint timestampSavePoint = (LocalDateTimeSavePoint) savePointService
-        .loadSavePoint(LocalDateTimeSavePointContainer.class);
+        .loadSavePoint();
     LOGGER.info("Updating job save point to the last batch save point {}", timestampSavePoint);
     DefaultJobMode nextJobMode = DefaultJobMode.INCREMENTAL_LOAD;
     LOGGER.info("Updating next job mode to the {}", nextJobMode);
@@ -38,3 +38,4 @@ public class LocalDateTimeJobModeFinalizer implements JobModeFinalizer {
   }
 
 }
+

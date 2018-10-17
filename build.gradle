@@ -30,6 +30,7 @@ project.ext {
     dropwizardVersion = '1.1.0'
     jUnitVersion = '4.12'
     jsonAssertVersion = '1.5.0'
+    apacheCommonsTextVersion = '1.5'
 
     elasticsearchVersion = "5.5.2"
     dropwizardVersion = "1.1.0"

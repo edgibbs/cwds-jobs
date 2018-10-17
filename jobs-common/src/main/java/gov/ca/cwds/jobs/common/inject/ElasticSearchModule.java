@@ -1,9 +1,9 @@
 package gov.ca.cwds.jobs.common.inject;
 
 import com.google.inject.AbstractModule;
-import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import gov.ca.cwds.jobs.common.elastic.ElasticSearchIndexerDao;
 import gov.ca.cwds.jobs.common.elastic.ElasticUtils;
+import gov.ca.cwds.jobs.common.elastic.ElasticsearchConfiguration;
 import org.elasticsearch.client.Client;
 
 /**
@@ -11,9 +11,9 @@ import org.elasticsearch.client.Client;
  */
 public class ElasticSearchModule extends AbstractModule {
 
-  private BaseJobConfiguration configuration;
+  private ElasticsearchConfiguration configuration;
 
-  ElasticSearchModule(BaseJobConfiguration configuration) {
+  public ElasticSearchModule(ElasticsearchConfiguration configuration) {
     this.configuration = configuration;
   }
 
@@ -26,7 +26,7 @@ public class ElasticSearchModule extends AbstractModule {
   }
 
   private ElasticSearchIndexerDao createElasticSearchDao(Client client,
-      BaseJobConfiguration configuration) {
+      ElasticsearchConfiguration configuration) {
     ElasticSearchIndexerDao esIndexerDao = new ElasticSearchIndexerDao(client,
         configuration);
     esIndexerDao.createIndexIfMissing();

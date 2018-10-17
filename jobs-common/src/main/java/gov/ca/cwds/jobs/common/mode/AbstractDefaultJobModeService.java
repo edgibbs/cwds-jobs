@@ -2,10 +2,8 @@ package gov.ca.cwds.jobs.common.mode;
 
 import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INCREMENTAL_LOAD;
 import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD;
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD_RESUME;
 
 import com.google.inject.Inject;
-import gov.ca.cwds.jobs.common.api.JobModeService;
 import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.rest.api.ApiException;
@@ -51,9 +49,8 @@ public abstract class AbstractDefaultJobModeService<S extends SavePoint> impleme
       String jobMode = jsonObject.getString("jobMode");
       switch (jobMode) {
         case "INITIAL_LOAD":
-        case "INITIAL_LOAD_RESUME":
-          LOG.info(CURRENT_JOB_MODE_IS, INITIAL_LOAD_RESUME);
-          return INITIAL_LOAD_RESUME;
+          LOG.info(CURRENT_JOB_MODE_IS, INITIAL_LOAD);
+          return INITIAL_LOAD;
         case "INCREMENTAL_LOAD":
           LOG.info(CURRENT_JOB_MODE_IS, INCREMENTAL_LOAD);
           return INCREMENTAL_LOAD;

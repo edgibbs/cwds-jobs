@@ -3,7 +3,6 @@ package gov.ca.cwds.jobs.common.elastic;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import gov.ca.cwds.jobs.common.BaseJobConfiguration;
 import java.io.Closeable;
 import java.io.IOException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
@@ -37,7 +36,7 @@ public class ElasticSearchIndexerDao implements Closeable {
   /**
    * Elasticsearch configuration
    */
-  private BaseJobConfiguration config;
+  private ElasticsearchConfiguration config;
 
   /**
    * Constructor.
@@ -46,7 +45,7 @@ public class ElasticSearchIndexerDao implements Closeable {
    * @param config The ElasticSearch configuration which is read from .yaml file
    */
   @Inject
-  public ElasticSearchIndexerDao(Client client, BaseJobConfiguration config) {
+  public ElasticSearchIndexerDao(Client client, ElasticsearchConfiguration config) {
     this.client = client;
     this.config = config;
   }
@@ -98,7 +97,7 @@ public class ElasticSearchIndexerDao implements Closeable {
       try {
         // Give Elasticsearch a moment to catch its breath.
         // Thread.currentThread().wait(2000L); // thread monitor error
-        Thread.sleep(20000L);
+        Thread.sleep(2000L);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         LOGGER.warn("Interrupted!");

@@ -5,6 +5,5 @@ package gov.ca.cwds.jobs.common.mode;
  */
 public enum DefaultJobMode implements JobMode {
   INITIAL_LOAD,
-  INITIAL_LOAD_RESUME,
   INCREMENTAL_LOAD
 }

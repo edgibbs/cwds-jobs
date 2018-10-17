@@ -38,4 +38,10 @@ public class LisTimestampSavePointService extends
       LOGGER.info("Save point is empty. Ignoring it");
     }
   }
+
+  @Override
+  public Class<? extends SavePointContainer<? extends TimestampSavePoint<BigInteger>, DefaultJobMode>> getSavePointContainerClass() {
+    return LisTimestampSavePointContainer.class;
+  }
+
 }

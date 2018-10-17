@@ -1,29 +1,29 @@
 package gov.ca.cwds.jobs.cap.users;
 
-import com.google.inject.AbstractModule;
-import gov.ca.cwds.jobs.common.BaseJobConfiguration;
+import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INCREMENTAL_LOAD;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+
+import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
+import gov.ca.cwds.jobs.common.configuration.JobOptions;
 import gov.ca.cwds.jobs.common.core.JobRunner;
+import gov.ca.cwds.jobs.common.inject.JobModule;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
 import gov.ca.cwds.test.support.DatabaseHelper;
 import io.dropwizard.db.DataSourceFactory;
-import liquibase.exception.LiquibaseException;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INCREMENTAL_LOAD;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import liquibase.exception.LiquibaseException;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CapUsersJobTest {
 
@@ -32,8 +32,8 @@ public class CapUsersJobTest {
 
   private static LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("cap_job_temp");
   private LocalDateTimeSavePointContainerService savePointContainerService =
-          new LocalDateTimeSavePointContainerService(
-                  lastRunDirHelper.getSavepointContainerFolder().toString());
+      new LocalDateTimeSavePointContainerService(
+          lastRunDirHelper.getSavepointContainerFolder().toString());
 
   private DatabaseHelper databaseHelper;
 
@@ -80,7 +80,6 @@ public class CapUsersJobTest {
     assertEquals(2, TestCapUserWriter.getItems().size());
   }
 
-
   private void testInitialLoad() {
     LocalDateTime timestampBeforeStart = LocalDateTime.now();
     assertEquals(0, TestCapUserWriter.getItems().size());
@@ -88,14 +87,24 @@ public class CapUsersJobTest {
     assertEquals(MockedIdmService.NUMBER_OF_USERS, TestCapUserWriter.getItems().size());
 
     LocalDateTimeSavePointContainer savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
-            .readSavePointContainer(LocalDateTimeSavePointContainer.class);
+        .readSavePointContainer(LocalDateTimeSavePointContainer.class);
     assertTrue(savePointContainer.getSavePoint().getTimestamp().isAfter(timestampBeforeStart));
     assertTrue(savePointContainer.getSavePoint().getTimestamp().isBefore(LocalDateTime.now()));
     assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
   }
 
   private void runJob() {
-    JobRunner.run(createCapUsersJobModule());
+    JobOptions jobOptions = JobOptions.parseCommandLine(getModuleArgs());
+    CapUsersJobConfiguration jobConfiguration = JobConfiguration
+        .getJobsConfiguration(CapUsersJobConfiguration.class, jobOptions.getConfigFileLocation());
+    JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
+    CapUsersJobModule capUsersJobModule = new CapUsersJobModule(jobConfiguration,
+        jobOptions.getLastRunLoc());
+    capUsersJobModule.setIdmService(MockedIdmService.class);
+    jobModule.addModule(capUsersJobModule);
+    TestCapUserWriter.reset();
+    capUsersJobModule.setCapElasticWriterClass(TestCapUserWriter.class);
+    JobRunner.run(jobModule);
   }
 
   private void addCwsDataForIncrementalLoad(int i) throws LiquibaseException {
@@ -118,53 +127,38 @@ public class CapUsersJobTest {
         scriptName = "not valid name";
     }
     getDataBaseHelper()
-            .runScript(scriptName, parameters, SCHEMA_NAME);
+        .runScript(scriptName, parameters, SCHEMA_NAME);
   }
 
   private DatabaseHelper getDataBaseHelper() {
     if (databaseHelper == null) {
       DataSourceFactory cwsDataSourceFactory = getCapUsersJobConfiguration()
-              .getCmsDataSourceFactory();
+          .getCmsDataSourceFactory();
       databaseHelper = new DatabaseHelper(cwsDataSourceFactory.getUrl(),
-              cwsDataSourceFactory.getUser(), cwsDataSourceFactory.getPassword());
+          cwsDataSourceFactory.getUser(), cwsDataSourceFactory.getPassword());
     }
     return databaseHelper;
   }
 
-  private CapUsersJobModule createCapUsersJobModule() {
-    CapUsersJobModule capUsersJobModule = new CapUsersJobModule(getModuleArgs());
-
-    capUsersJobModule.setIdmService(MockedIdmService.class);
-    capUsersJobModule.setElasticSearchModule(new AbstractModule() {
-      @Override
-      protected void configure() {
-        // Do nothing here
-      }
-    });
-    TestCapUserWriter.reset();
-    capUsersJobModule.setCapElasticWriterClass(TestCapUserWriter.class);
-    return capUsersJobModule;
-  }
-
   private String[] getModuleArgs() {
     return new String[]{"-c", getConfigFilePath(), "-l",
-            lastRunDirHelper.getSavepointContainerFolder().toString()};
+        lastRunDirHelper.getSavepointContainerFolder().toString()};
   }
 
   private static String getConfigFilePath() {
     return Paths.get("src", "test", "resources", "cap-users-job-test.yaml")
-            .normalize().toAbsolutePath().toString();
+        .normalize().toAbsolutePath().toString();
   }
 
   private static CapUsersJobConfiguration getCapUsersJobConfiguration() {
     CapUsersJobConfiguration capUsersJobConfiguration =
-            BaseJobConfiguration.getJobsConfiguration(CapUsersJobConfiguration.class, getConfigFilePath());
+        JobConfiguration.getJobsConfiguration(CapUsersJobConfiguration.class, getConfigFilePath());
     DataSourceFactory dataSourceFactory = capUsersJobConfiguration.getCmsDataSourceFactory();
     dataSourceFactory.setUrl(dataSourceFactory.getProperties().get("hibernate.connection.url"));
     dataSourceFactory
-            .setUser(dataSourceFactory.getProperties().get("hibernate.connection.username"));
+        .setUser(dataSourceFactory.getProperties().get("hibernate.connection.username"));
     dataSourceFactory
-            .setPassword(dataSourceFactory.getProperties().get("hibernate.connection.password"));
+        .setPassword(dataSourceFactory.getProperties().get("hibernate.connection.password"));
 
     return capUsersJobConfiguration;
   }

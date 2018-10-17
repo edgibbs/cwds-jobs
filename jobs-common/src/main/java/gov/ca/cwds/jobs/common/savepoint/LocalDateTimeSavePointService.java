@@ -35,4 +35,10 @@ public class LocalDateTimeSavePointService extends
       LOGGER.info("Save point is empty. Ignoring it");
     }
   }
+
+  @Override
+  public Class<? extends SavePointContainer<? extends TimestampSavePoint<LocalDateTime>, DefaultJobMode>> getSavePointContainerClass() {
+    return LocalDateTimeSavePointContainer.class;
+  }
+
 }

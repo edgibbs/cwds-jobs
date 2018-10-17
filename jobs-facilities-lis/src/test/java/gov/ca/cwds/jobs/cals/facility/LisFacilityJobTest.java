@@ -6,7 +6,6 @@ import static gov.ca.cwds.test.support.DatabaseHelper.setUpDatabase;
 import static org.junit.Assert.assertEquals;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.inject.AbstractModule;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.cals.DatabaseHelper;
 import gov.ca.cwds.jobs.cals.facility.lisfas.LisFacilityJobConfiguration;
@@ -18,8 +17,12 @@ import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointCont
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointContainerService;
 import gov.ca.cwds.jobs.common.TestWriter;
 import gov.ca.cwds.jobs.common.batch.BatchProcessor;
+import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
+import gov.ca.cwds.jobs.common.configuration.JobOptions;
 import gov.ca.cwds.jobs.common.core.JobPreparator;
 import gov.ca.cwds.jobs.common.core.JobRunner;
+import gov.ca.cwds.jobs.common.inject.JobModule;
+import gov.ca.cwds.jobs.common.inject.MultiThreadModule;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
 import gov.ca.cwds.jobs.utils.DataSourceFactoryUtils;
@@ -56,11 +59,10 @@ public class LisFacilityJobTest {
       lastRunDirHelper.deleteSavePointContainerFolder();
       testInitialLoad();
       testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD);
-      testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD_RESUME);
       testIncrementalLoad();
     } finally {
       lastRunDirHelper.deleteSavePointContainerFolder();
-      TestWriter.reset();
+      FacilityTestWriter.reset();
     }
   }
 
@@ -131,9 +133,8 @@ public class LisFacilityJobTest {
 
   private static LisFacilityJobConfiguration getFacilityJobConfiguration() {
     LisFacilityJobConfiguration facilityJobConfiguration =
-        BaseFacilityJobConfiguration
+        JobConfiguration
             .getJobsConfiguration(LisFacilityJobConfiguration.class, getConfigFilePath());
-
     DataSourceFactoryUtils
         .fixDatasourceFactory(facilityJobConfiguration.getCalsnsDataSourceFactory());
     DataSourceFactoryUtils.fixDatasourceFactory(facilityJobConfiguration.getLisDataSourceFactory());
@@ -143,25 +144,23 @@ public class LisFacilityJobTest {
   }
 
   private void runInitialLoad() {
-    JobRunner.run(createLisFacilityJobModule());
+    JobOptions jobOptions = JobOptions.parseCommandLine(getModuleArgs());
+    LisFacilityJobConfiguration jobConfiguration = JobConfiguration
+        .getJobsConfiguration(LisFacilityJobConfiguration.class,
+            jobOptions.getConfigFileLocation());
+    JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
+    jobModule.addModules(new MultiThreadModule(jobConfiguration.getMultiThread()));
+    LisFacilityJobModule lisFacilityJobModule = new LisFacilityJobModule(jobConfiguration,
+        jobOptions.getLastRunLoc());
+    jobModule.setJobPreparator(new LisJobPreparator());
+    jobModule.addModule(lisFacilityJobModule);
+    FacilityTestWriter.reset();
+    lisFacilityJobModule.setFacilityElasticWriterClass(FacilityTestWriter.class);
+    JobRunner.run(jobModule);
   }
 
   private void runIncrementalLoad() {
     runInitialLoad();
-  }
-
-  private LisFacilityJobModule createLisFacilityJobModule() {
-    LisFacilityJobModule lisFacilityJobModule = new LisFacilityJobModule(getModuleArgs());
-    FacilityTestWriter.reset();
-    lisFacilityJobModule.setFacilityElasticWriterClass(FacilityTestWriter.class);
-    lisFacilityJobModule.setElasticSearchModule(new AbstractModule() {
-      @Override
-      protected void configure() {
-
-      }
-    });
-    lisFacilityJobModule.setJobPreparatorClass(LisJobPreparator.class);
-    return lisFacilityJobModule;
   }
 
   private String[] getModuleArgs() {
