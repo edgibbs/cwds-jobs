@@ -16,7 +16,7 @@ public final class CapUsersJobRunner {
   public static void main(String[] args) {
     JobOptions jobOptions = JobOptions.parseCommandLine(args);
     CapUsersJobConfiguration jobConfiguration = JobConfiguration
-        .getJobsConfiguration(CapUsersJobConfiguration.class, jobOptions.getLastRunLoc());
+        .getJobsConfiguration(CapUsersJobConfiguration.class, jobOptions.getConfigFileLocation());
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
     ElasticsearchConfiguration elasticsearchConfiguration = jobConfiguration.getElasticsearch();
     elasticsearchConfiguration.setIndexSettings("cap.users.settings.json");
