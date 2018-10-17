@@ -17,7 +17,7 @@ public final class CwsFacilityJobRunner {
   public static void main(String[] args) {
     JobOptions jobOptions = JobOptions.parseCommandLine(args);
     CwsFacilityJobConfiguration jobConfiguration = JobConfiguration
-        .getJobsConfiguration(CwsFacilityJobConfiguration.class, jobOptions.getLastRunLoc());
+        .getJobsConfiguration(CwsFacilityJobConfiguration.class, jobOptions.getConfigFileLocation());
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
     ElasticsearchConfiguration elasticsearchConfiguration = jobConfiguration.getElasticsearch();
     elasticsearchConfiguration.setDocumentMapping("facility.mapping.json");

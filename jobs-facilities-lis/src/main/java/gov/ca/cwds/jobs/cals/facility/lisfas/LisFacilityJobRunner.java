@@ -17,7 +17,7 @@ public final class LisFacilityJobRunner {
   public static void main(String[] args) {
     JobOptions jobOptions = JobOptions.parseCommandLine(args);
     LisFacilityJobConfiguration jobConfiguration = JobConfiguration
-        .getJobsConfiguration(LisFacilityJobConfiguration.class, jobOptions.getLastRunLoc());
+        .getJobsConfiguration(LisFacilityJobConfiguration.class, jobOptions.getConfigFileLocation());
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
     ElasticsearchConfiguration elasticsearchConfiguration = jobConfiguration.getElasticsearch();
     elasticsearchConfiguration.setDocumentMapping("facility.mapping.json");
