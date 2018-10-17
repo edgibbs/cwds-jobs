@@ -54,7 +54,7 @@ public class JobMainTest {
 
   @Test
   public void testCase1_initial_b1() throws IOException {
-    runInitialJob("testCase1", "database_structure.xml");
+    runInitialJob("testcase1", "database_structure.xml");
     assertEquals(0, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
     assertTrue(savePointContainer.getSavePoint().getTimestamp().equals(
@@ -179,7 +179,7 @@ public class JobMainTest {
 
   private void runCrashJob() {
     TestJobConfiguration configuration = JobConfiguration
-        .getJobsConfiguration(TestJobConfiguration.class, getConfigFilePath("testCase12"));
+        .getJobsConfiguration(TestJobConfiguration.class, getConfigFilePath("testcase12"));
     String runDir = lastRunDirHelper.getSavepointContainerFolder().toString();
     JobModule jobModule = new JobModule(runDir);
     TestCustomModule customModule = new TestCustomModule(configuration, runDir);
