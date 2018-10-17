@@ -19,7 +19,7 @@ public abstract class AbstractChangedFacilityService implements
     String facilityId = null;
     try {
       facilityId = identifier.getId();
-      LOG.info("Loading entity by id {}", identifier.getId());
+      LOG.info("Loading entity by id {}", facilityId);
       FacilityDTO facilityDTO = loadEntityById(identifier);
       if (facilityDTO == null) {
         LOG.error("Can't get facility by id {}", facilityId);
