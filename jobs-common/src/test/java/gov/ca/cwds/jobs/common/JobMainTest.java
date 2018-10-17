@@ -181,8 +181,7 @@ public class JobMainTest {
     TestJobConfiguration configuration = JobConfiguration
         .getJobsConfiguration(TestJobConfiguration.class, getConfigFilePath("testCase12"));
     String runDir = lastRunDirHelper.getSavepointContainerFolder().toString();
-    JobModule<TestJobConfiguration> jobModule = new JobModule<>(
-        configuration, runDir);
+    JobModule jobModule = new JobModule(runDir);
     TestCustomModule customModule = new TestCustomModule(configuration, runDir);
     customModule.setChangedEntityServiceProvider(BrokenTestEntityServiceProvider.class);
     jobModule.addModules(customModule,
@@ -216,8 +215,7 @@ public class JobMainTest {
     TestJobConfiguration configuration = JobConfiguration
         .getJobsConfiguration(TestJobConfiguration.class, getConfigFilePath(testCase));
     String runDir = lastRunDirHelper.getSavepointContainerFolder().toString();
-    JobModule<TestJobConfiguration> jobModule = new JobModule<>(
-        configuration, runDir);
+    JobModule jobModule = new JobModule(runDir);
     jobModule.addModules(new TestCustomModule(configuration, runDir),
         new MultiThreadModule(configuration.getMultiThread()),
         new TestDataAccessModule());

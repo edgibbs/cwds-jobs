@@ -113,7 +113,7 @@ public class CapUsersJobModule extends JobModule {
   @Inject
   protected CapUsersJobConfiguration getJobsConfiguration(JobOptions jobsOptions) {
     CapUsersJobConfiguration capUsersJobConfiguration = MultiThreadJobConfiguration
-        .getJobsConfiguration(CapUsersJobConfiguration.class, jobsOptions.getEsConfigLoc());
+        .getJobsConfiguration(CapUsersJobConfiguration.class, jobsOptions.getConfigFileLocation());
     capUsersJobConfiguration.setIndexSettings("cap.users.settings.json");
     capUsersJobConfiguration.setDocumentMapping("cap.users.mapping.json");
     return capUsersJobConfiguration;

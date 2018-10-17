@@ -49,11 +49,11 @@ public class JobOptions {
   }
 
   /**
-   * Getter for location of Elasticsearch configuration file.
+   * Getter for location of configuration file.
    *
-   * @return location of Elasticsearch configuration file
+   * @return location of configuration file
    */
-  public String getEsConfigLoc() {
+  public String getConfigFileLocation() {
     return esConfigLoc;
   }
 
@@ -172,7 +172,7 @@ public class JobOptions {
   @SuppressFBWarnings("PATH_TRAVERSAL_IN") //Path cannot be controlled by the user
   private static JobOptions validateJobOptions(JobOptions jobOptions) {
     // check option: -c
-    File configFile = new File(jobOptions.getEsConfigLoc());
+    File configFile = new File(jobOptions.getConfigFileLocation());
     if (!configFile.exists()) {
       throw new JobsException(
           "job arguments error: specified configuration file " + configFile.getPath() + " not found");

@@ -58,7 +58,7 @@ public class LisFacilityJobModule extends BaseFacilityJobModule {
   private static final Logger LOG = LoggerFactory.getLogger(LisFacilityJobModule.class);
 
   public LisFacilityJobModule(String[] args) {
-    super(args);
+    super(args, lastRunDir);
   }
 
   @Override

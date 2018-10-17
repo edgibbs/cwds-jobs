@@ -1,4 +1,6 @@
-package gov.ca.cwds.jobs.cals.facility.cws.mode;
+package gov.ca.cwds.jobs.cals.facility.cws;
+
+import static gov.ca.cwds.cals.Constants.UnitOfWork.CMS;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cals.facility.cws.savepoint.CwsTimestampSavePointService;
@@ -7,16 +9,17 @@ import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
+import io.dropwizard.hibernate.UnitOfWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 7/1/2018.
  */
-public class CwsJobModeFinalizer implements JobModeFinalizer {
+public class CwsInitialJobModeFinalizer implements JobModeFinalizer {
 
   private static final Logger LOGGER = LoggerFactory
-      .getLogger(CwsJobModeFinalizer.class);
+      .getLogger(CwsInitialJobModeFinalizer.class);
 
   @Inject
   private CwsTimestampSavePointService savePointService;
@@ -25,6 +28,7 @@ public class CwsJobModeFinalizer implements JobModeFinalizer {
   private LocalDateTimeSavePointContainerService savePointContainerService;
 
   @Override
+  @UnitOfWork(CMS)
   public void doFinalizeJob() {
     LocalDateTimeSavePoint timestampSavePoint = savePointService.findFirstIncrementalSavePoint();
     LOGGER.info("Updating job save point to the last batch save point {}", timestampSavePoint);

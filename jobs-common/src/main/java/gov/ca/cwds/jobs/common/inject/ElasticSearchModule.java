@@ -13,7 +13,7 @@ public class ElasticSearchModule extends AbstractModule {
 
   private ElasticsearchConfiguration configuration;
 
-  ElasticSearchModule(ElasticsearchConfiguration configuration) {
+  public ElasticSearchModule(ElasticsearchConfiguration configuration) {
     this.configuration = configuration;
   }
 

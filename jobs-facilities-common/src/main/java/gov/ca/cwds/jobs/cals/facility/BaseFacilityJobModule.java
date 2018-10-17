@@ -1,21 +1,23 @@
 package gov.ca.cwds.jobs.cals.facility;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.cals.inject.MappingModule;
 import gov.ca.cwds.jobs.common.BulkWriter;
-import gov.ca.cwds.jobs.common.configuration.JobOptions;
-import gov.ca.cwds.jobs.common.inject.JobModule;
 
 /**
  * Created by Alexander Serbin on 3/28/2018.
  */
-public abstract class BaseFacilityJobModule extends JobModule {
+public abstract class BaseFacilityJobModule<T extends BaseFacilityJobConfiguration> extends AbstractModule {
 
+  private final String lastRunDir;
   private Class<? extends BulkWriter<ChangedFacilityDto>> facilityElasticWriterClass;
+  private T jobConfiguration;
 
-  public BaseFacilityJobModule(String[] args) {
-    super(args);
+  public BaseFacilityJobModule(T jobConfiguration, String lastRunDir) {
     this.facilityElasticWriterClass = FacilityElasticWriter.class;
+    this.jobConfiguration = jobConfiguration;
+    this.lastRunDir = lastRunDir;
   }
 
   public void setFacilityElasticWriterClass(
@@ -23,23 +25,20 @@ public abstract class BaseFacilityJobModule extends JobModule {
     this.facilityElasticWriterClass = facilityElasticWriterClass;
   }
 
+  public T getJobConfiguration() {
+    return jobConfiguration;
+  }
+
+  public String getLastRunDir() {
+    return lastRunDir;
+  }
+
   @Override
   protected void configure() {
-    super.configure();
     bind(new TypeLiteral<BulkWriter<ChangedFacilityDto>>() {
     }).to(facilityElasticWriterClass);
     install(new MappingModule());
     install(new CalsnsDataAccessModule());
-  }
-
-  protected <T extends BaseFacilityJobConfiguration> T getJobsConfiguration(JobOptions jobOptions,
-      Class<T> configurationClass) {
-    T facilityJobConfiguration =
-        BaseFacilityJobConfiguration.getJobsConfiguration(configurationClass,
-            jobOptions.getEsConfigLoc());
-    facilityJobConfiguration.setDocumentMapping("facility.mapping.json");
-    facilityJobConfiguration.setIndexSettings("facility.settings.json");
-    return facilityJobConfiguration;
   }
 
 }
