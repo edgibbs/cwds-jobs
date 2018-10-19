@@ -11,6 +11,7 @@ dependencies {
     compile (group: 'io.dropwizard', name: 'dropwizard-db', version: dropwizardVersion){
         exclude group: 'org.slf4j'
     }
+    compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
     compile group: 'org.elasticsearch.client', name:'transport', version: elasticsearchVersion
 
     compile group: 'gov.ca.cwds.api', name: 'api-core-cms', version: coreApiVersion
