@@ -33,34 +33,6 @@ run job using following command:
 ```bash
 $java -cp jobs.jar gov.ca.cwds.jobs.FacilityIndexerJob path/to/config/file.yaml
 ```
-#### Code overview
-In order to create new job you have to implement 2 interfaces: _JobReader_, _JobWriter_ and optional _JobProcessor_
-_JobReader_ has a single method _I read()_ which is responsible for reading items from input source. It must return null when everything is read.
-_JobWriter_ has a single method _write(List\<I\> items)_ which is responsible for writing chunk of data to output target.
-_JobProcessor_ has a single method _O process(I item)_, you can implement it if some mapping logic is required
-Then you should provide those components to a job. Google guice example config:
-```java
-@Provides
-@Named("job")
-@Inject
-public Job job(@Named("reader") JobReader reader,
-               @Named("writer") JobWriter writer) {
-        return new AsyncReadWriteJob(reader, writer);
-}
-
-//or with processor
-
-@Provides
-@Named("job")
-@Inject
-public Job job(@Named("reader") JobReader reader,
-               @Named("processor") JobProcessor processor,
-               @Named("writer") JobWriter writer) {
-        return new AsyncReadWriteJob(reader, processor, writer);
-}
-```
-Read and write operation runs in separate threads.
-
 
 # Questions
 
