@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public final class ElasticUtils {
           Settings.builder().put("cluster.name", config.getElasticsearchCluster());
       client = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
 
-      for (InetSocketTransportAddress address : getValidatedESNodes(config)) {
+      for (TransportAddress address : getValidatedESNodes(config)) {
         client.addTransportAddress(address);
       }
     } catch (RuntimeException e) {
@@ -45,9 +45,9 @@ public final class ElasticUtils {
     return client;
   }
 
-  private static List<InetSocketTransportAddress> getValidatedESNodes(
+  private static List<TransportAddress> getValidatedESNodes(
       ElasticsearchConfiguration config) {
-    List<InetSocketTransportAddress> nodesList = new LinkedList<>();
+    List<TransportAddress> nodesList = new LinkedList<>();
     String[] params;
     List<String> nodes = config.getNodes();
     Map<String, String> hostPortMap = new HashMap<>(nodes.size());
@@ -63,7 +63,7 @@ public final class ElasticUtils {
         LOGGER.info("Adding new ES Node host:[{}] port:[{}] to elasticsearch client", k, v);
         try {
           nodesList
-              .add(new InetSocketTransportAddress(InetAddress.getByName(k), Integer.parseInt(v)));
+              .add(new TransportAddress(InetAddress.getByName(k), Integer.parseInt(v)));
         } catch (UnknownHostException e) {
           LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
           throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
