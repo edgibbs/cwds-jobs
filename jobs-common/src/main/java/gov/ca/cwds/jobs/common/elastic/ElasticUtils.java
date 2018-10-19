@@ -7,9 +7,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,16 +28,12 @@ public final class ElasticUtils {
 
   public static TransportClient createAndConfigureESClient(ElasticsearchConfiguration config) {
     TransportClient client = null;
-
-    LOGGER.info("Create NEW ES client");
     try {
-      Settings.Builder settings =
-          Settings.builder().put("cluster.name", config.getElasticsearchCluster());
-      client = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
-
+      client = makeESTransportClient(config);
       for (TransportAddress address : getValidatedESNodes(config)) {
         client.addTransportAddress(address);
       }
+      return client;
     } catch (RuntimeException e) {
       LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
       if (client != null) {
@@ -42,6 +41,27 @@ public final class ElasticUtils {
       }
       throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
     }
+  }
+
+  protected static TransportClient makeESTransportClient(final ElasticsearchConfiguration config) {
+    TransportClient client;
+    final String cluster = config.getElasticsearchCluster();
+    final String user = config.getUser();
+    final String password = config.getPassword();
+    final boolean secureClient = StringUtils.isNotBlank(user) && StringUtils.isNotBlank(password);
+
+    final Settings.Builder settings = Settings.builder().put("cluster.name", cluster);
+    settings.put("client.transport.sniff", true);
+
+    if (secureClient) {
+      LOGGER.info("Enable X-Pack - cluster: {}", cluster);
+      settings.put("xpack.security.user", user + ":" + password);
+      client = new PreBuiltXPackTransportClient(settings.build());
+    } else {
+      LOGGER.info("Disable X-Pack - cluster: {}", cluster);
+      client = new PreBuiltTransportClient(settings.build());
+    }
+
     return client;
   }
 

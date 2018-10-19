@@ -17,6 +17,8 @@ dependencies {
     compile group: 'gov.ca.cwds.api', name: 'api-core-common', version: coreApiVersion
     compile (group: 'gov.ca.cwds.api', name: 'api-core', version: coreApiVersion) {
         exclude group: 'org.glassfish.jersey.core'
+        exclude group: 'org.elasticsearch'
+        exclude group: 'org.elasticsearch.client'
     }
 
     testCompile group: 'com.h2database', name: 'h2', version: '1.4.194'
