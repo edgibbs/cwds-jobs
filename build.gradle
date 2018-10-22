@@ -4,6 +4,9 @@ buildscript {
             url "http://sonar.dev.cwds.io:8081/artifactory/repo"
         }
         jcenter()
+        maven {
+            url "https://artifacts.elastic.co/maven"
+        }
     }
 }
 
@@ -63,6 +66,9 @@ allprojects {
         mavenLocal()
         maven {
             url artifactoryRepo
+        }
+        maven {
+            url "https://artifacts.elastic.co/maven"
         }
     }
 

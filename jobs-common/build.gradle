@@ -13,14 +13,17 @@ dependencies {
     }
     compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
     compile group: 'org.elasticsearch.client', name:'transport', version: elasticsearchVersion
+    compile group: 'org.elasticsearch.client', name:'x-pack-transport', version: elasticsearchVersion
 
-    compile group: 'gov.ca.cwds.api', name: 'api-core-cms', version: coreApiVersion
+    compile (group: 'gov.ca.cwds.api', name: 'api-core-cms', version: coreApiVersion) {
+        exclude group: 'org.elasticsearch'
+        exclude group: 'org.elasticsearch.client'
+    }
     compile group: 'gov.ca.cwds.api', name: 'api-core-common', version: coreApiVersion
     compile (group: 'gov.ca.cwds.api', name: 'api-core', version: coreApiVersion) {
         exclude group: 'org.glassfish.jersey.core'
         exclude group: 'org.elasticsearch'
         exclude group: 'org.elasticsearch.client'
-        exclude group: 'org.elasticsearch.plugin'
     }
 
     testCompile group: 'com.h2database', name: 'h2', version: '1.4.194'
