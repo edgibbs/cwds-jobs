@@ -10,6 +10,7 @@ import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.ws.rs.client.Client;
@@ -18,6 +19,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +77,11 @@ public class IdmServiceImpl implements IdmService {
         .header(HttpHeaders.AUTHORIZATION, basicAuthHeader)
         .post(Entity.entity(racfIds, MediaType.APPLICATION_JSON));
 
+    if (response.getStatus() != Status.OK.getStatusCode()) {
+      LOGGER.warn("IDM search by RACFIDs responded with status {}", response.getStatus());
+      return Collections.emptyList();
+    }
+
     return response.readEntity(new GenericType<List<User>>() {
     });
   }
@@ -90,6 +97,11 @@ public class IdmServiceImpl implements IdmService {
         .request(MediaType.APPLICATION_JSON)
         .header(HttpHeaders.AUTHORIZATION, basicAuthHeader)
         .get();
+
+    if (response.getStatus() != Status.OK.getStatusCode()) {
+      LOGGER.warn("IDM getCapChanges responded with status {}", response.getStatus());
+      return Collections.emptyList();
+    }
 
     return response.readEntity(new GenericType<List<UserAndOperation>>() {
     });

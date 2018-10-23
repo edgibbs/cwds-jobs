@@ -12,8 +12,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.shiro.util.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CwsChangedUsersService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(CwsChangedUsersService.class);
+
 
   @Inject
   private LocalDateTimeSavePointService savePointService;
@@ -28,12 +33,14 @@ public class CwsChangedUsersService {
     LocalDateTime savePointTime = savePointService.loadSavePoint().getTimestamp();
     Set<String> changedRacfIds = dao.getChangedRacfIds(savePointTime);
     if (CollectionUtils.isEmpty(changedRacfIds)) {
+      LOGGER.info("No changes in CWS/CMS found");
       return Collections.emptyList();
     }
+    LOGGER.info("The number of RACFIDs with changed data: {}", changedRacfIds.size());
     changedRacfIds = changedRacfIds.stream().map(String::trim).collect(Collectors.toSet());
     List<User> users = idmService.getUsersByRacfIds(changedRacfIds);
     return users.stream()
-            .map(e -> new ChangedUserDto(e, RecordChangeOperation.U))
-            .collect(Collectors.toList());
+        .map(e -> new ChangedUserDto(e, RecordChangeOperation.U))
+        .collect(Collectors.toList());
   }
 }
