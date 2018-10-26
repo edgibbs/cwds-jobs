@@ -12,8 +12,7 @@ dependencies {
         exclude group: 'org.slf4j'
     }
     compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
-    compile group: 'org.elasticsearch.client', name:'transport', version: elasticsearchVersion
-    compile group: 'org.elasticsearch.client', name:'x-pack-transport', version: elasticsearchVersion
+    compile group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: elasticsearchVersion
 
     compile (group: 'gov.ca.cwds.api', name: 'api-core-cms', version: coreApiVersion) {
         exclude group: 'org.elasticsearch'

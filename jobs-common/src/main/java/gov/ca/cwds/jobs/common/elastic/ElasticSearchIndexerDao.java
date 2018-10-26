@@ -6,12 +6,11 @@ import com.google.inject.Inject;
 import java.io.Closeable;
 import java.io.IOException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
+import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.Requests;
-import org.elasticsearch.cluster.metadata.IndexMetaData;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +30,7 @@ public class ElasticSearchIndexerDao implements Closeable {
   /**
    * Client is thread safe.
    */
-  private Client client;
+  private RestHighLevelClient client;
 
   /**
    * Elasticsearch configuration
@@ -45,7 +44,7 @@ public class ElasticSearchIndexerDao implements Closeable {
    * @param config The ElasticSearch configuration which is read from .yaml file
    */
   @Inject
-  public ElasticSearchIndexerDao(Client client, ElasticsearchConfiguration config) {
+  public ElasticSearchIndexerDao(RestHighLevelClient client, ElasticsearchConfiguration config) {
     this.client = client;
     this.config = config;
   }
@@ -57,9 +56,15 @@ public class ElasticSearchIndexerDao implements Closeable {
    * @return whether the index exists
    */
   private boolean doesIndexExist(final String index) {
-    final IndexMetaData indexMetaData = client.admin().cluster()
-        .state(Requests.clusterStateRequest()).actionGet().getState().getMetaData().index(index);
-    return indexMetaData != null;
+    GetIndexRequest request = new GetIndexRequest();
+    request.indices(index);
+    boolean exists = false;
+    try {
+      exists = client.indices().exists(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      LOGGER.warn("Can't validate index [" + index + "] existence", e);
+    }
+    return exists;
   }
 
   /**
@@ -69,17 +74,17 @@ public class ElasticSearchIndexerDao implements Closeable {
     LOGGER.warn("CREATING ES INDEX [{}] for type [{}]",
         config.getElasticsearchAlias(), config.getElasticsearchDocType());
 
-    CreateIndexRequestBuilder createIndexRequestBuilder =
-        getClient().admin().indices().prepareCreate(config.getElasticsearchAlias());
+    CreateIndexRequest createIndexRequest = new CreateIndexRequest(config.getElasticsearchAlias());
+    createIndexRequest.settings(config.getIndexSettings(), XContentType.JSON);
+    createIndexRequest.mapping(config.getElasticsearchDocType(), config.getDocumentMapping(),
+        XContentType.JSON);
 
-    createIndexRequestBuilder
-        .setSettings(config.getIndexSettings(), XContentType.JSON);
-    createIndexRequestBuilder
-        .addMapping(config.getElasticsearchDocType(), config.getDocumentMapping(),
-            XContentType.JSON);
-
-    CreateIndexRequest indexRequest = createIndexRequestBuilder.request();
-    getClient().admin().indices().create(indexRequest).actionGet();
+    try {
+      client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      LOGGER.error("Unable to create index [" + config.getElasticsearchAlias()  + "]", e);
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -96,8 +101,7 @@ public class ElasticSearchIndexerDao implements Closeable {
       createIndex();
       try {
         // Give Elasticsearch a moment to catch its breath.
-        // Thread.currentThread().wait(2000L); // thread monitor error
-        Thread.sleep(2000L);
+        Thread.sleep(10000L);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         LOGGER.warn("Interrupted!");
@@ -116,9 +120,10 @@ public class ElasticSearchIndexerDao implements Closeable {
    */
   public IndexRequest bulkAdd(final ObjectMapper mapper, final String id, final Object obj)
       throws JsonProcessingException {
-    return client.prepareIndex(config.getElasticsearchAlias(),
-        config.getElasticsearchDocType(), id)
-        .setSource(mapper.writeValueAsBytes(obj), XContentType.JSON).request();
+    IndexRequest indexRequest = new IndexRequest(config.getElasticsearchAlias(),
+        config.getElasticsearchDocType(), id);
+    indexRequest.source(mapper.writeValueAsBytes(obj), XContentType.JSON);
+    return indexRequest;
   }
 
   /**
@@ -128,14 +133,15 @@ public class ElasticSearchIndexerDao implements Closeable {
    * @return prepared DeleteRequest
    */
   public DeleteRequest bulkDelete(final String id) {
-    return client.prepareDelete(config.getElasticsearchAlias(),
-        config.getElasticsearchDocType(), id).request();
+    DeleteRequest deleteRequest = new DeleteRequest(config.getElasticsearchAlias(),
+        config.getElasticsearchDocType(), id);
+    return deleteRequest;
   }
 
   /**
    * Stop the ES client, if started.
    */
-  private void stop() {
+  private void stop() throws IOException {
     if (client != null) {
       this.client.close();
     }
@@ -155,7 +161,7 @@ public class ElasticSearchIndexerDao implements Closeable {
   /**
    * @return the client
    */
-  public Client getClient() {
+  public RestHighLevelClient getClient() {
     return client;
   }
 }
