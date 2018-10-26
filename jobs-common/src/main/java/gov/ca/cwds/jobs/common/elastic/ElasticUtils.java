@@ -21,19 +21,10 @@ public final class ElasticUtils {
   private ElasticUtils() {}
 
   public static RestHighLevelClient createAndConfigureESClient(ElasticsearchConfiguration config) {
-    RestHighLevelClient client = null;
     try {
-      client = new RestHighLevelClient(RestClient.builder(getHttpHosts(config.getNodes())));
-      return client;
+      return new RestHighLevelClient(RestClient.builder(getHttpHosts(config.getNodes())));
     } catch (RuntimeException e) {
       LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
-      if (client != null) {
-        try {
-          client.close();
-        } catch (IOException e1) {
-          LOGGER.error("Was not able to close Elasticsearch client", e);
-        }
-      }
       throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
     }
   }
