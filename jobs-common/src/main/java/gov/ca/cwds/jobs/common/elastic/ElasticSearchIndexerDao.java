@@ -63,6 +63,7 @@ public class ElasticSearchIndexerDao implements Closeable {
       exists = client.indices().exists(request, RequestOptions.DEFAULT);
     } catch (IOException e) {
       LOGGER.warn("Can't validate index [" + index + "] existence", e);
+      throw new RuntimeException(e);
     }
     return exists;
   }
