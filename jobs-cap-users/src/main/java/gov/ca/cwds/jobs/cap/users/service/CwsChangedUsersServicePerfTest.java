@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 public class CwsChangedUsersServicePerfTest implements CwsChangedUsersService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CwsChangedUsersServiceImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CwsChangedUsersServicePerfTest.class);
 
   @Inject
   private IdmService idmService;
