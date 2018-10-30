@@ -9,7 +9,7 @@ perryApiPassword: ${PERRY_PASS:-pass}
 jerseyClientConnectTimeout: ${CONNECT_TIMEOUT:-20000}
 jerseyClientReadTimeout: ${READ_TIMEOUT:-60000}
 
-performanceTestMode: ${PERF_TEST_MODE_ON:-false}
+performanceTestMode: ${PERF_TEST_MODE_ON:-true}
 
 elasticsearch:
   elasticsearch.additional.nodes:
