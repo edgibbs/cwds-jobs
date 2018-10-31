@@ -1,8 +1,0 @@
-elasticsearch.host: localhost
-elasticsearch.port: 9316
-elasticsearch.cluster: elasticsearch
-elasticsearch.alias: rfa1aforms
-elasticsearch.doctype: rfa1aform
-#
-elasticsearch.xpack.user: elastic
-elasticsearch.xpack.password: changeme
