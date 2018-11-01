@@ -5,7 +5,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +27,15 @@ public final class ElasticUtils {
 
   public static RestHighLevelClient createAndConfigureESClient(ElasticsearchConfiguration config) {
     try {
-      return new RestHighLevelClient(RestClient.builder(getHttpHosts(config.getNodes())));
+      final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+      credentialsProvider.setCredentials(AuthScope.ANY,
+          new UsernamePasswordCredentials(config.getUser(), config.getPassword()));
+
+      RestClientBuilder restClientBuilder = RestClient.builder(getHttpHosts(config.getNodes())).setHttpClientConfigCallback(
+          httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+
+      RestHighLevelClient client = new RestHighLevelClient(restClientBuilder);
+      return client;
     } catch (RuntimeException e) {
       LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
       throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
