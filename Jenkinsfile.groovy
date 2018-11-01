@@ -34,14 +34,14 @@ node ('cals-slave'){
    stage('Build'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
    }
-   stage('Tests and Coverage') {
-	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
-   }
-   stage('SonarQube analysis'){
-     		withSonarQubeEnv('Core-SonarQube') {
-     			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
-             }
-   }
+//   stage('Tests and Coverage') {
+//	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
+//   }
+//   stage('SonarQube analysis'){
+//     		withSonarQubeEnv('Core-SonarQube') {
+//     			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
+//             }
+//   }
     stage ('Push to artifactory'){
         rtGradle.deployer.deployArtifacts = true
         buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
