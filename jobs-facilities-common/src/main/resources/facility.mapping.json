@@ -11,10 +11,10 @@
       }
     },
     "addresses": {
-      "type": "nested",
+      "type": "nested"
     },
     "phones": {
-      "type": "nested",
+      "type": "nested"
     },
     "county": {
       "properties": {
