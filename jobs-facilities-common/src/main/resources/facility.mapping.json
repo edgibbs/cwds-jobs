@@ -2,7 +2,6 @@
   "properties": {
     "name": {
       "type": "text",
-      "copy_to": "_all",
       "fields": {
         "for_sort": {
           "type": "text",
@@ -13,11 +12,9 @@
     },
     "addresses": {
       "type": "nested",
-      "copy_to": "_all"
     },
     "phones": {
       "type": "nested",
-      "copy_to": "_all"
     },
     "county": {
       "properties": {
@@ -29,9 +26,6 @@
           "copy_to": "_all"
         }
       }
-    },
-    "_all": {
-      "type": "text"
     }
   }
 }
