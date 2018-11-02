@@ -2,40 +2,45 @@ package gov.ca.cwds.jobs.common.elastic;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import gov.ca.cwds.jobs.common.configuration.MultiThreadJobConfiguration;
 import java.io.IOException;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
 import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.client.AdminClient;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.client.ClusterAdminClient;
+import org.elasticsearch.client.ElasticMockFactory;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.client.IndicesClient;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.cluster.metadata.MetaData;
+import org.elasticsearch.common.CheckedConsumer;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 /**
  * Created by Ievgenii Drozd on 5/3/2018.
  */
-@Ignore
 public class ElasticSearchIndexerDaoTest {
 
   private static final String ES_ALIAS = "mockESAlias";
@@ -105,21 +110,21 @@ public class ElasticSearchIndexerDaoTest {
   }
 
   @Test
-  public void testIndexDoesExist() {
+  public void testIndexDoesExist() throws IOException {
     setUpClusterMock();
     when(metaDataMock.index(ES_ALIAS)).thenReturn(indexMetaDataMock); //index should exist
     indexerDao.createIndexIfMissing();
   }
 
   @Test
-  public void testIndexDoesNotExist() {
+  public void testIndexDoesNotExist() throws IOException {
     setUpClusterMock();
     when(metaDataMock.index(ES_ALIAS)).thenReturn(null); //empty index
     indexerDao.createIndexIfMissing();
   }
 
   @Test
-  public void testCreateIndex() {
+  public void testCreateIndex() throws IOException {
     setUpClusterMock();
     when(metaDataMock.index(ES_ALIAS)).thenReturn(null); //empty index
 
@@ -148,33 +153,57 @@ public class ElasticSearchIndexerDaoTest {
   }
 
   @Test
-  public void testGetClient() {
+  public void testGetClient() throws IOException {
     setUpClusterMock();
     Assert.assertEquals(clientMock, indexerDao.getClient());
   }
 
   @SuppressWarnings("unchecked")
-  private void setUpClusterMock() {
+  private void setUpClusterMock() throws IOException {
     when(clusterStateMock.getMetaData()).thenReturn(metaDataMock);
     when(clusterStateResponseMock.getState()).thenReturn(clusterStateMock);
     when(actionFutureMock.actionGet()).thenReturn(clusterStateResponseMock);
-    when(clusterAdminClientMock.state(Mockito.any())).thenReturn(actionFutureMock);
+    when(clusterAdminClientMock.state(any())).thenReturn(actionFutureMock);
     when(adminClientMock.cluster()).thenReturn(clusterAdminClientMock);
     when(configMock.getElasticsearchAlias()).thenReturn(ES_ALIAS);
     when(configMock.getElasticsearchDocType()).thenReturn(DOC_TYPE);
-//    when(clientMock.admin()).thenReturn(adminClientMock);
     when(adminClientMock.indices()).thenReturn(indicesAdminClientMock);
     when(indicesAdminClientMock.prepareCreate(ES_ALIAS)).thenReturn(createIndexRequestBuilder);
     when(createIndexRequestBuilder.request()).thenReturn(null);
-    when(indicesAdminClientMock.create(Mockito.any())).thenReturn(createActionMock);
-//    when(clientMock
-//        .prepareDelete(Mockito.any(), Mockito.any(), Mockito.any()))
-//        .thenThrow(Exception.class);
+    when(indicesAdminClientMock.create(any())).thenReturn(createActionMock);
+
+    final RestClient restClient = mock(RestClient.class);
+    final ElasticMockFactory esMockFactory = new ElasticMockFactory(clientMock);
+    final IndicesClient indicesClient = esMockFactory.makeIndicesClient();
+    final Response esResponse = mock(Response.class);
+    final StatusLine statusLine = mock(StatusLine.class);
+    final HttpEntity httpEntity = mock(HttpEntity.class);
+    final Header header = mock(Header.class);
+    final HeaderElement headerElement = mock(HeaderElement.class);
+    final HeaderElement[] headerElements = {headerElement};
+    final CheckedConsumer<RestClient, IOException> doClose = (rc) -> System.out.println("consume");
+
+    when(clientMock.indices()).thenReturn(indicesClient);
+    when(clientMock.getLowLevelClient()).thenReturn(restClient);
+    when(clientMock.getClient()).thenReturn(restClient);
+    when(clientMock.getDoClose()).thenReturn(doClose);
+
+    when(restClient.performRequest(any(Request.class))).thenReturn(esResponse);
+    when(statusLine.getStatusCode()).thenReturn(200);
+    when(httpEntity.getContentType()).thenReturn(header);
+
+    when(esResponse.getStatusLine()).thenReturn(statusLine);
+    when(esResponse.getEntity()).thenReturn(httpEntity);
+
+    when(header.getElements()).thenReturn(headerElements);
+    when(header.getName()).thenReturn("application");
+    when(header.getValue()).thenReturn("json");
+
     doAnswer(invocation -> null).when(createActionMock).actionGet();
     doAnswer(invocation -> null).when(createIndexRequestBuilder)
-        .setSettings(Mockito.any(), Mockito.any());
+        .setSettings(any(), any());
     doAnswer(invocation -> null).when(createIndexRequestBuilder)
-        .addMapping(Mockito.any(), Mockito.any(), Mockito.any());
+        .addMapping(any(), any(), any());
 
     indexerDao = new ElasticSearchIndexerDao(clientMock, configMock);
     assertThat(indexerDao.getClient(), notNullValue());
