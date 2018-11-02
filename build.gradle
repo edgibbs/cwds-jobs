@@ -134,8 +134,8 @@ task libLicenseReport(dependsOn:[generateLicenseReport, libLicenceFolders,
 
 sonarqube {
   properties {
-      property "sonar.projectKey", "cwds.ca.gov:cals-jobs"
-      property "sonar.projectName", "cals-jobs"
+      property "sonar.projectKey", "cwds.ca.gov:cwds-jobs"
+      property "sonar.projectName", "cwds-jobs"
       property "sonar.jacoco.reportPaths",   allTestCoverageFile
   }
 }
