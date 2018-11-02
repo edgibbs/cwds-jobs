@@ -99,13 +99,6 @@ public class ElasticSearchIndexerDao implements Closeable {
     if (!doesIndexExist(index)) {
       LOGGER.warn("ES INDEX {} DOES NOT EXIST!!", index);
       createIndex();
-      try {
-        // Give Elasticsearch a moment to catch its breath.
-        Thread.sleep(10000L);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        LOGGER.warn("Interrupted!");
-      }
     }
   }
 
