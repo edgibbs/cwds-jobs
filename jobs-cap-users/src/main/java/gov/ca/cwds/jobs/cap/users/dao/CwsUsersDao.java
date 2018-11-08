@@ -27,4 +27,12 @@ public class CwsUsersDao extends BaseDaoImpl {
 
     return new HashSet<>(racfIds);
   }
+
+  public Set<String> getAllRacfIds() {
+    List<String> racfIds = grabSession()
+        .createNamedQuery(UserId.CWSCMS_All_RACFIDS_QUERY_NAME, String.class)
+        .list();
+
+    return new HashSet<>(racfIds);
+  }
 }

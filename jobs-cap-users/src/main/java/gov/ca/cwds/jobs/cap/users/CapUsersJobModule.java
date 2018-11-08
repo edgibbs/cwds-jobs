@@ -13,6 +13,9 @@ import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersIncrementalJob;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersInitialJob;
+import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersService;
+import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersServiceImpl;
+import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersServicePerfTest;
 import gov.ca.cwds.jobs.cap.users.service.IdmService;
 import gov.ca.cwds.jobs.cap.users.service.IdmServiceImpl;
 import gov.ca.cwds.jobs.common.BulkWriter;
@@ -95,6 +98,11 @@ public class CapUsersJobModule extends AbstractModule {
 
   private void configureIncrementalMode() {
     bind(Job.class).to(CapUsersIncrementalJob.class);
+    if (getJobsConfiguration().isPerformanceTestMode()) {
+      bind(CwsChangedUsersService.class).to(CwsChangedUsersServicePerfTest.class);
+    } else {
+      bind(CwsChangedUsersService.class).to(CwsChangedUsersServiceImpl.class);
+    }
     install(new CwsCmsDataAccessModule());
   }
 
