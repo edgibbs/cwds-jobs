@@ -5,7 +5,6 @@ import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
-import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,13 +16,13 @@ public class CapChangedUsersService {
   private static final Logger LOGGER = LoggerFactory.getLogger(CapChangedUsersService.class);
 
   @Inject
-  private LocalDateTimeSavePointService savePointService;
+  private CapUsersSavePointService savePointService;
 
   @Inject
   private IdmService idmService;
 
   public List<ChangedUserDto> getCapChanges() {
-    LocalDateTime savePointTime = savePointService.loadSavePoint().getTimestamp();
+    LocalDateTime savePointTime = savePointService.loadSavePoint().getCognitoTimestamp();
     List<UserAndOperation> userAndOperations = idmService.getCapChanges(savePointTime);
     LOGGER.info("the number of CAP changes recieved is: {}", userAndOperations.size());
     return userAndOperations.stream()

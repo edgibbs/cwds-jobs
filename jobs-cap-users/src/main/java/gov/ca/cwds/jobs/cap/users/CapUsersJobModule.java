@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
@@ -13,17 +16,20 @@ import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersIncrementalJob;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersInitialJob;
+import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePoint;
+import gov.ca.cwds.jobs.cap.users.service.CapUsersJobModeService;
+import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointContainerService;
+import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointService;
+import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersService;
 import gov.ca.cwds.jobs.cap.users.service.IdmService;
 import gov.ca.cwds.jobs.cap.users.service.IdmServiceImpl;
 import gov.ca.cwds.jobs.common.BulkWriter;
 import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.inject.ElasticsearchBulkSize;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
-import gov.ca.cwds.jobs.common.mode.LocalDateTimeDefaultJobModeService;
-import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
-import java.time.LocalDateTime;
+import gov.ca.cwds.jobs.common.savepoint.SavePointService;
+import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import javax.ws.rs.client.Client;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClientBuilder;
@@ -73,18 +79,22 @@ public class CapUsersJobModule extends AbstractModule {
     bindConstant().annotatedWith(PerryApiPassword.class)
         .to(getJobsConfiguration().getPerryApiPassword());
     bind(IdmService.class).to(idmService);
-    bind(
-        new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
-        }).to(LocalDateTimeSavePointContainerService.class);
+    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint, DefaultJobMode>>() {
+    }).to(CapUsersSavePointContainerService.class);
+    bind(new TypeLiteral<SavePointService<CapUsersSavePoint, DefaultJobMode>>() {
+    }).toProvider(CapUsersSavePointServiceProvider.class);
+    bind(CapUsersSavePointService.class).toProvider(CapUsersSavePointServiceProvider.class);
+    bind(CwsChangedUsersService.class).toProvider(CwsChangedUsersServiceProvider.class);
+    install(new CwsCmsDataAccessModule());
   }
 
   private void configureJobModes() {
     switch (defineJobMode()) {
       case INITIAL_LOAD:
-        configureInitialMode();
+        bind(Job.class).to(CapUsersInitialJob.class);
         break;
       case INCREMENTAL_LOAD:
-        configureIncrementalMode();
+        bind(Job.class).to(CapUsersIncrementalJob.class);
         break;
       default:
         String errorMsg = "Job mode cannot be defined";
@@ -93,23 +103,13 @@ public class CapUsersJobModule extends AbstractModule {
     }
   }
 
-  private void configureIncrementalMode() {
-    bind(Job.class).to(CapUsersIncrementalJob.class);
-    install(new CwsCmsDataAccessModule());
-  }
-
-  private void configureInitialMode() {
-    bind(Job.class).to(CapUsersInitialJob.class);
-  }
-
   private DefaultJobMode defineJobMode() {
-    LocalDateTimeDefaultJobModeService timestampDefaultJobModeService =
-        new LocalDateTimeDefaultJobModeService();
-    LocalDateTimeSavePointContainerService savePointContainerService =
-        new LocalDateTimeSavePointContainerService(lastRunLoc);
-    timestampDefaultJobModeService.setSavePointContainerService(savePointContainerService);
-
-    return timestampDefaultJobModeService.getCurrentJobMode();
+    CapUsersJobModeService capUsersJobModeService =
+        new CapUsersJobModeService();
+    CapUsersSavePointContainerService savePointContainerService =
+        new CapUsersSavePointContainerService(lastRunLoc);
+    capUsersJobModeService.setSavePointContainerService(savePointContainerService);
+    return capUsersJobModeService.getCurrentJobMode();
   }
 
   @Provides
@@ -134,5 +134,42 @@ public class CapUsersJobModule extends AbstractModule {
     client.register(new JacksonJsonProvider(mapper));
     return client;
   }
+
+  static class CwsChangedUsersServiceProvider implements Provider<CwsChangedUsersService> {
+
+    @Inject
+    private UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory;
+
+    @Inject
+    private Injector injector;
+
+    @Override
+    public CwsChangedUsersService get() {
+      CwsChangedUsersService service = this.unitOfWorkAwareProxyFactory
+          .create(CwsChangedUsersService.class);
+      this.injector.injectMembers(service);
+      return service;
+    }
+
+  }
+
+  static class CapUsersSavePointServiceProvider implements Provider<CapUsersSavePointService> {
+
+    @Inject
+    private UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory;
+
+    @Inject
+    private Injector injector;
+
+    @Override
+    public CapUsersSavePointService get() {
+      CapUsersSavePointService service = this.unitOfWorkAwareProxyFactory
+          .create(CapUsersSavePointService.class);
+      this.injector.injectMembers(service);
+      return service;
+    }
+
+  }
+
 }
 

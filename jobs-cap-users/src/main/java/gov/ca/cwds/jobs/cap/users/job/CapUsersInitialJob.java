@@ -4,8 +4,6 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
-
 public class CapUsersInitialJob extends AbstractCapUsersJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(CapUsersInitialJob.class);
 
@@ -14,11 +12,9 @@ public class CapUsersInitialJob extends AbstractCapUsersJob {
 
   @Override
   void runJob() {
-    LocalDateTime dateTimeAtStart = LocalDateTime.now();
-    LOGGER.info("CapUsersInitialJob is running");
+    LOGGER.info("Initial Cap Users Job is running");
     batchProcessor.processBatches();
-    LOGGER.info("Initial Cap Users Job, creating timestampSavePoint at {}", dateTimeAtStart);
-    createSavePoint(dateTimeAtStart);
+    LOGGER.info("Finishing Initial Cap Users Job");
   }
 
   @Override

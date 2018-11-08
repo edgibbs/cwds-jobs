@@ -6,8 +6,6 @@ import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
-
 public class CapUsersIncrementalJob extends AbstractCapUsersJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(CapUsersIncrementalJob.class);
 
@@ -20,11 +18,9 @@ public class CapUsersIncrementalJob extends AbstractCapUsersJob {
 
   @Override
   void runJob() {
-    LocalDateTime dateTimeAtStart = LocalDateTime.now();
     LOGGER.info("CapUsersIncrementalJob is running");
     updatesProcessor.processUpdates();
-    LOGGER.info("finishing Incremental Cap Users Job, creating timestampSavePoint at {}", dateTimeAtStart);
-    createSavePoint(dateTimeAtStart);
+    LOGGER.info("Finishing Incremental Cap Users Job");
   }
 
   @Override
