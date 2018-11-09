@@ -5,7 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.cap.users.dao.CapUsersDao;
+import gov.ca.cwds.jobs.cap.users.dao.CwsUsersDao;
 import gov.ca.cwds.jobs.cap.users.entity.CwsOffice;
 import gov.ca.cwds.jobs.cap.users.entity.StaffPerson;
 import gov.ca.cwds.jobs.cap.users.entity.UserId;
@@ -30,7 +30,7 @@ public class CwsCmsDataAccessModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(CapUsersDao.class);
+    bind(CwsUsersDao.class);
   }
 
   @Inject

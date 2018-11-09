@@ -4,7 +4,7 @@ import static gov.ca.cwds.jobs.cap.users.CwsCmsDataAccessModule.CWS;
 import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INCREMENTAL_LOAD;
 
 import com.google.inject.Inject;
-import gov.ca.cwds.jobs.cap.users.dao.CapUsersDao;
+import gov.ca.cwds.jobs.cap.users.dao.CwsUsersDao;
 import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePoint;
 import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePointContainer;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
@@ -24,7 +24,7 @@ public class CapUsersSavePointService extends
   private SavePointContainerService<CapUsersSavePoint, DefaultJobMode> savePointContainerService;
 
   @Inject
-  private CapUsersDao dao;
+  private CwsUsersDao dao;
 
   @Override
   public void saveSavePoint(CapUsersSavePoint savePoint) {

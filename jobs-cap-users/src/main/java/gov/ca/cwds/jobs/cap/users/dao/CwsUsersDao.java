@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.Set;
 import org.hibernate.SessionFactory;
 
-public class CapUsersDao extends BaseDaoImpl {
+public class CwsUsersDao extends BaseDaoImpl {
 
   @Inject
-  public CapUsersDao(@CmsSessionFactory SessionFactory sessionFactory) {
+  public CwsUsersDao(@CmsSessionFactory SessionFactory sessionFactory) {
     super(sessionFactory);
   }
 

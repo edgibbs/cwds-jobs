@@ -4,7 +4,7 @@ import static gov.ca.cwds.jobs.cap.users.CwsCmsDataAccessModule.CWS;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.jobs.cap.users.dao.CapUsersDao;
+import gov.ca.cwds.jobs.cap.users.dao.CwsUsersDao;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -27,7 +27,7 @@ public class CwsChangedUsersServiceImpl implements CwsChangedUsersService {
   private IdmService idmService;
 
   @Inject
-  private CapUsersDao dao;
+  private CwsUsersDao dao;
 
   @UnitOfWork(CWS)
   public List<ChangedUserDto> getCwsChanges() {

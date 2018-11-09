@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.cap.users.service;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.jobs.cap.users.dao.CapUsersDao;
+import gov.ca.cwds.jobs.cap.users.dao.CwsUsersDao;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import java.util.List;
@@ -20,7 +20,7 @@ public class PerfTestCwsChangedUsersService implements CwsChangedUsersService {
   private IdmService idmService;
 
   @Inject
-  private CapUsersDao dao;
+  private CwsUsersDao dao;
 
   @Override
   public List<ChangedUserDto> getCwsChanges() {
