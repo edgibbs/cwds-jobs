@@ -1,12 +1,13 @@
 package gov.ca.cwds.jobs.cap.users.service;
 
+import static gov.ca.cwds.jobs.cap.users.CwsCmsDataAccessModule.CWS;
+
 import com.google.inject.Inject;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.jobs.cap.users.dao.CwsUsersDao;
+import gov.ca.cwds.jobs.cap.users.dao.CapUsersDao;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
-import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointService;
-import java.time.LocalDateTime;
+import io.dropwizard.hibernate.UnitOfWork;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -17,21 +18,20 @@ import org.slf4j.LoggerFactory;
 
 public class CwsChangedUsersServiceImpl implements CwsChangedUsersService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CwsChangedUsersServiceImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CwsChangedUsersService.class);
 
   @Inject
-  private LocalDateTimeSavePointService savePointService;
+  private CapUsersSavePointService savePointService;
 
   @Inject
   private IdmService idmService;
 
   @Inject
-  private CwsUsersDao dao;
+  private CapUsersDao dao;
 
-  @Override
+  @UnitOfWork(CWS)
   public List<ChangedUserDto> getCwsChanges() {
-    LocalDateTime savePointTime = savePointService.loadSavePoint().getTimestamp();
-    Set<String> changedRacfIds = dao.getChangedRacfIds(savePointTime);
+    Set<String> changedRacfIds = dao.getChangedRacfIds(savePointService.loadSavePoint());
     if (CollectionUtils.isEmpty(changedRacfIds)) {
       LOGGER.info("No changes in CWS/CMS found");
       return Collections.emptyList();
@@ -43,4 +43,5 @@ public class CwsChangedUsersServiceImpl implements CwsChangedUsersService {
         .map(e -> new ChangedUserDto(e, RecordChangeOperation.U))
         .collect(Collectors.toList());
   }
+
 }

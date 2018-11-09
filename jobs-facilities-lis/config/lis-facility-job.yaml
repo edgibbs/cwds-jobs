@@ -44,10 +44,10 @@ fasDataSourceFactory:
       hibernate.show_sql: false
       hibernate.c3p0.min_size: 5
       hibernate.c3p0.max_size: 5
-      ssl: ${FAS_SSL_ENABLED:-false}
-      sslmode: ${FAS_SSL_MODE:-disable}
-      sslcert: ${FAS_SSL_CERT:}
-      sslkey: ${FAS_SSL_KEY:}
+      hibernate.connection.ssl: ${FAS_SSL_ENABLED:-false}
+      hibernate.connection.sslmode: ${FAS_SSL_MODE:-disable}
+      hibernate.connection.sslcert: ${FAS_SSL_CERT:}
+      hibernate.connection.sslkey: ${FAS_SSL_KEY:}
 
 calsnsDataSourceFactory:
   properties:

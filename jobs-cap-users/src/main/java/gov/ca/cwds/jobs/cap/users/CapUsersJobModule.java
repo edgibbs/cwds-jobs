@@ -21,11 +21,10 @@ import gov.ca.cwds.jobs.cap.users.service.CapUsersJobModeService;
 import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointContainerService;
 import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointService;
 import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersService;
-import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersService;
 import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersServiceImpl;
-import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersServicePerfTest;
 import gov.ca.cwds.jobs.cap.users.service.IdmService;
 import gov.ca.cwds.jobs.cap.users.service.IdmServiceImpl;
+import gov.ca.cwds.jobs.cap.users.service.PerfTestCwsChangedUsersService;
 import gov.ca.cwds.jobs.common.BulkWriter;
 import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.inject.ElasticsearchBulkSize;
@@ -87,28 +86,36 @@ public class CapUsersJobModule extends AbstractModule {
     bind(new TypeLiteral<SavePointService<CapUsersSavePoint, DefaultJobMode>>() {
     }).toProvider(CapUsersSavePointServiceProvider.class);
     bind(CapUsersSavePointService.class).toProvider(CapUsersSavePointServiceProvider.class);
-    bind(CwsChangedUsersService.class).toProvider(CwsChangedUsersServiceProvider.class);
     install(new CwsCmsDataAccessModule());
   }
 
   private void configureJobModes() {
     switch (defineJobMode()) {
       case INITIAL_LOAD:
-        bind(Job.class).to(CapUsersInitialJob.class);
+        configureInitialMode();
         break;
       case INCREMENTAL_LOAD:
-        bind(Job.class).to(CapUsersIncrementalJob.class);
-        if (getJobsConfiguration().isPerformanceTestMode()) {
-          bind(CwsChangedUsersService.class).to(CwsChangedUsersServicePerfTest.class);
-        } else {
-          bind(CwsChangedUsersService.class).to(CwsChangedUsersServiceImpl.class);
-        }
+        configureIncrementalMode();
         break;
       default:
         String errorMsg = "Job mode cannot be defined";
         LOG.info(errorMsg);
         throw new UnsupportedOperationException(errorMsg);
     }
+  }
+
+  private void configureIncrementalMode() {
+    bind(Job.class).to(CapUsersIncrementalJob.class);
+    if (getJobsConfiguration().isPerformanceTestMode()) {
+      bind(CwsChangedUsersService.class).toProvider(PerfTestCwsChangedUsersServiceProvider.class);
+    } else {
+      bind(CwsChangedUsersService.class).toProvider(CwsChangedUsersServiceProvider.class);
+    }
+  }
+
+  private void configureInitialMode() {
+    bind(Job.class).to(CapUsersInitialJob.class);
+    bind(CwsChangedUsersService.class).toProvider(CwsChangedUsersServiceProvider.class);
   }
 
   private DefaultJobMode defineJobMode() {
@@ -143,7 +150,7 @@ public class CapUsersJobModule extends AbstractModule {
     return client;
   }
 
-  static class CwsChangedUsersServiceProvider implements Provider<CwsChangedUsersService> {
+  static class CwsChangedUsersServiceProvider implements Provider<CwsChangedUsersServiceImpl> {
 
     @Inject
     private UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory;
@@ -152,9 +159,28 @@ public class CapUsersJobModule extends AbstractModule {
     private Injector injector;
 
     @Override
-    public CwsChangedUsersService get() {
-      CwsChangedUsersService service = this.unitOfWorkAwareProxyFactory
-          .create(CwsChangedUsersService.class);
+    public CwsChangedUsersServiceImpl get() {
+      CwsChangedUsersServiceImpl service = this.unitOfWorkAwareProxyFactory
+          .create(CwsChangedUsersServiceImpl.class);
+      this.injector.injectMembers(service);
+      return service;
+    }
+
+  }
+
+  static class PerfTestCwsChangedUsersServiceProvider implements
+      Provider<PerfTestCwsChangedUsersService> {
+
+    @Inject
+    private UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory;
+
+    @Inject
+    private Injector injector;
+
+    @Override
+    public PerfTestCwsChangedUsersService get() {
+      PerfTestCwsChangedUsersService service = this.unitOfWorkAwareProxyFactory
+          .create(PerfTestCwsChangedUsersService.class);
       this.injector.injectMembers(service);
       return service;
     }
