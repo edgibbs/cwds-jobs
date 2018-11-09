@@ -13,6 +13,8 @@ public class CapUsersJobConfiguration implements JobConfiguration {
   private int jerseyClientConnectTimeout;
   private int jerseyClientReadTimeout;
 
+  private boolean performanceTestMode;
+
   private int elasticSearchBulkSize;
 
   private DataSourceFactory cmsDataSourceFactory;
@@ -65,6 +67,14 @@ public class CapUsersJobConfiguration implements JobConfiguration {
 
   public void setElasticSearchBulkSize(int elasticSearchBulkSize) {
     this.elasticSearchBulkSize = elasticSearchBulkSize;
+  }
+
+  public boolean isPerformanceTestMode() {
+    return performanceTestMode;
+  }
+
+  public void setPerformanceTestMode(boolean performanceTestMode) {
+    this.performanceTestMode = performanceTestMode;
   }
 
   @JsonProperty

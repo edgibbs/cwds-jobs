@@ -21,6 +21,9 @@ import gov.ca.cwds.jobs.cap.users.service.CapUsersJobModeService;
 import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointContainerService;
 import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointService;
 import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersService;
+import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersService;
+import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersServiceImpl;
+import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersServicePerfTest;
 import gov.ca.cwds.jobs.cap.users.service.IdmService;
 import gov.ca.cwds.jobs.cap.users.service.IdmServiceImpl;
 import gov.ca.cwds.jobs.common.BulkWriter;
@@ -95,6 +98,11 @@ public class CapUsersJobModule extends AbstractModule {
         break;
       case INCREMENTAL_LOAD:
         bind(Job.class).to(CapUsersIncrementalJob.class);
+        if (getJobsConfiguration().isPerformanceTestMode()) {
+          bind(CwsChangedUsersService.class).to(CwsChangedUsersServicePerfTest.class);
+        } else {
+          bind(CwsChangedUsersService.class).to(CwsChangedUsersServiceImpl.class);
+        }
         break;
       default:
         String errorMsg = "Job mode cannot be defined";

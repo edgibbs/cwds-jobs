@@ -4,6 +4,8 @@ perryApiPassword: ${PERRY_PASS:-pass}
 
 elasticSearchBulkSize: 10
 
+performanceTestMode: ${PERF_TEST_MODE_ON:-false}
+
 cmsDataSourceFactory:
   properties:
     hibernate.connection.driver_class: org.h2.Driver

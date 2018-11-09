@@ -65,6 +65,7 @@ public class CapUsersJobTest {
       lastRunDirHelper.deleteSavePointContainerFolder();
       testInitialLoad();
       testIncrementalLoad();
+      testIncrementalLoadPerformanceMode();
     } finally {
       lastRunDirHelper.deleteSavePointContainerFolder();
       TestCapUserWriter.reset();
@@ -126,10 +127,23 @@ public class CapUsersJobTest {
     assertSavePoint(savePointCheckRequest);
   }
 
+
+  private void testIncrementalLoadPerformanceMode() {
+    runJob(true);
+    assertEquals(15, TestCapUserWriter.getItems().size());
+    runJob(true);
+    assertEquals(15, TestCapUserWriter.getItems().size());
+  }
+
   private void runJob() {
+    runJob(false);
+  }
+
+  private void runJob(boolean isPerformanceTestMode) {
     JobOptions jobOptions = JobOptions.parseCommandLine(getModuleArgs());
     CapUsersJobConfiguration jobConfiguration = JobConfiguration
         .getJobsConfiguration(CapUsersJobConfiguration.class, jobOptions.getConfigFileLocation());
+    jobConfiguration.setPerformanceTestMode(isPerformanceTestMode);
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
     CapUsersJobModule capUsersJobModule = new CapUsersJobModule(jobConfiguration,
         jobOptions.getLastRunLoc());
