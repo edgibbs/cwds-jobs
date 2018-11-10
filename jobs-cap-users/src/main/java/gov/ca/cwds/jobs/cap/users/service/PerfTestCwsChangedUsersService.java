@@ -11,9 +11,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CwsChangedUsersServicePerfTest implements CwsChangedUsersService {
+public class PerfTestCwsChangedUsersService implements CwsChangedUsersService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CwsChangedUsersServicePerfTest.class);
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(PerfTestCwsChangedUsersService.class);
 
   @Inject
   private IdmService idmService;

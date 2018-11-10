@@ -4,12 +4,13 @@ import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INCREMENTAL_LOAD;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
+import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePoint;
+import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePointContainer;
+import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointContainerService;
 import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
 import gov.ca.cwds.jobs.common.configuration.JobOptions;
 import gov.ca.cwds.jobs.common.core.JobRunner;
 import gov.ca.cwds.jobs.common.inject.JobModule;
-import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
-import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
 import gov.ca.cwds.test.support.DatabaseHelper;
 import io.dropwizard.db.DataSourceFactory;
@@ -30,9 +31,16 @@ public class CapUsersJobTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(CapUsersJobTest.class);
   private static final String SCHEMA_NAME = "CWSCMS";
 
+  private static final LocalDateTime INITIAL_USERID_TIMESTAMP = LocalDateTime
+      .of(2018, 2, 6, 7, 4, 36, 471000000);
+  private static final LocalDateTime INITIAL_CWS_OFFICE_TIMESTAMP = LocalDateTime
+      .of(2018, 2, 5, 10, 52, 34, 55000000);
+  private static final LocalDateTime INITIAL_STAFF_PERSON_TIMESTAMP = LocalDateTime
+      .of(2017, 9, 25, 11, 52, 3, 699000000);
+
   private static LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("cap_job_temp");
-  private LocalDateTimeSavePointContainerService savePointContainerService =
-      new LocalDateTimeSavePointContainerService(
+  private CapUsersSavePointContainerService savePointContainerService =
+      new CapUsersSavePointContainerService(
           lastRunDirHelper.getSavepointContainerFolder().toString());
 
   private DatabaseHelper databaseHelper;
@@ -67,18 +75,43 @@ public class CapUsersJobTest {
   private void testIncrementalLoad() throws LiquibaseException {
     runJob();
     assertEquals(0, TestCapUserWriter.getItems().size());
-    addCwsDataForIncrementalLoad(1);
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime userIdTimestamp = now.plusSeconds(1);
+    LocalDateTime cwsOfficeTimestamp = now.plusSeconds(2);
+    LocalDateTime staffPersonAndOfficeTimestamp = now.plusSeconds(3);
+
+    addCwsDataForIncrementalLoad(1, userIdTimestamp);
     runJob();
     assertEquals(4, TestCapUserWriter.getItems().size());
-    addCwsDataForIncrementalLoad(2);
+    SavePointCheckRequest savePointCheckRequest = new SavePointCheckRequest();
+    savePointCheckRequest.timeBeforeStart = now;
+    savePointCheckRequest.userIdTimestamp = userIdTimestamp;
+    savePointCheckRequest.cwsOfficeTimestamp = INITIAL_CWS_OFFICE_TIMESTAMP;
+    savePointCheckRequest.staffPersonTimeStamp = INITIAL_STAFF_PERSON_TIMESTAMP;
+    assertSavePoint(savePointCheckRequest);
+
+    addCwsDataForIncrementalLoad(2, cwsOfficeTimestamp);
     runJob();
     assertEquals(1, TestCapUserWriter.getItems().size());
-    addCwsDataForIncrementalLoad(3);
+    savePointCheckRequest.timeBeforeStart = now;
+    savePointCheckRequest.userIdTimestamp = userIdTimestamp;
+    savePointCheckRequest.cwsOfficeTimestamp = cwsOfficeTimestamp;
+    savePointCheckRequest.staffPersonTimeStamp = INITIAL_STAFF_PERSON_TIMESTAMP;
+    assertSavePoint(savePointCheckRequest);
+
+    addCwsDataForIncrementalLoad(3, staffPersonAndOfficeTimestamp);
     runJob();
     assertEquals(3, TestCapUserWriter.getItems().size());
+    savePointCheckRequest.timeBeforeStart = now;
+    savePointCheckRequest.userIdTimestamp = userIdTimestamp;
+    savePointCheckRequest.cwsOfficeTimestamp = staffPersonAndOfficeTimestamp;
+    savePointCheckRequest.staffPersonTimeStamp = staffPersonAndOfficeTimestamp;
+    assertSavePoint(savePointCheckRequest);
+
     MockedIdmService.capChanges = true;
     runJob();
     assertEquals(2, TestCapUserWriter.getItems().size());
+
   }
 
   private void testInitialLoad() {
@@ -86,12 +119,12 @@ public class CapUsersJobTest {
     assertEquals(0, TestCapUserWriter.getItems().size());
     runJob();
     assertEquals(MockedIdmService.NUMBER_OF_USERS, TestCapUserWriter.getItems().size());
-
-    LocalDateTimeSavePointContainer savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
-        .readSavePointContainer(LocalDateTimeSavePointContainer.class);
-    assertTrue(savePointContainer.getSavePoint().getTimestamp().isAfter(timestampBeforeStart));
-    assertTrue(savePointContainer.getSavePoint().getTimestamp().isBefore(LocalDateTime.now()));
-    assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
+    SavePointCheckRequest savePointCheckRequest = new SavePointCheckRequest();
+    savePointCheckRequest.timeBeforeStart = timestampBeforeStart;
+    savePointCheckRequest.userIdTimestamp = INITIAL_USERID_TIMESTAMP;
+    savePointCheckRequest.cwsOfficeTimestamp = INITIAL_CWS_OFFICE_TIMESTAMP;
+    savePointCheckRequest.staffPersonTimeStamp = INITIAL_STAFF_PERSON_TIMESTAMP;
+    assertSavePoint(savePointCheckRequest);
   }
 
 
@@ -121,11 +154,12 @@ public class CapUsersJobTest {
     JobRunner.run(jobModule);
   }
 
-  private void addCwsDataForIncrementalLoad(int i) throws LiquibaseException {
+  private void addCwsDataForIncrementalLoad(int i, LocalDateTime timestamp)
+      throws LiquibaseException {
     DateTimeFormatter datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     Map<String, Object> parameters = new HashMap<>();
-    parameters.put("now", datetimeFormatter.format(LocalDateTime.now()));
+    parameters.put("now", datetimeFormatter.format(timestamp));
     String scriptName;
     switch (i) {
       case 1:
@@ -175,6 +209,27 @@ public class CapUsersJobTest {
         .setPassword(dataSourceFactory.getProperties().get("hibernate.connection.password"));
 
     return capUsersJobConfiguration;
+  }
+
+  private void assertSavePoint(SavePointCheckRequest savePointCheckRequest) {
+    CapUsersSavePointContainer savePointContainer = (CapUsersSavePointContainer) savePointContainerService
+        .readSavePointContainer(CapUsersSavePointContainer.class);
+    CapUsersSavePoint savePoint = savePointContainer.getSavePoint();
+    assertTrue(savePoint.getCognitoTimestamp().isAfter(savePointCheckRequest.timeBeforeStart));
+    assertTrue(savePoint.getCognitoTimestamp().isBefore(LocalDateTime.now()));
+    assertEquals(savePointCheckRequest.userIdTimestamp, savePoint.getUserIdTimestamp());
+    assertEquals(savePointCheckRequest.cwsOfficeTimestamp, savePoint.getCwsOfficeTimestamp());
+    assertEquals(savePointCheckRequest.staffPersonTimeStamp, savePoint.getStaffPersonTimestamp());
+    assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
+  }
+
+  private class SavePointCheckRequest {
+
+    private LocalDateTime timeBeforeStart;
+    private LocalDateTime userIdTimestamp;
+    private LocalDateTime cwsOfficeTimestamp;
+    private LocalDateTime staffPersonTimeStamp;
+
   }
 
 }

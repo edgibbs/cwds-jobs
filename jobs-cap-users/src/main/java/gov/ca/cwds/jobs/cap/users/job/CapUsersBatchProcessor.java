@@ -13,7 +13,6 @@ public class CapUsersBatchProcessor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CapUsersBatchProcessor.class);
 
-
   @Inject
   private CapUsersInitialJobIterator capUsersJobBatchIterator;
 
