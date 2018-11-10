@@ -46,8 +46,8 @@ fasDataSourceFactory:
       hibernate.c3p0.max_size: 5
       hibernate.connection.ssl: ${FAS_SSL_ENABLED:-false}
       hibernate.connection.sslmode: ${FAS_SSL_MODE:-disable}
-      hibernate.connection.sslcert: ${FAS_SSL_CERT:}
-      hibernate.connection.sslkey: ${FAS_SSL_KEY:}
+      hibernate.connection.sslcert: ${FAS_SSL_CERT:-config/cerf.crt}
+      hibernate.connection.sslkey: ${FAS_SSL_KEY:-config/key.pk8}
 
 calsnsDataSourceFactory:
   properties:
