@@ -7,10 +7,10 @@ import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiPassword;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
+import gov.ca.cwds.jobs.cap.users.service.exception.IdmServiceException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.ws.rs.client.Client;
@@ -79,7 +79,7 @@ public class IdmServiceImpl implements IdmService {
 
     if (response.getStatus() != Status.OK.getStatusCode()) {
       LOGGER.warn("IDM search by RACFIDs responded with status {}", response.getStatus());
-      return Collections.emptyList();
+      throw new IdmServiceException();
     }
 
     return response.readEntity(new GenericType<List<User>>() {
@@ -100,7 +100,7 @@ public class IdmServiceImpl implements IdmService {
 
     if (response.getStatus() != Status.OK.getStatusCode()) {
       LOGGER.warn("IDM getCapChanges responded with status {}", response.getStatus());
-      return Collections.emptyList();
+      throw new IdmServiceException();
     }
 
     return response.readEntity(new GenericType<List<UserAndOperation>>() {
