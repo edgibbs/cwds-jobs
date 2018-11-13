@@ -35,7 +35,7 @@ public class IdmServiceImpl implements IdmService {
   private static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
-  private static final int BATCH_SIZE = 15;
+  private static final int BATCH_SIZE = 1;
 
 
   @Inject
