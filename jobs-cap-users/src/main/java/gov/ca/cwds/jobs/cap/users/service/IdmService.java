@@ -11,7 +11,7 @@ import java.util.Set;
 public interface IdmService {
   UsersPage getUserPage(String paginationToken);
 
-  List<User> getUsersByRacfIds(Set<String> racfIds);
+  List<User> getUsersByRacfIds(List<String> racfIds);
 
   List<UserAndOperation> getCapChanges(LocalDateTime savePointTime);
 }

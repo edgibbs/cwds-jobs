@@ -28,7 +28,7 @@ public class MockedIdmService implements IdmService {
   }
 
   @Override
-  public List<User> getUsersByRacfIds(Set<String> racfIds) {
+  public List<User> getUsersByRacfIds(List<String> racfIds) {
     List<User> users = new ArrayList<>(racfIds.size());
     for (int i = 0; i < racfIds.size(); i++) {
       users.add(createUser(i));

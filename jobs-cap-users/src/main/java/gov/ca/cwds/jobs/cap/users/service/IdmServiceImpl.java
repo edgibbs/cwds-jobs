@@ -11,8 +11,11 @@ import gov.ca.cwds.jobs.cap.users.service.exception.IdmServiceException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
@@ -21,6 +24,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +35,7 @@ public class IdmServiceImpl implements IdmService {
   private static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
+  private static final int BATCH_SIZE = 100;
 
 
   @Inject
@@ -69,8 +74,12 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   @SuppressWarnings("unchecked")
-  public List<User> getUsersByRacfIds(Set<String> racfIds) {
+  public List<User> getUsersByRacfIds(List<String> racfIds) {
+    List<List<String>> batches = ListUtils.partition(racfIds, BATCH_SIZE);
+    return batches.stream().flatMap( a -> processRequest(a).stream()).collect(Collectors.toList());
+  }
 
+  private List<User> processRequest(List<String> racfIds) {
     Response response = client
         .target(apiURL + "/users/search")
         .request(MediaType.APPLICATION_JSON)
