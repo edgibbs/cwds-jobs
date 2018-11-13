@@ -8,9 +8,7 @@ import gov.ca.cwds.jobs.cap.users.entity.StaffPerson;
 import gov.ca.cwds.jobs.cap.users.entity.UserId;
 import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePoint;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.hibernate.SessionFactory;
 
 public class CwsUsersDao extends BaseDaoImpl {
@@ -20,23 +18,19 @@ public class CwsUsersDao extends BaseDaoImpl {
     super(sessionFactory);
   }
 
-  public Set<String> getChangedRacfIds(CapUsersSavePoint savePoint) {
-    List<String> racfIds = currentSession()
+  public List<String> getChangedRacfIds(CapUsersSavePoint savePoint) {
+    return currentSession()
         .createNamedQuery(UserId.CWSCMS_INCREMENTAL_LOAD_QUERY_NAME, String.class)
         .setParameter(UserId.OFFICE_DATE_AFTER, savePoint.getCwsOfficeTimestamp())
         .setParameter(UserId.STAFF_PERSON_DATE_AFTER, savePoint.getStaffPersonTimestamp())
         .setParameter(UserId.USERID_DATE_AFTER, savePoint.getUserIdTimestamp())
         .list();
-
-    return new HashSet<>(racfIds);
   }
 
-  public Set<String> getAllRacfIds() {
-    List<String> racfIds = grabSession()
+  public List<String> getAllRacfIds() {
+    return currentSession()
         .createNamedQuery(UserId.CWSCMS_All_RACFIDS_QUERY_NAME, String.class)
         .list();
-
-    return new HashSet<>(racfIds);
   }
 
   public LocalDateTime getUserIdMaxLastUpdatedTime() {
