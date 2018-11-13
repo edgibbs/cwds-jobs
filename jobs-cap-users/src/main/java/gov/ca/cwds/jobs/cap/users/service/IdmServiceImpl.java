@@ -35,7 +35,7 @@ public class IdmServiceImpl implements IdmService {
   private static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
-  private static final int BATCH_SIZE = 1;
+  private static final int BATCH_SIZE = 50;
 
 
   @Inject
@@ -76,8 +76,24 @@ public class IdmServiceImpl implements IdmService {
   @SuppressWarnings("unchecked")
   public List<User> getUsersByRacfIds(List<String> racfIds) {
     List<List<String>> batches = ListUtils.partition(racfIds, BATCH_SIZE);
-    return batches.stream().flatMap( a -> processRequest(a).stream()).collect(Collectors.toList());
-  }
+    LOGGER.info("Start working on {} batches", batches.size());
+
+    List<User> users = new ArrayList<>();
+
+    for (List<String> batch : batches) {
+      LOGGER.info("APP IS PROCESSES BATCH");
+      users.addAll(processRequest(batch));
+      try {
+        LOGGER.info("SLEEP FOR 500");
+        Thread.sleep(500);
+      } catch (InterruptedException e) {
+        LOGGER.warn("THREAD ERROR!!!");
+        Thread.currentThread().interrupt();
+      }
+    }
+
+    return  users;
+    }
 
   private List<User> processRequest(List<String> racfIds) {
     Response response = client
