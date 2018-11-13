@@ -45,7 +45,7 @@ dependencies {
     testCompile(group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion) {
         exclude group: 'gov.ca.cwds.api'
     }
-
+    
     testCompile(group: 'gov.ca.cwds.cals', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true)
 
 }
