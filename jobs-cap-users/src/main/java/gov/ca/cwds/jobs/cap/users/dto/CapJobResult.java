@@ -1,6 +1,8 @@
 package gov.ca.cwds.jobs.cap.users.dto;
 
 import java.io.Serializable;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class CapJobResult implements Serializable {
 
@@ -28,5 +30,15 @@ public class CapJobResult implements Serializable {
 
   public void setCapPartSuccess(boolean capPartSuccess) {
     this.capPartSuccess = capPartSuccess;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return EqualsBuilder.reflectionEquals(this, o);
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this);
   }
 }
