@@ -35,7 +35,7 @@ public class IdmServiceImpl implements IdmService {
   private static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
-  private static final int BATCH_SIZE = 10;
+  private static final int BATCH_SIZE = 7;
 
 
   @Inject
@@ -80,12 +80,13 @@ public class IdmServiceImpl implements IdmService {
 
     List<User> users = new ArrayList<>();
 
+    int i = 0;
     for (List<String> batch : batches) {
-      LOGGER.info("APP IS PROCESSES BATCH");
+      LOGGER.info("APP IS PROCESSING THE BATCH #{}", i++);
       users.addAll(processRequest(batch));
       try {
-        LOGGER.info("SLEEP FOR 500");
-        Thread.sleep(500);
+        LOGGER.info("SLEEP FOR 700");
+        Thread.sleep(700);
       } catch (InterruptedException e) {
         LOGGER.warn("THREAD ERROR!!!");
         Thread.currentThread().interrupt();
