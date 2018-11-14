@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-sudo gradle shadowJar
+#sudo gradle shadowJar
 
-rm -rf cws-out
-mkdir cws-out
+#rm -rf cws-out
+#mkdir cws-out
 
 java -Dlog4j.configuration=file:log4j.properties -jar build/libs/cap-users-job-1.3-SNAPSHOT.jar \
      -c config/unix_cap-users-job.yaml -l ./cws-out/ \

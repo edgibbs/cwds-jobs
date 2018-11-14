@@ -11,9 +11,11 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
+import gov.ca.cwds.jobs.cap.users.inject.BatchSize;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiPassword;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
+import gov.ca.cwds.jobs.cap.users.inject.SleepTime;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersIncrementalJob;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersInitialJob;
 import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePoint;
@@ -76,6 +78,10 @@ public class CapUsersJobModule extends AbstractModule {
         .to(configuration.getElasticSearchBulkSize());
     bindConstant().annotatedWith(PerryApiUrl.class)
         .to(getConfiguration().getPerryApiUrl());
+    bindConstant().annotatedWith(BatchSize.class)
+        .to(getConfiguration().getBatchSize());
+    bindConstant().annotatedWith(SleepTime.class)
+        .to(getConfiguration().getSleepTime());
     bindConstant().annotatedWith(PerryApiUser.class)
         .to(getJobsConfiguration().getPerryApiUser());
     bindConstant().annotatedWith(PerryApiPassword.class)

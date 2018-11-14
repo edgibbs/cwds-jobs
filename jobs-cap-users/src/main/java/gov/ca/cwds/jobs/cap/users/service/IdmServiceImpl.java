@@ -4,9 +4,11 @@ import com.google.inject.Inject;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UsersPage;
+import gov.ca.cwds.jobs.cap.users.inject.BatchSize;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiPassword;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
+import gov.ca.cwds.jobs.cap.users.inject.SleepTime;
 import gov.ca.cwds.jobs.cap.users.service.exception.IdmServiceException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -35,7 +37,7 @@ public class IdmServiceImpl implements IdmService {
   private static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
-  private static final int BATCH_SIZE = 7;
+  private static final int BATCH_SIZE = 100;
 
 
   @Inject
@@ -52,6 +54,14 @@ public class IdmServiceImpl implements IdmService {
   @Inject
   @PerryApiPassword
   private String perryApiPassword;
+
+//  @Inject
+//  @BatchSize
+//  private int batchSize;
+//
+//  @Inject
+//  @SleepTime
+  private int sleepTime = 600;
 
   private String basicAuthHeader;
 
@@ -78,6 +88,8 @@ public class IdmServiceImpl implements IdmService {
     List<List<String>> batches = ListUtils.partition(racfIds, BATCH_SIZE);
     LOGGER.info("Start working on {} batches", batches.size());
 
+    //return batches.stream().flatMap( a -> processRequest(a).stream()).collect(Collectors.toList());
+
     List<User> users = new ArrayList<>();
 
     int i = 0;
@@ -85,8 +97,8 @@ public class IdmServiceImpl implements IdmService {
       LOGGER.info("APP IS PROCESSING THE BATCH #{}", i++);
       users.addAll(processRequest(batch));
       try {
-        LOGGER.info("SLEEP FOR 700");
-        Thread.sleep(700);
+        LOGGER.info("SLEEP FOR {}", sleepTime);
+        Thread.sleep(sleepTime);
       } catch (InterruptedException e) {
         LOGGER.warn("THREAD ERROR!!!");
         Thread.currentThread().interrupt();

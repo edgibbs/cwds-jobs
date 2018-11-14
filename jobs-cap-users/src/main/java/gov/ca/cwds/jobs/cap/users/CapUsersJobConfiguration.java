@@ -13,6 +13,9 @@ public class CapUsersJobConfiguration implements JobConfiguration {
   private int jerseyClientConnectTimeout;
   private int jerseyClientReadTimeout;
 
+  private int sleepTime;
+  private int batchSize;
+
   private boolean performanceTestMode;
 
   private int elasticSearchBulkSize;
@@ -75,6 +78,22 @@ public class CapUsersJobConfiguration implements JobConfiguration {
 
   public void setPerformanceTestMode(boolean performanceTestMode) {
     this.performanceTestMode = performanceTestMode;
+  }
+
+  public int getSleepTime() {
+    return sleepTime;
+  }
+
+  public void setSleepTime(int sleepTime) {
+    this.sleepTime = sleepTime;
+  }
+
+  public int getBatchSize() {
+    return batchSize;
+  }
+
+  public void setBatchSize(int batchSize) {
+    this.batchSize = batchSize;
   }
 
   @JsonProperty
