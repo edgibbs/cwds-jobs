@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class CwsChangedUsersServiceImpl implements CwsChangedUsersService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CwsChangedUsersService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CwsChangedUsersServiceImpl.class);
 
   @Inject
   private CapUsersSavePointService savePointService;
