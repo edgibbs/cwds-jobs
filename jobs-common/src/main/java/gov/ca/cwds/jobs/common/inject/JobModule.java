@@ -40,6 +40,10 @@ public class JobModule extends AbstractModule {
     this.modules.add(module);
   }
 
+  public List<AbstractModule> getModules() {
+    return modules;
+  }
+
   static class DefaultJobPreparator implements JobPreparator {
 
     @Override
