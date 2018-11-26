@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UsersPage;
+import gov.ca.cwds.jobs.cap.users.inject.BatchSize;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiPassword;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
@@ -12,10 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
@@ -35,7 +33,6 @@ public class IdmServiceImpl implements IdmService {
   private static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
-  private static final int BATCH_SIZE = 100;
 
 
   @Inject
@@ -52,6 +49,11 @@ public class IdmServiceImpl implements IdmService {
   @Inject
   @PerryApiPassword
   private String perryApiPassword;
+
+  @Inject
+  @BatchSize
+  private int batchSize;
+
 
   private String basicAuthHeader;
 
@@ -75,8 +77,15 @@ public class IdmServiceImpl implements IdmService {
   @Override
   @SuppressWarnings("unchecked")
   public List<User> getUsersByRacfIds(List<String> racfIds) {
-    List<List<String>> batches = ListUtils.partition(racfIds, BATCH_SIZE);
-    return batches.stream().flatMap( a -> processRequest(a).stream()).collect(Collectors.toList());
+    List<List<String>> batches = ListUtils.partition(racfIds, batchSize);
+    LOGGER.info("Start working on {} batche(s) of RACFIDs", batches.size());
+    List<User> users = new ArrayList<>();
+    int i = 0;
+    for (List<String> batch : batches) {
+      LOGGER.info("PROCESSING THE UPDATE FOR RACFID BATCH #{}", i++);
+      users.addAll(processRequest(batch));
+    }
+    return users;
   }
 
   private List<User> processRequest(List<String> racfIds) {

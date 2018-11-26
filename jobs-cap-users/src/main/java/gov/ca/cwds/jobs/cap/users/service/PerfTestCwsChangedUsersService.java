@@ -9,7 +9,6 @@ import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import io.dropwizard.hibernate.UnitOfWork;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
