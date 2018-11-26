@@ -31,13 +31,13 @@ public class CwsChangedUsersServiceImpl implements CwsChangedUsersService {
 
   @UnitOfWork(CWS)
   public List<ChangedUserDto> getCwsChanges() {
-    Set<String> changedRacfIds = dao.getChangedRacfIds(savePointService.loadSavePoint());
+    List<String> changedRacfIds = dao.getChangedRacfIds(savePointService.loadSavePoint());
     if (CollectionUtils.isEmpty(changedRacfIds)) {
       LOGGER.info("No changes in CWS/CMS found");
       return Collections.emptyList();
     }
     LOGGER.info("The number of RACFIDs with changed data: {}", changedRacfIds.size());
-    changedRacfIds = changedRacfIds.stream().map(String::trim).collect(Collectors.toSet());
+    changedRacfIds = changedRacfIds.stream().map(String::trim).collect(Collectors.toList());
     List<User> users = idmService.getUsersByRacfIds(changedRacfIds);
     return users.stream()
         .map(e -> new ChangedUserDto(e, RecordChangeOperation.U))
