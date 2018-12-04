@@ -54,6 +54,8 @@ public class CwsFacilityJobTest {
   private static final String CWSCMS_INCREMENTAL_LOAD_UPDATED_FACILITY_ID = "AP9Ewb409u";
   private static final String CWSCMS_INCREMENTAL_LOAD_DELETED_FACILITY_ID = "AyT7r860AB";
 
+  private static final int INITIAL_FACILITIES_COUNT = 167;
+
   @Test
   public void cwsFacilityJobTest()
       throws IOException, JSONException, InterruptedException, LiquibaseException {
@@ -62,10 +64,20 @@ public class CwsFacilityJobTest {
       testInitialLoad();
       testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD);
       testIncrementalLoad();
+      testDeletedFacilities();
     } finally {
       lastRunDirHelper.deleteSavePointContainerFolder();
       FacilityTestWriter.reset();
     }
+  }
+
+  private void testDeletedFacilities() throws IOException {
+    lastRunDirHelper.createSavePointContainerFolder();
+    lastRunDirHelper.deleteSavePointContainerFolder();
+    FacilityTestWriter.reset();
+    runInitialLoad();
+    //Initial count + new facility - deleted facility = Initial count
+    assertEquals(INITIAL_FACILITIES_COUNT, TestWriter.getItems().size());
   }
 
   private void testInitialResumeLoad(DefaultJobMode jobMode) {
@@ -107,7 +119,7 @@ public class CwsFacilityJobTest {
     LocalDateTime now = LocalDateTime.now();
     assertEquals(0, TestWriter.getItems().size());
     runInitialLoad();
-    assertEquals(167, TestWriter.getItems().size());
+    assertEquals(INITIAL_FACILITIES_COUNT, TestWriter.getItems().size());
     assertFacility("fixtures/facilities-initial-load-cwscms.json",
         CWSCMS_INITIAL_LOAD_FACILITY_ID);
 

@@ -27,6 +27,9 @@ import gov.ca.cwds.jobs.cals.facility.BaseFacilityJobModule;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.cals.facility.cws.CwsFacilityJob;
 import gov.ca.cwds.jobs.cals.facility.cws.CwsFacilityJobConfiguration;
+import gov.ca.cwds.jobs.cals.facility.cws.QueryConstants;
+import gov.ca.cwds.jobs.cals.facility.cws.QueryConstants.IncrementalMode;
+import gov.ca.cwds.jobs.cals.facility.cws.QueryConstants.InitialMode;
 import gov.ca.cwds.jobs.cals.facility.cws.entity.CwsChangedFacilityService;
 import gov.ca.cwds.jobs.cals.facility.cws.savepoint.CwsTimestampSavePointService;
 import gov.ca.cwds.jobs.common.core.Job;
@@ -98,16 +101,22 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
     timestampDefaultJobModeService.setSavePointContainerService(savePointContainerService);
     if (timestampDefaultJobModeService.getCurrentJobMode() == INITIAL_LOAD) {
       bind(JobModeFinalizer.class).toProvider(CwsInitialModeFinalizerProvider.class);
-      bindConstant().annotatedWith(TimestampField.class).to("lastUpdatedTime");
-      bindConstant().annotatedWith(CwsIdentifierCreator.class)
-          .to("new CwsChangedIdentifier(home.identifier, home.lastUpdatedTime)");
+      bindConstant().annotatedWith(CwsGetIdentifiersAfterTimestampQuery.class)
+          .to(QueryConstants.InitialMode.GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY);
+      bindConstant().annotatedWith(CwsGetIdentifiersBetweenTimestampsQuery.class)
+          .to(QueryConstants.InitialMode.GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY);
+      bindConstant().annotatedWith(CwsGetNextSavePointQuery.class)
+          .to(InitialMode.GET_NEXT_SAVEPOINT_QUERY);
+
     } else { //incremental load
       bind(JobModeFinalizer.class).toInstance(() -> {
       });
-      bindConstant().annotatedWith(TimestampField.class).to("replicationLastUpdated");
-      bindConstant().annotatedWith(CwsIdentifierCreator.class)
-          .to("new CwsChangedIdentifier(home.identifier, "
-              + "home.recordChangeOperation, home.replicationLastUpdated)");
+      bindConstant().annotatedWith(CwsGetIdentifiersAfterTimestampQuery.class)
+          .to(IncrementalMode.GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY);
+      bindConstant().annotatedWith(CwsGetIdentifiersBetweenTimestampsQuery.class)
+          .to(IncrementalMode.GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY);
+      bindConstant().annotatedWith(CwsGetNextSavePointQuery.class)
+          .to(IncrementalMode.GET_NEXT_SAVEPOINT_QUERY);
     }
   }
 
