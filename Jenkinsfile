@@ -14,7 +14,7 @@ node ('dora-slave'){
         string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
         string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')]),
         pipelineTriggers([[$class: 'GitHubPRTrigger',
-            branchRestriction: [targetBranch: 'development'],
+            // branchRestriction: [targetBranch: 'development'],
             events: [[$class: 'GitHubPRCommitEvent']],
             preStatus: true,
             repoProviders: [[$class: 'GitHubPluginRepoProvider',
