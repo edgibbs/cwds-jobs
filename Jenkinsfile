@@ -4,7 +4,6 @@ node ('dora-slave'){
    def artifactVersion="3.3-SNAPSHOT"
    def serverArti = Artifactory.server 'CWDS_DEV'
    def rtGradle = Artifactory.newGradleBuild()
-   if (env.BUILD_JOB_TYPE!="pull_request" ) {
    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')),
    disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
    parameters([
@@ -23,7 +22,6 @@ node ('dora-slave'){
             skipFirstRun: true,
             spec: 'H/15 * * * * ',
             triggerMode: 'HEAVY_HOOKS']])])
-   }
 
   try {
    stage('Preparation') {
@@ -39,8 +37,6 @@ node ('dora-slave'){
          newTag = newSemVer()
          echo newTag
    }
-   
-   if (env.BUILD_JOB_TYPE!="pull_request" ) {
    stage('Build'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
    }
@@ -57,7 +53,6 @@ node ('dora-slave'){
         rtGradle.deployer.deployArtifacts = true
         buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
         rtGradle.deployer.deployArtifacts = false
-	}
 	}
 
 	stage('Clean WorkSpace') {
