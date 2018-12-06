@@ -34,8 +34,7 @@ node ('dora-slave'){
 	   rtGradle.useWrapper = true
    }
    stage('Increment Tag') {
-        newTag = newSemVer()
-        echo newTag
+      checkForLabel("cwds-jobs")
    }
    stage('Build'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
