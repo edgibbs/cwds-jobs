@@ -1,10 +1,13 @@
+@Library('jenkins-pipeline-utils') _
+
 node ('dora-slave'){
    def artifactVersion="3.3-SNAPSHOT"
    def serverArti = Artifactory.server 'CWDS_DEV'
    def rtGradle = Artifactory.newGradleBuild()
-   properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')),
-   disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
-   parameters([
+   if (env.BUILD_JOB_TYPE=="master" ) {
+     properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')),
+     disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+     parameters([
         booleanParam(defaultValue: true, description: '', name: 'USE_NEWRELIC'),
         string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
         string(defaultValue: 'master', description: '', name: 'branch'),
@@ -19,7 +22,15 @@ node ('dora-slave'){
             repoPermission: 'PULL']],
             skipFirstRun: true,
             spec: 'H/15 * * * * ',
-            triggerMode: 'HEAVY_HOOKS']])])
+            triggerMode: 'HEAVY_HOOKS']])
+            ])
+   } else {
+      properties([disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+      parameters([
+        string(defaultValue: 'master', description: '', name: 'branch'),
+        booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
+        string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')])])
+   }
 
   try {
    stage('Preparation') {
@@ -30,6 +41,10 @@ node ('dora-slave'){
 	   rtGradle.deployer.mavenCompatible = true
 	   rtGradle.deployer.deployMavenDescriptors = true
 	   rtGradle.useWrapper = true
+   }
+   stage('Increment Tag') {
+        newTag = newSemVer()
+        echo newTag
    }
    stage('Build'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
