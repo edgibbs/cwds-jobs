@@ -6,23 +6,32 @@ node ('dora-slave'){
    def rtGradle = Artifactory.newGradleBuild()
    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')),
    disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
-   parameters([
+   if (env.BUILD_JOB_TYPE=="master" ) {
+     parameters([
         booleanParam(defaultValue: true, description: '', name: 'USE_NEWRELIC'),
         string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
         string(defaultValue: 'master', description: '', name: 'branch'),
         booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
         string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
         string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')]),
-        // pipelineTriggers([[$class: 'GitHubPRTrigger',
-            // branchRestriction: [targetBranch: 'development'],
-            // events: [[$class: 'GitHubPRCommitEvent']],
-            // preStatus: true,
-            // repoProviders: [[$class: 'GitHubPluginRepoProvider',
-            // repoPermission: 'PULL']],
-            // skipFirstRun: true,
-            // spec: 'H/15 * * * * ',
-            // triggerMode: 'HEAVY_HOOKS']])
+        pipelineTriggers([[$class: 'GitHubPRTrigger',
+            branchRestriction: [targetBranch: 'development'],
+            events: [[$class: 'GitHubPRCommitEvent']],
+            preStatus: true,
+            repoProviders: [[$class: 'GitHubPluginRepoProvider',
+            repoPermission: 'PULL']],
+            skipFirstRun: true,
+            spec: 'H/15 * * * * ',
+            triggerMode: 'HEAVY_HOOKS']])
             ])
+   } else {
+      properties([disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+      parameters([
+        string(defaultValue: 'master', description: '', name: 'branch'),
+        booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
+        string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')]),
+       ])])
+   }
 
   try {
    stage('Preparation') {
@@ -34,9 +43,9 @@ node ('dora-slave'){
 	   rtGradle.deployer.deployMavenDescriptors = true
 	   rtGradle.useWrapper = true
    }
-   stage("Increment Tag") {
-         newTag = newSemVer()
-         echo newTag
+   stage('Increment Tag') {
+        newTag = newSemVer()
+        echo newTag
    }
    stage('Build'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
@@ -49,7 +58,6 @@ node ('dora-slave'){
      			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
              }
    }
-
     stage ('Push to artifactory'){
         rtGradle.deployer.deployArtifacts = true
         buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
