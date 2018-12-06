@@ -33,7 +33,7 @@ node ('dora-slave'){
 	   rtGradle.deployer.deployMavenDescriptors = true
 	   rtGradle.useWrapper = true
    }
-   stage('Increment Tag') {
+   stage('Check for Label') {
       checkForLabel("cwds-jobs")
    }
    stage('Build'){
@@ -47,18 +47,24 @@ node ('dora-slave'){
      			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
              }
    }
-    stage ('Push to artifactory'){
-        rtGradle.deployer.deployArtifacts = true
-        buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
-        rtGradle.deployer.deployArtifacts = false
-	}
-
-	stage('Clean WorkSpace') {
-		archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
-		sh ('docker-compose down -v')
- 	    publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
-
-	}
+   if (env.BUILD_JOB_TYPE=="master" ) {
+        stage('Increment Tag') {
+           newTag = newSemVer()
+           echo newTag
+        }
+        stage ('Push to artifactory'){
+            rtGradle.deployer.deployArtifacts = true
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+            rtGradle.deployer.deployArtifacts = false
+    	}
+    
+    	stage('Clean WorkSpace') {
+    		archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
+    		sh ('docker-compose down -v')
+     	    publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
+    
+    	}
+    }
  } catch (e)   {
 	   publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
 	   sh ('docker-compose down -v')
