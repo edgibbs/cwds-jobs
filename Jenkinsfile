@@ -29,8 +29,7 @@ node ('dora-slave'){
       parameters([
         string(defaultValue: 'master', description: '', name: 'branch'),
         booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
-        string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')]),
-       ])])
+        string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')])])
    }
 
   try {
