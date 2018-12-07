@@ -57,12 +57,10 @@ node ('dora-slave'){
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
             rtGradle.deployer.deployArtifacts = false
     	}
-    
     	stage('Clean WorkSpace') {
     		archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
     		sh ('docker-compose down -v')
      	    publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
-    
     	}
     }
  } catch (e)   {
