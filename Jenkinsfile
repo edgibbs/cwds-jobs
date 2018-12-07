@@ -48,6 +48,10 @@ node ('dora-slave'){
              }
    }
    if (env.BUILD_JOB_TYPE=="master" ) {
+        stage('Increment Tag') {
+           newTag = newSemVer()
+           echo newTag
+        }
         stage ('Push to artifactory'){
             rtGradle.deployer.deployArtifacts = true
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
