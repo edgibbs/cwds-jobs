@@ -13,17 +13,8 @@ node ('dora-slave'){
         string(defaultValue: 'master', description: '', name: 'branch'),
         booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
         string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
-        string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')]),
-        pipelineTriggers([[$class: 'GitHubPRTrigger',
-            branchRestriction: [targetBranch: 'development'],
-            events: [[$class: 'GitHubPRCommitEvent']],
-            preStatus: true,
-            repoProviders: [[$class: 'GitHubPluginRepoProvider',
-            repoPermission: 'PULL']],
-            skipFirstRun: true,
-            spec: 'H/15 * * * * ',
-            triggerMode: 'HEAVY_HOOKS']])
-            ])
+        string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')])
+        ])
    } else {
       properties([disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
       parameters([
@@ -42,9 +33,8 @@ node ('dora-slave'){
 	   rtGradle.deployer.deployMavenDescriptors = true
 	   rtGradle.useWrapper = true
    }
-   stage('Increment Tag') {
-        newTag = newSemVer()
-        echo newTag
+   stage('Check for Label') {
+      checkForLabel("cwds-jobs")
    }
    stage('Build'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
@@ -57,18 +47,20 @@ node ('dora-slave'){
      			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
              }
    }
-    stage ('Push to artifactory'){
-        rtGradle.deployer.deployArtifacts = true
-        buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
-        rtGradle.deployer.deployArtifacts = false
-	}
-
-	stage('Clean WorkSpace') {
-		archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
-		sh ('docker-compose down -v')
- 	    publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
-
-	}
+   if (env.BUILD_JOB_TYPE=="master" ) {
+        stage ('Push to artifactory'){
+            rtGradle.deployer.deployArtifacts = true
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+            rtGradle.deployer.deployArtifacts = false
+    	}
+    
+    	stage('Clean WorkSpace') {
+    		archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
+    		sh ('docker-compose down -v')
+     	    publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
+    
+    	}
+    }
  } catch (e)   {
 	   publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
 	   sh ('docker-compose down -v')
