@@ -34,8 +34,10 @@ node ('dora-slave'){
 	   rtGradle.deployer.deployMavenDescriptors = true
 	   rtGradle.useWrapper = true
    }
-   stage('Check for Label') {
-      checkForLabel("cwds-jobs")
+   if (env.BUILD_JOB_TYPE=="pull_request" ) {
+     stage('Check for Label') {
+        checkForLabel("cwds-jobs")
+     }
    }
    stage('Build'){
 		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
