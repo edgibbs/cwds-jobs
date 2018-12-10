@@ -6,7 +6,7 @@ node ('dora-slave'){
    def rtGradle = Artifactory.newGradleBuild()
    if (env.BUILD_JOB_TYPE=="master" ) {
      triggerProperties = pullRequestMergedTriggerProperties('cwds-jobs-master')
-     properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')),
+     properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '25')),
      pipelineTriggers([triggerProperties]), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
      parameters([
         booleanParam(defaultValue: true, description: '', name: 'USE_NEWRELIC'),
@@ -72,6 +72,8 @@ node ('dora-slave'){
        emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
        subject: "Jobs failed with ${e.message}", to: "Leonid.Marushevskiy@osi.ca.gov, Alex.Kuznetsov@osi.ca.gov"
        slackSend channel: "#cals-api", baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', message: "Build Falled: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+       currentBuild.result = "FAILURE"
+       throw exceptioncurrentBuild.result = "FAILURE"
 	}finally {
         cleanWs()
     }
