@@ -48,7 +48,7 @@ fasDataSourceFactory:
       hibernate.connection.sslmode: ${FAS_SSL_MODE:-disable}
       hibernate.connection.sslcert: ${FAS_SSL_CERT:-config/cerf.crt}
       hibernate.connection.sslkey: ${FAS_SSL_KEY:-config/key.pk8}
-      hibernate.connection.sslpassword: ${FAS_SSL_KEY_PASS:-password}
+      hibernate.connection.sslpassword: ${DB_FAS_PASSWORD:-password}
 
 calsnsDataSourceFactory:
   properties:
