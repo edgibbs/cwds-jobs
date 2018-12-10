@@ -57,10 +57,11 @@ project.ext {
 if (System.getProperty('newVersion')) {
     def newVersion = "${System.getProperty('newVersion')}"
     version = newVersion
+    echo "version with newTag, $version"
     print version + " With newTag"
 } else {
     version = projectVersion
-    print version + " WithOut newTag"
+    echo "version without newTag, $version"
 }
 group = commonGroupId
 
