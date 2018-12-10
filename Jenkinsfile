@@ -73,7 +73,7 @@ node ('dora-slave'){
        subject: "Jobs failed with ${e.message}", to: "Leonid.Marushevskiy@osi.ca.gov, Alex.Kuznetsov@osi.ca.gov"
        slackSend channel: "#cals-api", baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', message: "Build Falled: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
        currentBuild.result = "FAILURE"
-       throw exceptioncurrentBuild.result = "FAILURE"
+       throw exception
 	}finally {
         cleanWs()
     }
