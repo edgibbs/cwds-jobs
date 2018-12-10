@@ -34,20 +34,39 @@ node ('dora-slave'){
        rtGradle.deployer.deployMavenDescriptors = true
        rtGradle.useWrapper = true
    }
+   if (env.BUILD_JOB_TYPE=="pull_request" ) {
+     stage('Check for Label') {
+        checkForLabel("cwds-jobs")
+     }
+   }
+   stage('Build'){
+       def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+   }
+   stage('Tests and Coverage') {
+       buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
+   }
+   stage('SonarQube analysis'){
+       withSonarQubeEnv('Core-SonarQube') {
+         buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
+       }
+   }
    if (env.BUILD_JOB_TYPE=="master" ) {
-      incrementTag
-      buildProject
-      testsAndCoverage
-      sonarQubeAnalysis
-      pushToArtifactory
-      cleanWorkspace
-    } else {
-      checkForLabel
-      buildProject
-      testsAndCoverage
-      sonarQubeAnalysis
+        stage('Increment Tag') {
+           newTag = newSemVer()
+           echo newTag
+        }
+        stage ('Push to artifactory'){
+            rtGradle.deployer.deployArtifacts = true
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
+            tGradle.deployer.deployArtifacts = false
+        }
+        stage('Clean WorkSpace') {
+            archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
+            sh ('docker-compose down -v')
+            publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
+        }
     }
-  } catch(Exception e) {
+ } catch(Exception e) {
        publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
        sh ('docker-compose down -v')
        emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
@@ -55,49 +74,7 @@ node ('dora-slave'){
        slackSend channel: "#cals-api", baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', message: "Build Falled: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
        currentBuild.result = "FAILURE"
        throw e
-   }finally {
+    }finally {
         cleanWs()
-   }
-  }
-   def checkForLabel() {
-      stage('Check for Label') {
-         checkForLabel("cwds-jobs")
-      }
-   }
-   def testAndCoverage() {
-      stage('Tests and Coverage') {
-        buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
-      }
-   }
-   def sonarQubeAnalysis() {
-     stage('SonarQube analysis'){
-         withSonarQubeEnv('Core-SonarQube') {
-           buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
-       }
-     }
-   }
-   def pushToArtifactory() {
-     stage ('Push to artifactory'){
-          rtGradle.deployer.deployArtifacts = true
-          buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
-          tGradle.deployer.deployArtifacts = false
-       }
-   }
-   def cleanWorkspace() {
-     stage('Clean WorkSpace') {
-            archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
-            sh ('docker-compose down -v')
-            publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
-        }
-   }
-   def buildProject() {
-     stage('Build'){
-       def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -D build=${BUILD_NUMBER} -DnewVersion=${env.newTag}".toString()
-     }
-   }
-   def incrementTag() {
-      stage('Increment Tag') {
-        newTag = newSemVer()
-      }
-   }
-
+    }
+}
