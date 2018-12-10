@@ -40,7 +40,7 @@ node ('dora-slave'){
      }
    }
    stage('Build'){
-       def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()"
+       def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
    }
    stage('Tests and Coverage') {
        buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
