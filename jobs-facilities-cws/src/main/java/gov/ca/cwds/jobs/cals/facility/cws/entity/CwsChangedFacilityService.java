@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.cals.facility.cws.entity;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.cals.service.CwsFacilityService;
-import gov.ca.cwds.cals.service.dto.FacilityDTO;
+import gov.ca.cwds.cals.service.dto.FacilityDto;
 import gov.ca.cwds.jobs.cals.facility.AbstractChangedFacilityService;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
@@ -19,7 +19,7 @@ public class CwsChangedFacilityService extends AbstractChangedFacilityService im
   private CwsFacilityService cwsFacilityService;
 
   @Override
-  protected FacilityDTO loadEntityById(ChangedEntityIdentifier identifier) {
+  protected FacilityDto loadEntityById(ChangedEntityIdentifier identifier) {
     return cwsFacilityService.loadFacilityFromCwsCms(identifier.getId());
   }
 }
