@@ -38,9 +38,9 @@ node ('dora-slave'){
        rtGradle.useWrapper = true
    }
    if (env.BUILD_JOB_TYPE=="master" ) {
-        stage('Increment Tag') {
-           newTag = newSemVer()
-        }
+      stage('Increment Tag') {
+        newTag = newSemVer()
+      }
    } else {
      stage('Check for Label') {
         checkForLabel("cwds-jobs")
