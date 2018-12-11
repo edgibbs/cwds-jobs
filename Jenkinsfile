@@ -1,5 +1,7 @@
 @Library('jenkins-pipeline-utils') _
 
+GITHUB_CREDENTIALS_ID = '433ac100-b3c2-4519-b4d6-207c029a103b'
+
 node ('dora-slave'){
    def artifactVersion="3.3-SNAPSHOT"
    def serverArti = Artifactory.server 'CWDS_DEV'
@@ -27,7 +29,7 @@ node ('dora-slave'){
   try {
    stage('Preparation') {
        cleanWs()
-       git branch: '$branch', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/cals-jobs.git'
+       git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/cals-jobs.git'
        rtGradle.tool = "Gradle_35"
        rtGradle.resolver repo:'repo', server: serverArti
        rtGradle.deployer.mavenCompatible = true
@@ -56,6 +58,9 @@ node ('dora-slave'){
        }
    }
    if (env.BUILD_JOB_TYPE=="master" ) {
+        stage('Tag Repo') {
+           tagGithubRepo(newTag, GITHUB_CREDENTIALS_ID)
+        }
         stage ('Push to artifactory'){
             rtGradle.deployer.deployArtifacts = true
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()

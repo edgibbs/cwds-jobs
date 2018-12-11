@@ -7,7 +7,12 @@ buildscript {
     }
 }
 
-version = parent.version
+if (System.getProperty('newVersion')) {
+    def newVersion = "${System.getProperty('newVersion')}"
+    version = newVersion
+} else {
+    version = parent.version
+}
 
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
