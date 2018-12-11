@@ -17,7 +17,7 @@ apply plugin: 'eclipse'
 
 project.ext {
     cwdsModelVersion = '0.8.1_629-RC'
-    calsApiVersion = '1.0.6'
+    calsApiVersion = '1.2.2'
     coreApiVersion = '1.7.4_829-RC'
     perryVersion = '4.0.2_1104-RC'
     testSupportVersion = '0.5.6_272-RC'
@@ -35,7 +35,7 @@ project.ext {
     elasticsearchVersion = "5.5.2"
     dropwizardVersion = "1.1.0"
 
-    projectMajorVersion = "1.3"
+    projectMajorVersion = "1.4"
 
     isRelease = System.getProperty("Release") == "true"
     buildNumber = System.getProperty('BuildNumber')

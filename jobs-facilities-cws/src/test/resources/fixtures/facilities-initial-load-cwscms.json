@@ -23,6 +23,7 @@
     "license_number": null,
     "status": null,
     "capacity": 20,
+    "available_beds": null,
     "license_effective_date": null,
     "original_application_recieved_date": null,
     "last_visit_date": null,
