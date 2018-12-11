@@ -6,6 +6,7 @@ node ('dora-slave'){
    def artifactVersion="3.3-SNAPSHOT"
    def serverArti = Artifactory.server 'CWDS_DEV'
    def rtGradle = Artifactory.newGradleBuild()
+   def newTag
    if (env.BUILD_JOB_TYPE=="master" ) {
      triggerProperties = pullRequestMergedTriggerProperties('cwds-jobs-master')
      properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '25')),
@@ -39,7 +40,6 @@ node ('dora-slave'){
    if (env.BUILD_JOB_TYPE=="master" ) {
         stage('Increment Tag') {
            newTag = newSemVer()
-           echo newTag
         }
    } else {
      stage('Check for Label') {
@@ -47,7 +47,7 @@ node ('dora-slave'){
      }
    }
    stage('Build'){
-       def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -D build=${BUILD_NUMBER} -DnewVersion=${env.newTag}".toString()
+       def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
    }
    stage('Tests and Coverage') {
        buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
@@ -63,8 +63,8 @@ node ('dora-slave'){
         }
         stage ('Push to artifactory'){
             rtGradle.deployer.deployArtifacts = true
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
-            tGradle.deployer.deployArtifacts = false
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=\$RELEASE_PROJECT -DBuildNumber=\$BUILD_NUMBER -DCustomVersion=\$OVERRIDE_VERSION -DnewVersion=${newTag}".toString()
+            rtGradle.deployer.deployArtifacts = false
         }
         stage('Clean WorkSpace') {
             archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
