@@ -64,7 +64,7 @@ node ('dora-slave'){
         }
         stage ('Push to artifactory'){
             rtGradle.deployer.deployArtifacts = true
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=\$RELEASE_PROJECT -DBuildNumber=\$BUILD_NUMBER -DCustomVersion=\$OVERRIDE_VERSION".toString()
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=\$RELEASE_PROJECT -DBuildNumber=\$BUILD_NUMBER -DCustomVersion=\$OVERRIDE_VERSION -DnewVersion=${newTag}".toString()
             rtGradle.deployer.deployArtifacts = false
         }
         stage('Clean WorkSpace') {
