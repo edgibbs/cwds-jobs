@@ -26,13 +26,13 @@ node ('dora-slave'){
 
   try {
    stage('Preparation') {
-          cleanWs()
-	   git branch: '$branch', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/cals-jobs.git'
-	   rtGradle.tool = "Gradle_35"
-	   rtGradle.resolver repo:'repo', server: serverArti
-	   rtGradle.deployer.mavenCompatible = true
-	   rtGradle.deployer.deployMavenDescriptors = true
-	   rtGradle.useWrapper = true
+       cleanWs()
+       git branch: '$branch', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/cals-jobs.git'
+       rtGradle.tool = "Gradle_35"
+       rtGradle.resolver repo:'repo', server: serverArti
+       rtGradle.deployer.mavenCompatible = true
+       rtGradle.deployer.deployMavenDescriptors = true
+       rtGradle.useWrapper = true
    }
    if (env.BUILD_JOB_TYPE=="pull_request" ) {
      stage('Check for Label') {
@@ -40,15 +40,15 @@ node ('dora-slave'){
      }
    }
    stage('Build'){
-		def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+       def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
    }
    stage('Tests and Coverage') {
-	   buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
+       buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
    }
    stage('SonarQube analysis'){
-     		withSonarQubeEnv('Core-SonarQube') {
-     			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
-             }
+       withSonarQubeEnv('Core-SonarQube') {
+         buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
+       }
    }
    if (env.BUILD_JOB_TYPE=="master" ) {
         stage('Increment Tag') {
@@ -57,24 +57,24 @@ node ('dora-slave'){
         }
         stage ('Push to artifactory'){
             rtGradle.deployer.deployArtifacts = true
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
-            rtGradle.deployer.deployArtifacts = false
-    	}
-    	stage('Clean WorkSpace') {
-    		archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
-    		sh ('docker-compose down -v')
-     	    publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
-    	}
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
+            tGradle.deployer.deployArtifacts = false
+        }
+        stage('Clean WorkSpace') {
+            archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
+            sh ('docker-compose down -v')
+            publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
+        }
     }
- } catch (e)   {
-	   publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
-	   sh ('docker-compose down -v')
+ } catch(Exception e) {
+       publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
+       sh ('docker-compose down -v')
        emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
        subject: "Jobs failed with ${e.message}", to: "Leonid.Marushevskiy@osi.ca.gov, Alex.Kuznetsov@osi.ca.gov"
        slackSend channel: "#cals-api", baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', message: "Build Falled: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
        currentBuild.result = "FAILURE"
-       throw exception
-	}finally {
+       throw e
+    }finally {
         cleanWs()
     }
 }
