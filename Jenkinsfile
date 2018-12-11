@@ -34,13 +34,18 @@ node ('dora-slave'){
        rtGradle.deployer.deployMavenDescriptors = true
        rtGradle.useWrapper = true
    }
-   if (env.BUILD_JOB_TYPE=="pull_request" ) {
+   if (env.BUILD_JOB_TYPE=="master" ) {
+        stage('Increment Tag') {
+           newTag = newSemVer()
+           echo newTag
+        }
+   } else {
      stage('Check for Label') {
         checkForLabel("cwds-jobs")
      }
    }
    stage('Build'){
-       def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'jar shadowJar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+       def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -D build=${BUILD_NUMBER} -DnewVersion=${env.newTag}".toString()
    }
    stage('Tests and Coverage') {
        buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
@@ -51,10 +56,6 @@ node ('dora-slave'){
        }
    }
    if (env.BUILD_JOB_TYPE=="master" ) {
-        stage('Increment Tag') {
-           newTag = newSemVer()
-           echo newTag
-        }
         stage ('Push to artifactory'){
             rtGradle.deployer.deployArtifacts = true
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
