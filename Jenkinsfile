@@ -53,9 +53,7 @@ node ('dora-slave'){
        buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
    }
    stage('SonarQube analysis'){
-       withSonarQubeEnv('Core-SonarQube') {
-         buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
-       }
+       lint(rtGradle)
    }
    if (env.BUILD_JOB_TYPE=="master" ) {
         stage('Tag Repo') {
