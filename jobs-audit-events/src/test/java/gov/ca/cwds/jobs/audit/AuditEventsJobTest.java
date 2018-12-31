@@ -22,8 +22,7 @@ public class AuditEventsJobTest {
           .getJobsConfiguration(AuditEventsJobConfiguration.class,
               jobOptions.getConfigFileLocation());
       JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
-      AuditEventsJobModule capUsersJobModule = new AuditEventsJobModule(jobConfiguration,
-          jobOptions.getLastRunLoc());
+      AuditEventsJobModule capUsersJobModule = new AuditEventsJobModule(jobConfiguration);
       jobModule.addModule(capUsersJobModule);
       JobRunner.run(jobModule);
     } finally {

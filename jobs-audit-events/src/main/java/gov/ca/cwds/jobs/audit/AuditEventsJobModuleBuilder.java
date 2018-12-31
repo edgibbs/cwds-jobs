@@ -23,8 +23,7 @@ public class AuditEventsJobModuleBuilder implements JobModuleBuilder {
     elasticsearchConfiguration.setIndexSettings("audit.events.settings.json");
     elasticsearchConfiguration.setDocumentMapping("audit.events.mapping.json");
     jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration));
-    jobModule.addModule(new AuditEventsJobModule(jobConfiguration,
-        jobOptions.getLastRunLoc()));
+    jobModule.addModule(new AuditEventsJobModule(jobConfiguration));
     return jobModule;
   }
 
