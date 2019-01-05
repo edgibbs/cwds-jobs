@@ -38,12 +38,15 @@ node ('dora-slave'){
        rtGradle.deployer.deployMavenDescriptors = true
        rtGradle.useWrapper = true
    }
-   stage(env.BUILD_JOB_TYPE == 'master' ? 'Increment Tag' : 'Check for Labels') {
-     newTag = newSemVer('', tagPrefixes)
-     (tagPrefix, newVersion) = (newTag =~ /^(.+)\-(\d+\.\d+\.\d+)/).with { it[0][1,2] }
-   }
-   stage('Build'){
-       def buildInfo = rtGradle.run buildFile: "jobs-${tagPrefix}/build.gradle", tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newVersion}".toString()
+   if (env.BUILD_JOB_TYPE == 'master') {
+     stage('Increment Tag') {
+       newTag = newSemVer('', tagPrefixes)
+       (tagPrefix, newVersion) = (newTag =~ /^(.+)\-(\d+\.\d+\.\d+)/).with { it[0][1,2] }
+     }
+   } else {
+     stage('Check for Labels') {
+       checkForLabel('cwds-jobs', tagPrefixes)
+     }
    }
    stage('Tests and Coverage') {
        buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
@@ -51,9 +54,12 @@ node ('dora-slave'){
    stage('SonarQube analysis'){
        lint(rtGradle)
    }
-   if (env.BUILD_JOB_TYPE=="master" ) {
+   if (env.BUILD_JOB_TYPE == 'master') {
         stage('Tag Repo') {
-           tagGithubRepo(newTag, GITHUB_CREDENTIALS_ID)
+            tagGithubRepo(newTag, GITHUB_CREDENTIALS_ID)
+        }
+        stage('Build'){
+            def buildInfo = rtGradle.run buildFile: "jobs-${tagPrefix}/build.gradle", tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newVersion}".toString()
         }
         stage ('Push to artifactory'){
             rtGradle.deployer.deployArtifacts = true
