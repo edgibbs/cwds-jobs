@@ -6,7 +6,8 @@ node ('dora-slave'){
    def artifactVersion="3.3-SNAPSHOT"
    def serverArti = Artifactory.server 'CWDS_DEV'
    def rtGradle = Artifactory.newGradleBuild()
-   def newTag
+   def tagPrefixes = ['audit-events', 'cap-users', 'facilities-cws', 'facilities-lis']
+   def newTag, tagPrefix, newVersion
    if (env.BUILD_JOB_TYPE=="master" ) {
      triggerProperties = pullRequestMergedTriggerProperties('cwds-jobs-master')
      properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '25')),
@@ -37,17 +38,15 @@ node ('dora-slave'){
        rtGradle.deployer.deployMavenDescriptors = true
        rtGradle.useWrapper = true
    }
-   if (env.BUILD_JOB_TYPE=="master" ) {
-      stage('Increment Tag') {
-        newTag = newSemVer()
-      }
-   } else {
-     stage('Check for Label') {
-        checkForLabel("cwds-jobs")
+   if (env.BUILD_JOB_TYPE == 'master') {
+     stage('Increment Tag') {
+       newTag = newSemVer('', tagPrefixes)
+       (tagPrefix, newVersion) = (newTag =~ /^(.+)\-(\d+\.\d+\.\d+)/).with { it[0][1,2] }
      }
-   }
-   stage('Build'){
-       def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
+   } else {
+     stage('Check for Labels') {
+       checkForLabel('cwds-jobs', tagPrefixes)
+     }
    }
    stage('Tests and Coverage') {
        buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
@@ -55,13 +54,16 @@ node ('dora-slave'){
    stage('SonarQube analysis'){
        lint(rtGradle)
    }
-   if (env.BUILD_JOB_TYPE=="master" ) {
+   if (env.BUILD_JOB_TYPE == 'master') {
         stage('Tag Repo') {
-           tagGithubRepo(newTag, GITHUB_CREDENTIALS_ID)
+            tagGithubRepo(newTag, GITHUB_CREDENTIALS_ID)
+        }
+        stage('Build'){
+            def buildInfo = rtGradle.run buildFile: "jobs-${tagPrefix}/build.gradle", tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newVersion}".toString()
         }
         stage ('Push to artifactory'){
             rtGradle.deployer.deployArtifacts = true
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=\$RELEASE_PROJECT -DBuildNumber=\$BUILD_NUMBER -DCustomVersion=\$OVERRIDE_VERSION -DnewVersion=${newTag}".toString()
+            buildInfo = rtGradle.run buildFile: "jobs-${tagPrefix}/build.gradle", tasks: "publish -DRelease=\$RELEASE_PROJECT -DBuildNumber=\$BUILD_NUMBER -DCustomVersion=\$OVERRIDE_VERSION -DnewVersion=${newVersion}".toString()
             rtGradle.deployer.deployArtifacts = false
         }
         stage('Clean WorkSpace') {
