@@ -3,7 +3,7 @@
 GITHUB_CREDENTIALS_ID = '433ac100-b3c2-4519-b4d6-207c029a103b'
 
 node ('dora-slave'){
-   def artifactVersion="3.3-SNAPSHOT"
+   def artifactVersion = '3.3-SNAPSHOT'
    def serverArti = Artifactory.server 'CWDS_DEV'
    def rtGradle = Artifactory.newGradleBuild()
    def tagPrefixes = ['audit-events', 'cap-users', 'facilities-cws', 'facilities-lis']
