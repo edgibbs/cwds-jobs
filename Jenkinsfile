@@ -3,7 +3,7 @@
 GITHUB_CREDENTIALS_ID = '433ac100-b3c2-4519-b4d6-207c029a103b'
 
 node ('dora-slave'){
-   def artifactVersion = '3.3-SNAPSHOT'
+   def artifactVersion = "3.3-SNAPSHOT"
    def serverArti = Artifactory.server 'CWDS_DEV'
    def rtGradle = Artifactory.newGradleBuild()
    def tagPrefixes = ['audit-events', 'cap-users', 'facilities-cws', 'facilities-lis']
@@ -43,6 +43,9 @@ node ('dora-slave'){
        newTag = newSemVer('', tagPrefixes)
        (tagPrefix, newVersion) = (newTag =~ /^(.+)\-(\d+\.\d+\.\d+)/).with { it[0][1,2] }
      }
+     stage('Build'){
+         def buildInfo = rtGradle.run buildFile: "jobs-${tagPrefix}/build.gradle".toString(), tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newVersion}".toString()
+     }
    } else {
      stage('Check for Labels') {
        checkForLabel('cwds-jobs', tagPrefixes)
@@ -61,12 +64,9 @@ node ('dora-slave'){
         stage('Tag Repo') {
             tagGithubRepo(newTag, GITHUB_CREDENTIALS_ID)
         }
-        stage('Build'){
-            def buildInfo = rtGradle.run buildFile: "jobs-${tagPrefix}/build.gradle", tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newVersion}".toString()
-        }
         stage ('Push to artifactory'){
             rtGradle.deployer.deployArtifacts = true
-            buildInfo = rtGradle.run buildFile: "jobs-${tagPrefix}/build.gradle", tasks: "publish -DRelease=\$RELEASE_PROJECT -DBuildNumber=\$BUILD_NUMBER -DCustomVersion=\$OVERRIDE_VERSION -DnewVersion=${newVersion}".toString()
+            buildInfo = rtGradle.run buildFile: "jobs-${tagPrefix}/build.gradle".toString(), tasks: "publish -DRelease=\$RELEASE_PROJECT -DBuildNumber=\$BUILD_NUMBER -DCustomVersion=\$OVERRIDE_VERSION -DnewVersion=${newVersion}".toString()
             rtGradle.deployer.deployArtifacts = false
         }
         stage('Clean WorkSpace') {
