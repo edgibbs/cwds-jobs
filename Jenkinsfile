@@ -55,6 +55,9 @@ node ('dora-slave'){
        lint(rtGradle)
    }
    if (env.BUILD_JOB_TYPE == 'master') {
+        stage('Update License Report') {
+          updateLicenseReport('master', GITHUB_CREDENTIALS_ID, [runtimeGradle: rtGradle])
+        }
         stage('Tag Repo') {
             tagGithubRepo(newTag, GITHUB_CREDENTIALS_ID)
         }
