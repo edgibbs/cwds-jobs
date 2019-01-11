@@ -83,7 +83,8 @@
       }
     },
     "timestamp": {
-      "type": "date"
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss"
     },
     "user_login": {
       "type": "text",
