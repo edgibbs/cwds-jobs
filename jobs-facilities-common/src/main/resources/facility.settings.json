@@ -4,10 +4,11 @@
   "analysis": {
     "analyzer": {
       "keyword_lowercase": {
-        "tokenizer": "keyword",
+        "type": "custom",
         "filter": [
           "lowercase"
-        ]
+        ],
+        "tokenizer": "whitespace"
       }
     }
   }
