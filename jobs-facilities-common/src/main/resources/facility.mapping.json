@@ -5,6 +5,7 @@
   "properties": {
     "name": {
       "type": "text",
+      "analyzer": "keyword_lowercase",
       "fields": {
         "for_sort": {
           "type": "text",
