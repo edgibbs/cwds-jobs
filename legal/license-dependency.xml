@@ -310,10 +310,10 @@
   <license name='No license found'>
     <dependency>cals-api-1.2.2.jar</dependency>
     <dependency>api-security-common-3.0.4_825-RC.jar</dependency>
+    <dependency>jwt-security-4.6.5.jar</dependency>
     <dependency>jcip-annotations-1.0.jar</dependency>
     <dependency>db2jcc_license_cisuz-4.0.0.jar</dependency>
     <dependency>cals-ns-data-model-0.10.2_706-RC.jar</dependency>
-    <dependency>jwt-security-4.1.0_1230-RC.jar</dependency>
     <dependency>jwt-security-3.0.4_825-RC.jar</dependency>
     <dependency>api-core-cms-1.7.4_829-RC.jar</dependency>
     <dependency>commons-io-1.3.2.jar</dependency>
@@ -321,10 +321,10 @@
     <dependency>dom4j-1.6.1.jar</dependency>
     <dependency>api-core-rest-1.7.4_829-RC.jar</dependency>
     <dependency>drools-engine-1.7.4_829-RC.jar</dependency>
-    <dependency>perry-4.1.0_1230-RC.jar</dependency>
     <dependency>legacy-data-access-1.7.4_829-RC.jar</dependency>
     <dependency>api-core-abac-1.7.4_829-RC.jar</dependency>
     <dependency>db2jcc4-4.21.29.jar</dependency>
+    <dependency>perry-4.6.5.jar</dependency>
     <dependency>dropwizard-guice-1.0.6.0.jar</dependency>
     <dependency>db2jcc4-4.0.0.jar</dependency>
     <dependency>api-core-1.7.4_829-RC.jar</dependency>

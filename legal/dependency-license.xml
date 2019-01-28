@@ -67,6 +67,10 @@
     <file>shiro-core-1.2.3.jar</file>
     <license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
   </dependency>
+  <dependency name='gov.ca.cwds.api:perry:4.6.5'>
+    <file>perry-4.6.5.jar</file>
+    <license name='No license found' />
+  </dependency>
   <dependency name='javax.inject:javax.inject:1'>
     <file>javax.inject-1.jar</file>
     <license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
@@ -114,10 +118,6 @@
   <dependency name='com.amazonaws:aws-java-sdk-connect:1.11.325'>
     <file>aws-java-sdk-connect-1.11.325.jar</file>
     <license name='Apache License, Version 2.0' url='https://aws.amazon.com/apache2.0' />
-  </dependency>
-  <dependency name='gov.ca.cwds.api:jwt-security:4.1.0_1230-RC'>
-    <file>jwt-security-4.1.0_1230-RC.jar</file>
-    <license name='No license found' />
   </dependency>
   <dependency name='org.apache.poi:poi-ooxml-schemas:3.17'>
     <file>poi-ooxml-schemas-3.17.jar</file>
@@ -558,6 +558,10 @@
   <dependency name='org.codehaus.woodstox:stax2-api:3.1.4'>
     <file>stax2-api-3.1.4.jar</file>
     <license name='The BSD License' url='http://www.opensource.org/licenses/bsd-license.php' />
+  </dependency>
+  <dependency name='gov.ca.cwds.api:jwt-security:4.6.5'>
+    <file>jwt-security-4.6.5.jar</file>
+    <license name='No license found' />
   </dependency>
   <dependency name='io.dropwizard:dropwizard-jackson:1.1.0'>
     <file>dropwizard-jackson-1.1.0.jar</file>
@@ -2126,10 +2130,6 @@
   <dependency name='org.glassfish.hk2:hk2-locator:2.5.0-b42'>
     <file>hk2-locator-2.5.0-b42.jar</file>
     <license name='CDDL + GPLv2 with classpath exception' url='https://glassfish.java.net/nonav/public/CDDL+GPL_1_1.html' />
-  </dependency>
-  <dependency name='gov.ca.cwds.api:perry:4.1.0_1230-RC'>
-    <file>perry-4.1.0_1230-RC.jar</file>
-    <license name='No license found' />
   </dependency>
   <dependency name='io.dropwizard.metrics:metrics-annotation:3.2.2'>
     <file>metrics-annotation-3.2.2.jar</file>
