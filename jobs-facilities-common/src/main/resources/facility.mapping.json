@@ -15,7 +15,14 @@
       }
     },
     "addresses": {
-      "type": "nested",
+      "type": "nested"
+    },
+    "full_residential_address": {
+      "type": "text",
+      "analyzer": "whitespace_lowercase"
+    },
+    "full_mailing_address": {
+      "type": "text",
       "analyzer": "whitespace_lowercase"
     },
     "phones": {
