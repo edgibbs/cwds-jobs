@@ -3,7 +3,7 @@
   "number_of_replicas": 2,
   "analysis": {
     "analyzer": {
-      "keyword_lowercase": {
+      "whitespace_lowercase": {
         "type": "custom",
         "filter": [
           "lowercase"

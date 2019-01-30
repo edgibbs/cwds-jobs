@@ -5,17 +5,18 @@
   "properties": {
     "name": {
       "type": "text",
-      "analyzer": "keyword_lowercase",
+      "analyzer": "whitespace_lowercase",
       "fields": {
         "for_sort": {
           "type": "text",
-          "analyzer": "keyword_lowercase",
+          "analyzer": "whitespace_lowercase",
           "fielddata": true
         }
       }
     },
     "addresses": {
-      "type": "nested"
+      "type": "nested",
+      "analyzer": "whitespace_lowercase"
     },
     "phones": {
       "type": "nested"
