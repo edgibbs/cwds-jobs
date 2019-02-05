@@ -115,10 +115,6 @@
     <file>aws-java-sdk-connect-1.11.325.jar</file>
     <license name='Apache License, Version 2.0' url='https://aws.amazon.com/apache2.0' />
   </dependency>
-  <dependency name='gov.ca.cwds.api:jwt-security:4.1.0_1230-RC'>
-    <file>jwt-security-4.1.0_1230-RC.jar</file>
-    <license name='No license found' />
-  </dependency>
   <dependency name='org.apache.poi:poi-ooxml-schemas:3.17'>
     <file>poi-ooxml-schemas-3.17.jar</file>
     <license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
@@ -172,13 +168,13 @@
     <file>transport-netty4-client-5.5.2.jar</file>
     <license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
   </dependency>
-  <dependency name='org.glassfish.jersey.test-framework:jersey-test-framework-core:2.25.1'>
-    <file>jersey-test-framework-core-2.25.1.jar</file>
-    <license name='CDDL+GPL License' url='http://glassfish.java.net/public/CDDL+GPL_1_1.html' />
-  </dependency>
   <dependency name='org.apache.lucene:lucene-memory:6.6.0'>
     <file>lucene-memory-6.6.0.jar</file>
     <license name='Apache 2' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
+  </dependency>
+  <dependency name='org.glassfish.jersey.test-framework:jersey-test-framework-core:2.25.1'>
+    <file>jersey-test-framework-core-2.25.1.jar</file>
+    <license name='CDDL+GPL License' url='http://glassfish.java.net/public/CDDL+GPL_1_1.html' />
   </dependency>
   <dependency name='io.springfox:springfox-swagger2:2.9.0'>
     <file>springfox-swagger2-2.9.0.jar</file>
@@ -276,14 +272,14 @@
     <file>jersey-declarative-linking-2.23.2.jar</file>
     <license name='CDDL+GPL License' url='http://glassfish.java.net/public/CDDL+GPL_1_1.html' />
   </dependency>
+  <dependency name='org.glassfish.web:javax.el:2.2.4'>
+    <file>javax.el-2.2.4.jar</file>
+    <license name='CDDL + GPLv2 with classpath exception' url='http://glassfish.dev.java.net/nonav/public/CDDL+GPL.html' />
+  </dependency>
   <dependency name='com.sun.xml.bind:jaxb-impl:2.1.14'>
     <file>jaxb-impl-2.1.14.jar</file>
     <license name='CDDL 1.1' url='https://glassfish.java.net/public/CDDL+GPL_1_1.html' />
     <license name='GPL2 w/ CPE' url='https://glassfish.java.net/public/CDDL+GPL_1_1.html' />
-  </dependency>
-  <dependency name='org.glassfish.web:javax.el:2.2.4'>
-    <file>javax.el-2.2.4.jar</file>
-    <license name='CDDL + GPLv2 with classpath exception' url='http://glassfish.dev.java.net/nonav/public/CDDL+GPL.html' />
   </dependency>
   <dependency name='io.springfox:springfox-core:2.9.0'>
     <file>springfox-core-2.9.0.jar</file>
@@ -316,6 +312,10 @@
   <dependency name='org.apache.chemistry.opencmis:chemistry-opencmis-client-bindings:1.1.0'>
     <file>chemistry-opencmis-client-bindings-1.1.0.jar</file>
     <license name='Apache 2' url='https://www.apache.org/licenses/LICENSE-2.0.txt' />
+  </dependency>
+  <dependency name='gov.ca.cwds.api:perry:4.7.1'>
+    <file>perry-4.7.1.jar</file>
+    <license name='No license found' />
   </dependency>
   <dependency name='org.glassfish.hk2:hk2-utils:2.5.0-b32'>
     <file>hk2-utils-2.5.0-b32.jar</file>
@@ -1012,13 +1012,13 @@
     <file>jersey-container-servlet-2.25.1.jar</file>
     <license name='CDDL+GPL License' url='http://glassfish.java.net/public/CDDL+GPL_1_1.html' />
   </dependency>
-  <dependency name='org.apache.logging.log4j:log4j-to-slf4j:2.8.2'>
-    <file>log4j-to-slf4j-2.8.2.jar</file>
-    <license name='Apache License, Version 2.0' url='https://www.apache.org/licenses/LICENSE-2.0.txt' />
-  </dependency>
   <dependency name='org.apache.lucene:lucene-backward-codecs:6.6.0'>
     <file>lucene-backward-codecs-6.6.0.jar</file>
     <license name='Apache 2' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
+  </dependency>
+  <dependency name='org.apache.logging.log4j:log4j-to-slf4j:2.8.2'>
+    <file>log4j-to-slf4j-2.8.2.jar</file>
+    <license name='Apache License, Version 2.0' url='https://www.apache.org/licenses/LICENSE-2.0.txt' />
   </dependency>
   <dependency name='com.amazonaws:aws-java-sdk-budgets:1.11.325'>
     <file>aws-java-sdk-budgets-1.11.325.jar</file>
@@ -1283,13 +1283,13 @@
     <file>lucene-spatial-extras-6.6.0.jar</file>
     <license name='Apache 2' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
   </dependency>
-  <dependency name='com.connx.jdbc:connxjdbc:12.4'>
-    <file>connxjdbc-12.4.jar</file>
-    <license name='No license found' />
-  </dependency>
   <dependency name='com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.8.7'>
     <file>jackson-datatype-jdk8-2.8.7.jar</file>
     <license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
+  </dependency>
+  <dependency name='com.connx.jdbc:connxjdbc:12.4'>
+    <file>connxjdbc-12.4.jar</file>
+    <license name='No license found' />
   </dependency>
   <dependency name='com.amazonaws:aws-java-sdk-snowball:1.11.325'>
     <file>aws-java-sdk-snowball-1.11.325.jar</file>
@@ -1332,6 +1332,10 @@
     <file>mimepull-1.8.jar</file>
     <license name='CDDL 1.1' url='https://glassfish.java.net/public/CDDL+GPL_1_1.html' />
     <license name='GPL2 w/ CPE' url='https://glassfish.java.net/public/CDDL+GPL_1_1.html' />
+  </dependency>
+  <dependency name='gov.ca.cwds.api:jwt-security:4.7.1'>
+    <file>jwt-security-4.7.1.jar</file>
+    <license name='No license found' />
   </dependency>
   <dependency name='org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'>
     <file>geronimo-jta_1.1_spec-1.1.1.jar</file>
@@ -1531,12 +1535,12 @@
     <file>commons-pool2-2.4.2.jar</file>
     <license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
   </dependency>
-  <dependency name='org.apache.ws.xmlschema:xmlschema-core:2.2.1'>
-    <file>xmlschema-core-2.2.1.jar</file>
-    <license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
-  </dependency>
   <dependency name='com.google.j2objc:j2objc-annotations:1.1'>
     <file>j2objc-annotations-1.1.jar</file>
+    <license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
+  </dependency>
+  <dependency name='org.apache.ws.xmlschema:xmlschema-core:2.2.1'>
+    <file>xmlschema-core-2.2.1.jar</file>
     <license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
   </dependency>
   <dependency name='org.apache.cxf:cxf-rt-frontend-jaxws:3.0.12'>
@@ -1666,10 +1670,6 @@
   <dependency name='com.amazonaws:aws-java-sdk-fms:1.11.325'>
     <file>aws-java-sdk-fms-1.11.325.jar</file>
     <license name='Apache License, Version 2.0' url='https://aws.amazon.com/apache2.0' />
-  </dependency>
-  <dependency name='gov.ca.cwds.cals:perry-data-model:0.10.1_697-RC'>
-    <file>perry-data-model-0.10.1_697-RC.jar</file>
-    <license name='No license found' />
   </dependency>
   <dependency name='org.codehaus.woodstox:woodstox-core-asl:4.4.1'>
     <file>woodstox-core-asl-4.4.1.jar</file>
@@ -1808,12 +1808,12 @@
     <file>aws-java-sdk-emr-1.11.325.jar</file>
     <license name='Apache License, Version 2.0' url='https://aws.amazon.com/apache2.0' />
   </dependency>
-  <dependency name='log4j:log4j:1.2.17'>
-    <file>log4j-1.2.17.jar</file>
-    <license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
-  </dependency>
   <dependency name='stax:stax-api:1.0.1'>
     <file>stax-api-1.0.1.jar</file>
+    <license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
+  </dependency>
+  <dependency name='log4j:log4j:1.2.17'>
+    <file>log4j-1.2.17.jar</file>
     <license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
   </dependency>
   <dependency name='org.slf4j:jul-to-slf4j:1.7.24'>
@@ -1864,13 +1864,13 @@
     <file>javax.inject-2.5.0-b32.jar</file>
     <license name='CDDL + GPLv2 with classpath exception' url='https://glassfish.java.net/nonav/public/CDDL+GPL_1_1.html' />
   </dependency>
-  <dependency name='org.objenesis:objenesis:2.5.1'>
-    <file>objenesis-2.5.1.jar</file>
-    <license name='Apache 2' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
-  </dependency>
   <dependency name='org.uberfire:uberfire-maven-support:1.1.0.Final'>
     <file>uberfire-maven-support-1.1.0.Final.jar</file>
     <license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
+  </dependency>
+  <dependency name='org.objenesis:objenesis:2.5.1'>
+    <file>objenesis-2.5.1.jar</file>
+    <license name='Apache 2' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
   </dependency>
   <dependency name='org.glassfish.hk2:hk2-api:2.5.0-b42'>
     <file>hk2-api-2.5.0-b42.jar</file>
@@ -1926,6 +1926,10 @@
   </dependency>
   <dependency name='gov.ca.cwds.api:legacy-data-access:1.7.4_829-RC'>
     <file>legacy-data-access-1.7.4_829-RC.jar</file>
+    <license name='No license found' />
+  </dependency>
+  <dependency name='gov.ca.cwds.cals:perry-data-model:0.11.2_718-RC'>
+    <file>perry-data-model-0.11.2_718-RC.jar</file>
     <license name='No license found' />
   </dependency>
   <dependency name='org.bouncycastle:bcpkix-jdk15on:1.55'>
@@ -2126,10 +2130,6 @@
   <dependency name='org.glassfish.hk2:hk2-locator:2.5.0-b42'>
     <file>hk2-locator-2.5.0-b42.jar</file>
     <license name='CDDL + GPLv2 with classpath exception' url='https://glassfish.java.net/nonav/public/CDDL+GPL_1_1.html' />
-  </dependency>
-  <dependency name='gov.ca.cwds.api:perry:4.1.0_1230-RC'>
-    <file>perry-4.1.0_1230-RC.jar</file>
-    <license name='No license found' />
   </dependency>
   <dependency name='io.dropwizard.metrics:metrics-annotation:3.2.2'>
     <file>metrics-annotation-3.2.2.jar</file>
