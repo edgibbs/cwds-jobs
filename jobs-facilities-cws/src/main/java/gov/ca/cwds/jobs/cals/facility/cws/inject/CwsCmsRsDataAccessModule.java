@@ -5,6 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import gov.ca.cwds.DataSourceName;
+import gov.ca.cwds.cals.inject.XaCmsSessionFactory;
 import gov.ca.cwds.cms.data.access.inject.DataAccessServicesSessionFactory;
 import gov.ca.cwds.data.legacy.cms.dao.ClientDao;
 import gov.ca.cwds.data.legacy.cms.dao.CountiesDao;
@@ -120,6 +121,13 @@ public class CwsCmsRsDataAccessModule extends AbstractModule {
   @CmsSessionFactory
   public SessionFactory cmsSessionFactory(CwsFacilityJobConfiguration facilityJobConfiguration) {
     return getCurrentSessionFactory(facilityJobConfiguration);
+  }
+
+  @Inject
+  @Provides
+  @XaCmsSessionFactory
+  public SessionFactory xaCmsSessionFactory(CwsFacilityJobConfiguration facilityJobConfiguration) {
+    return cmsSessionFactory(facilityJobConfiguration);
   }
 
   @Inject
