@@ -35,6 +35,7 @@
       "value": "Pending"
     },
     "capacity": 0,
+    "adjusted_capacity": 0,
     "available_beds": null,
     "license_effective_date": null,
     "original_application_recieved_date": null,

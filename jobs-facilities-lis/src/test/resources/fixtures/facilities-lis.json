@@ -30,6 +30,7 @@
       "value": "Certified (CFH, RFH & OSGHC)"
     },
     "capacity": 10,
+    "adjusted_capacity": null,
     "available_beds": null,
     "license_effective_date": "2015-04-13",
     "original_application_recieved_date": null,
