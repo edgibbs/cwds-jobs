@@ -19,7 +19,7 @@ project.ext {
     cwdsModelVersion = '0.8.1_629-RC'
     calsApiVersion = '1.7.0'
     coreApiVersion = '1.7.4_829-RC'
-    perryVersion = '4.7.1'
+    perryVersion = '4.11.0'
     testSupportVersion = '0.5.6_272-RC'
     commonsCliVersion = '1.4'
     commonsLangVersion = '3.6'
