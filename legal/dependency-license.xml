@@ -248,10 +248,6 @@
     <file>aws-java-sdk-s3-1.11.325.jar</file>
     <license name='Apache License, Version 2.0' url='https://aws.amazon.com/apache2.0' />
   </dependency>
-  <dependency name='gov.ca.cwds.cals:cals-api:1.2.2'>
-    <file>cals-api-1.2.2.jar</file>
-    <license name='No license found' />
-  </dependency>
   <dependency name='com.github.spullara.mustache.java:compiler:0.9.4'>
     <file>compiler-0.9.4.jar</file>
     <license name='Apache License 2.0' url='http://www.apache.org/licenses/LICENSE-2.0' />
@@ -312,10 +308,6 @@
   <dependency name='org.apache.chemistry.opencmis:chemistry-opencmis-client-bindings:1.1.0'>
     <file>chemistry-opencmis-client-bindings-1.1.0.jar</file>
     <license name='Apache 2' url='https://www.apache.org/licenses/LICENSE-2.0.txt' />
-  </dependency>
-  <dependency name='gov.ca.cwds.api:perry:4.7.1'>
-    <file>perry-4.7.1.jar</file>
-    <license name='No license found' />
   </dependency>
   <dependency name='org.glassfish.hk2:hk2-utils:2.5.0-b32'>
     <file>hk2-utils-2.5.0-b32.jar</file>
@@ -878,6 +870,10 @@
     <file>bootstrap-3.2.0.jar</file>
     <license name='Apache License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0' />
   </dependency>
+  <dependency name='gov.ca.cwds.api:perry:4.11.0'>
+    <file>perry-4.11.0.jar</file>
+    <license name='No license found' />
+  </dependency>
   <dependency name='commons-codec:commons-codec:1.10'>
     <file>commons-codec-1.10.jar</file>
     <license name='Apache License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt' />
@@ -1129,6 +1125,10 @@
     <file>netty-common-4.1.17.Final.jar</file>
     <license name='Apache License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0' />
   </dependency>
+  <dependency name='gov.ca.cwds.cals:cals-api:1.7.0'>
+    <file>cals-api-1.7.0.jar</file>
+    <license name='No license found' />
+  </dependency>
   <dependency name='com.amazonaws:aws-java-sdk-dynamodb:1.11.325'>
     <file>aws-java-sdk-dynamodb-1.11.325.jar</file>
     <license name='Apache License, Version 2.0' url='https://aws.amazon.com/apache2.0' />
@@ -1217,6 +1217,10 @@
   <dependency name='com.amazonaws:aws-java-sdk-opsworks:1.11.325'>
     <file>aws-java-sdk-opsworks-1.11.325.jar</file>
     <license name='Apache License, Version 2.0' url='https://aws.amazon.com/apache2.0' />
+  </dependency>
+  <dependency name='gov.ca.cwds.api:jwt-security:4.11.0'>
+    <file>jwt-security-4.11.0.jar</file>
+    <license name='No license found' />
   </dependency>
   <dependency name='com.amazonaws:aws-java-sdk-cloudsearch:1.11.325'>
     <file>aws-java-sdk-cloudsearch-1.11.325.jar</file>
@@ -1332,10 +1336,6 @@
     <file>mimepull-1.8.jar</file>
     <license name='CDDL 1.1' url='https://glassfish.java.net/public/CDDL+GPL_1_1.html' />
     <license name='GPL2 w/ CPE' url='https://glassfish.java.net/public/CDDL+GPL_1_1.html' />
-  </dependency>
-  <dependency name='gov.ca.cwds.api:jwt-security:4.7.1'>
-    <file>jwt-security-4.7.1.jar</file>
-    <license name='No license found' />
   </dependency>
   <dependency name='org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'>
     <file>geronimo-jta_1.1_spec-1.1.1.jar</file>
@@ -1928,10 +1928,6 @@
     <file>legacy-data-access-1.7.4_829-RC.jar</file>
     <license name='No license found' />
   </dependency>
-  <dependency name='gov.ca.cwds.cals:perry-data-model:0.11.2_718-RC'>
-    <file>perry-data-model-0.11.2_718-RC.jar</file>
-    <license name='No license found' />
-  </dependency>
   <dependency name='org.bouncycastle:bcpkix-jdk15on:1.55'>
     <file>bcpkix-jdk15on-1.55.jar</file>
     <license name='Bouncy Castle Licence' url='http://www.bouncycastle.org/licence.html' />
@@ -1939,6 +1935,10 @@
   <dependency name='org.bouncycastle:bcprov-jdk15on:1.55'>
     <file>bcprov-jdk15on-1.55.jar</file>
     <license name='Bouncy Castle Licence' url='http://www.bouncycastle.org/licence.html' />
+  </dependency>
+  <dependency name='gov.ca.cwds.cals:perry-data-model:0.11.2_722-RC'>
+    <file>perry-data-model-0.11.2_722-RC.jar</file>
+    <license name='No license found' />
   </dependency>
   <dependency name='io.dropwizard.metrics:metrics-jetty9:3.2.2'>
     <file>metrics-jetty9-3.2.2.jar</file>
