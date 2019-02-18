@@ -6,6 +6,7 @@ import gov.ca.cwds.jobs.common.core.JobModuleBuilder;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchConfiguration;
 import gov.ca.cwds.jobs.common.inject.ElasticSearchModule;
 import gov.ca.cwds.jobs.common.inject.JobModule;
+import gov.ca.cwds.jobs.common.inject.MultiThreadModule;
 
 /**
  * Created by Alexander Serbin on 11/20/2018
@@ -23,7 +24,8 @@ public class AuditEventsJobModuleBuilder implements JobModuleBuilder {
     elasticsearchConfiguration.setIndexSettings("audit.events.settings.json");
     elasticsearchConfiguration.setDocumentMapping("audit.events.mapping.json");
     jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration));
-    jobModule.addModule(new AuditEventsJobModule(jobConfiguration));
+    jobModule.addModule(new MultiThreadModule(jobConfiguration.getMultiThread()));
+    jobModule.addModule(new AuditEventsJobModule(jobConfiguration, jobOptions.getLastRunLoc()));
     return jobModule;
   }
 

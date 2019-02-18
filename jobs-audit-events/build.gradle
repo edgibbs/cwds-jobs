@@ -29,8 +29,13 @@ dependencies {
     compile project(':jobs-common')
     compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.26'
     compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.26'
+    compile group: 'gov.ca.cwds.api', name: 'perry', version: perryVersion
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
+    testCompile project(':jobs-common').sourceSets.test.output
+    testCompile(group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion) {
+        exclude group: 'gov.ca.cwds.api'
+    }
 
 }
 

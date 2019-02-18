@@ -24,4 +24,7 @@ dependencies {
         exclude group: 'gov.ca.cwds.api'
     }
 
+    testCompile group: 'org.skyscreamer', name: 'jsonassert', version: jsonAssertVersion
+
+
 }
