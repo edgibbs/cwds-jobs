@@ -11,3 +11,33 @@ elasticsearch:
   #
   elasticsearch.xpack.user: ${ELASTIC_SEARCH_XPACK_USER:-elastic}
   elasticsearch.xpack.password: ${ELASTIC_SEARCH_XPACK_PASSWORD:-changeme}
+
+multiThread:
+  batchSize: 10
+  elasticSearchBulkSize: 10
+  readerThreadsCount: 10
+
+nsDataSourceFactory:
+  properties:
+    hibernate.dialect: org.hibernate.dialect.PostgreSQL9Dialect
+    hibernate.temp.use_jdbc_metadata_defaults: false
+    hibernate.connection.driver_class: org.postgresql.Driver
+    hibernate.show_sql: false
+    hibernate.format_sql: false
+    hibernate.use_sql_comments: false
+    hibernate.connection.username: ${DB_NS_USER:-postgres_data}
+    hibernate.connection.password: ${DB_NS_PASSWORD:-postgres_data}
+    hibernate.connection.url: ${DB_NS_JDBC_URL:-jdbc:postgresql://127.0.0.1:5432/postgres_data}
+    hibernate.default_schema: ${DB_NS_DEFAULT_SCHEMA:-perry}
+    hibernate.connection.connectionTimeout: 1000000
+    hibernate.connection.loginTimeout: 1000000
+    hibernate.connection.keepAliveTimeOut: 8
+    hibernate.jdbc.time_zone: America/Los_Angeles
+    hibernate.jdbc.use_scrollable_resultset: true
+    hibernate.c3p0.min_size: 5
+    hibernate.c3p0.max_size: 5
+    hibernate.id.new_generator_mappings: false
+    hibernate.cache.use_second_level_cache: true
+    hibernate.cache.region.factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
+    hibernate.cache.use_query_cache: true
+    hibernate.connection.autocommit: false

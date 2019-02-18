@@ -121,6 +121,12 @@ public class ElasticSearchIndexerDao implements Closeable {
         .setSource(mapper.writeValueAsBytes(obj), XContentType.JSON).request();
   }
 
+  public IndexRequest bulkAdd(final String id, final String json) {
+    return client.prepareIndex(config.getElasticsearchAlias(),
+        config.getElasticsearchDocType(), id)
+        .setSource(json, XContentType.JSON).request();
+  }
+
   /**
    * Prepare an delete request for bulk operations.
    *

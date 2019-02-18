@@ -11,3 +11,22 @@ elasticsearch:
   #
   elasticsearch.xpack.user: elastic
   elasticsearch.xpack.password: changeme
+
+multiThread:
+  batchSize: 10
+  elasticSearchBulkSize: 10
+  readerThreadsCount: 10
+
+nsDataSourceFactory:
+  properties:
+    hibernate.dialect: org.hibernate.dialect.H2Dialect
+    hibernate.connection.driver_class: org.h2.Driver
+    hibernate.show_sql: false
+    hibernate.format_sql: false
+    hibernate.use_sql_comments: false
+    hibernate.connection.username: sa
+    hibernate.connection.password: ''
+    hibernate.connection.url: jdbc:h2:mem:ns;INIT=create schema if not exists ns\;set schema ns
+    hibernate.id.new_generator_mappings: false
+    hibernate.connection.autocommit: false
+
