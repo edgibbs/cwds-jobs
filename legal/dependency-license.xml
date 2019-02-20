@@ -572,6 +572,10 @@
     <file>jta-1.1.jar</file>
     <license name='No license found' />
   </dependency>
+  <dependency name='gov.ca.cwds.api:perry:4.13.2'>
+    <file>perry-4.13.2.jar</file>
+    <license name='No license found' />
+  </dependency>
   <dependency name='com.atomikos:transactions-jdbc:4.0.4'>
     <file>transactions-jdbc-4.0.4.jar</file>
     <license name='Atomikos Multiple Licensing Scheme' url='http://www.atomikos.com/Main/WhichLicenseApplies' />
@@ -664,10 +668,6 @@
   <dependency name='com.github.virtuald:curvesapi:1.04'>
     <file>curvesapi-1.04.jar</file>
     <license name='BSD License' url='http://opensource.org/licenses/BSD-3-Clause' />
-  </dependency>
-  <dependency name='gov.ca.cwds.api:jwt-security:4.13.0'>
-    <file>jwt-security-4.13.0.jar</file>
-    <license name='No license found' />
   </dependency>
   <dependency name='com.fasterxml.jackson.core:jackson-databind:2.8.7'>
     <file>jackson-databind-2.8.7.jar</file>
@@ -1054,10 +1054,6 @@
   </dependency>
   <dependency name='com.ibm:db2jcc4:4.0.0'>
     <file>db2jcc4-4.0.0.jar</file>
-    <license name='No license found' />
-  </dependency>
-  <dependency name='gov.ca.cwds.api:perry:4.13.0'>
-    <file>perry-4.13.0.jar</file>
     <license name='No license found' />
   </dependency>
   <dependency name='org.slf4j:jcl-over-slf4j:1.7.25'>
@@ -1549,6 +1545,10 @@
   </dependency>
   <dependency name='gov.ca.cwds.api:legacy-data-access-services:1.7.4_829-RC'>
     <file>legacy-data-access-services-1.7.4_829-RC.jar</file>
+    <license name='No license found' />
+  </dependency>
+  <dependency name='gov.ca.cwds.api:jwt-security:4.13.2'>
+    <file>jwt-security-4.13.2.jar</file>
     <license name='No license found' />
   </dependency>
   <dependency name='com.newrelic.agent.java:newrelic-api:3.41.0'>

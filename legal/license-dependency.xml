@@ -308,7 +308,6 @@
     <dependency>javassist-3.22.0-GA.jar</dependency>
   </license>
   <license name='No license found'>
-    <dependency>perry-4.13.0.jar</dependency>
     <dependency>api-security-common-3.0.4_825-RC.jar</dependency>
     <dependency>jcip-annotations-1.0.jar</dependency>
     <dependency>db2jcc_license_cisuz-4.0.0.jar</dependency>
@@ -319,6 +318,7 @@
     <dependency>jaxb-api-2.1.jar</dependency>
     <dependency>perry-data-model-0.11.2_724-RC.jar</dependency>
     <dependency>dom4j-1.6.1.jar</dependency>
+    <dependency>jwt-security-4.13.2.jar</dependency>
     <dependency>api-core-rest-1.7.4_829-RC.jar</dependency>
     <dependency>drools-engine-1.7.4_829-RC.jar</dependency>
     <dependency>legacy-data-access-1.7.4_829-RC.jar</dependency>
@@ -328,9 +328,9 @@
     <dependency>db2jcc4-4.0.0.jar</dependency>
     <dependency>api-core-1.7.4_829-RC.jar</dependency>
     <dependency>dms-client-0.7.4_113-RC.jar</dependency>
-    <dependency>jwt-security-4.13.0.jar</dependency>
     <dependency>legacy-data-access-services-1.7.4_829-RC.jar</dependency>
     <dependency>connxjdbc-12.4.jar</dependency>
+    <dependency>perry-4.13.2.jar</dependency>
     <dependency>api-security-3.0.4_825-RC.jar</dependency>
     <dependency>cals-api-1.7.0.jar</dependency>
     <dependency>api-core-common-1.7.4_829-RC.jar</dependency>
