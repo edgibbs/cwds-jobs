@@ -9,7 +9,7 @@ buildscript {
 
 plugins {
     id 'org.sonarqube' version '2.6'
-    id "com.github.hierynomus.license" version "0.15.0"
+    id 'com.github.jk1.dependency-license-report' version '1.5'
 }
 
 apply plugin: 'java'
@@ -127,3 +127,8 @@ task jacocoMergeTest(type: JacocoMerge) {
     executionData = project.fileTree(dir: '.', include:'**/build/jacoco/test.exec')
 }
 
+import com.github.jk1.license.render.CsvReportRenderer
+
+licenseReport {
+  renderers = [new CsvReportRenderer()]
+}
