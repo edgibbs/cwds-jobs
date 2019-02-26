@@ -7,7 +7,7 @@ dependencies {
 
     compile group: 'com.google.inject', name: 'guice', version: guiceVersion
     compile group: 'org.hibernate', name: 'hibernate-core', version: hibernateVersion
-    compile group: 'org.hibernate', name: 'hibernate-c3p0', version: hibernateVersion
+    compile group: 'org.hibernate', name: 'hibernate-hikaricp', version: hibernateVersion
     compile (group: 'io.dropwizard', name: 'dropwizard-db', version: dropwizardVersion){
         exclude group: 'org.slf4j'
     }

@@ -25,20 +25,25 @@ elasticsearch:
 
 cmsDataSourceFactory:
   properties:
-      hibernate.dialect: org.hibernate.dialect.DB2Dialect
-      hibernate.temp.use_jdbc_metadata_defaults: false
-      hibernate.connection.driver_class: com.ibm.db2.jcc.DB2Driver
-      hibernate.show_sql: false
-      hibernate.format_sql: true
-      hibernate.use_sql_comments: false
-      hibernate.connection.username: ${DB_CMS_USER:-db2inst1}
-      hibernate.connection.password: ${DB_CMS_PASSWORD:-db2inst1}
-      hibernate.connection.url: ${DB_CMS_JDBC_URL:-jdbc:db2://localhost:50000/DB0TDEV}
-      hibernate.default_schema: ${DB_CMS_SCHEMA:-CWSINT}
-      hibernate.connection.connectionTimeout: 1000000
-      hibernate.connection.loginTimeout: 1000000
-      hibernate.connection.keepAliveTimeOut: 8
-      hibernate.jdbc.time_zone: America/Los_Angeles
-      hibernate.jdbc.use_scrollable_resultset: true
-      hibernate.c3p0.min_size: 5
-      hibernate.c3p0.max_size: 5
+    hibernate.dialect: org.hibernate.dialect.DB2Dialect
+    hibernate.temp.use_jdbc_metadata_defaults: false
+    hibernate.connection.driver_class: com.ibm.db2.jcc.DB2Driver
+    hibernate.show_sql: false
+    hibernate.format_sql: false
+    hibernate.use_sql_comments: false
+    hibernate.connection.username: ${DB_CMS_USER:-db2inst1}
+    hibernate.connection.password: ${DB_CMS_PASSWORD:-db2inst1}
+    hibernate.connection.url: ${DB_CMS_JDBC_URL:-jdbc:db2://localhost:50000/DB0TDEV:retrieveMessagesFromServerOnGetMessage=true;emulateParameterMetaDataForZCalls=1;allowNextOnExhaustedResultSet=1;resultSetHoldability=2;queryTimeoutInterruptProcessingMode=2;queryCloseImplicit=1; queryDataSize=266143;}
+    hibernate.default_schema: ${DB_CMS_SCHEMA:-CWSINT}
+    hibernate.connection.connectionTimeout: 1000000
+    hibernate.connection.loginTimeout: 1000000
+    hibernate.connection.keepAliveTimeOut: 8
+    hibernate.jdbc.time_zone: America/Los_Angeles
+    hibernate.jdbc.use_scrollable_resultset: true
+    hibernate.connection.provider_class: org.hibernate.hikaricp.internal.HikariCPConnectionProvider
+    hibernate.hikari.minimumIdle: 4
+    hibernate.hikari.maximumPoolSize: 10
+    hibernate.hikari.maxLifetime: 900000
+    hibernate.hikari.idleTimeout: 90000
+    hibernate.hikari.connectionTimeout: 45000
+    hibernate.hikari.registerMbeans: true

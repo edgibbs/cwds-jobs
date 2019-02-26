@@ -34,10 +34,15 @@ nsDataSourceFactory:
     hibernate.connection.keepAliveTimeOut: 8
     hibernate.jdbc.time_zone: America/Los_Angeles
     hibernate.jdbc.use_scrollable_resultset: true
-    hibernate.c3p0.min_size: 5
-    hibernate.c3p0.max_size: 5
     hibernate.id.new_generator_mappings: false
     hibernate.cache.use_second_level_cache: true
     hibernate.cache.region.factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
     hibernate.cache.use_query_cache: true
     hibernate.connection.autocommit: false
+    hibernate.connection.provider_class: org.hibernate.hikaricp.internal.HikariCPConnectionProvider
+    hibernate.hikari.minimumIdle: 4
+    hibernate.hikari.maximumPoolSize: 10
+    hibernate.hikari.maxLifetime: 900000
+    hibernate.hikari.idleTimeout: 90000
+    hibernate.hikari.connectionTimeout: 45000
+    hibernate.hikari.registerMbeans: true
