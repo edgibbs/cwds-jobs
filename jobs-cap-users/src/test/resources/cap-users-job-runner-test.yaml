@@ -26,4 +26,12 @@ cmsDataSourceFactory:
     hibernate.connection.password: ''
     hibernate.connection.url: jdbc:h2:mem:CWSCMS;INIT=create schema if not exists CWSCMS\;set schema CWSCMS
     hibernate.dialect: org.hibernate.dialect.H2Dialect
+    hibernate.connection.provider_class: org.hibernate.hikaricp.internal.HikariCPConnectionProvider
+    hibernate.hikari.minimumIdle: 4
+    hibernate.hikari.maximumPoolSize: 10
+    hibernate.hikari.maxLifetime: 900000
+    hibernate.hikari.idleTimeout: 90000
+    hibernate.hikari.connectionTimeout: 45000
+    hibernate.hikari.registerMbeans: true
+
 

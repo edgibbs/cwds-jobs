@@ -27,6 +27,13 @@ cmsDataSourceFactory:
     hibernate.connection.url: jdbc:h2:mem:CWSCMSRS;INIT=create schema if not exists CWSCMSRS\;set schema CWSCMSRS
     #hibernate.connection.url: jdbc:h2:file:C:/data/CWSCMSRS;INIT=create schema if not exists CWSCMSRS\;set schema CWSCMSRS
     hibernate.dialect: org.hibernate.dialect.H2Dialect
+    hibernate.connection.provider_class: org.hibernate.hikaricp.internal.HikariCPConnectionProvider
+    hibernate.hikari.minimumIdle: 4
+    hibernate.hikari.maximumPoolSize: 10
+    hibernate.hikari.maxLifetime: 900000
+    hibernate.hikari.idleTimeout: 90000
+    hibernate.hikari.connectionTimeout: 45000
+    hibernate.hikari.registerMbeans: true
 
 calsnsDataSourceFactory:
   properties:
@@ -40,3 +47,10 @@ calsnsDataSourceFactory:
     hibernate.connection.url: jdbc:h2:mem:calsns;INIT=create schema if not exists calsns\;set schema calsns
     hibernate.id.new_generator_mappings: false
     hibernate.connection.autocommit: false
+    hibernate.connection.provider_class: org.hibernate.hikaricp.internal.HikariCPConnectionProvider
+    hibernate.hikari.minimumIdle: 4
+    hibernate.hikari.maximumPoolSize: 10
+    hibernate.hikari.maxLifetime: 900000
+    hibernate.hikari.idleTimeout: 90000
+    hibernate.hikari.connectionTimeout: 45000
+    hibernate.hikari.registerMbeans: true

@@ -24,7 +24,7 @@ public class AuditEventElasticWriter extends ElasticWriter<AuditEventChangedDto>
   @Override
   public void write(List<AuditEventChangedDto> items) {
     items.forEach(item -> {
-      LOGGER.debug("Preparing to insert item: ID {}", item.getId());
+      LOGGER.debug("Preparing to insert/update item: ID {}", item.getId());
       bulkProcessor.add(elasticsearchDao.bulkAdd(item.getId(), item.getDTO()));
     });
     bulkProcessor.flush();

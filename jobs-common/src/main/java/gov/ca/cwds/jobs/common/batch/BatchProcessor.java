@@ -43,6 +43,7 @@ public class BatchProcessor<E, S extends SavePoint, J extends JobMode> {
     JobTimeReport jobTimeReport = new JobTimeReport();
     JobBatch<S> batch = jobBatchIterator.getNextPortion();
     while (!batch.isEmpty()) {
+      LOGGER.info("Batch processing, batch size = {}", batch.getSize());
       batchReadersPool.loadEntities(batch.getChangedEntityIdentifiers());
       handleBatchSavepoint(batch);
       batch = jobBatchIterator.getNextPortion();
