@@ -26,6 +26,7 @@ configurations {
 dependencies {
 
     compile project(':jobs-facilities-common')
+    compile group: 'org.hibernate', name: 'hibernate-c3p0', version: hibernateVersion
 
     testCompile project(':jobs-facilities-common').sourceSets.test.output
     testCompile(group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion) {
