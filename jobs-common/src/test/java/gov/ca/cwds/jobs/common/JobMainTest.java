@@ -54,7 +54,7 @@ public class JobMainTest {
 
   @Test
   public void testCase1_initial_b1() throws IOException {
-    runInitialJob("testcase1", "database_structure.xml");
+    runInitialJob("testcase1", "t1", "database_structure.xml");
     assertEquals(0, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
     assertTrue(savePointContainer.getSavePoint().getTimestamp().equals(
@@ -64,7 +64,7 @@ public class JobMainTest {
 
   @Test
   public void testCase2_initial_b10() throws IOException {
-    runInitialJob("testcase2", "database_structure.xml");
+    runInitialJob("testcase2", "t2", "database_structure.xml");
     assertEquals(0, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
     assertTrue(savePointContainer.getSavePoint().getTimestamp().equals(
@@ -74,7 +74,7 @@ public class JobMainTest {
 
   @Test
   public void testCase3_initial_b1() throws IOException {
-    runInitialJob("testcase3", "database_structure.xml",
+    runInitialJob("testcase3", "t3", "database_structure.xml",
         "testcases/testcase3/test_case_3.xml");
     assertEquals(1, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
@@ -85,7 +85,7 @@ public class JobMainTest {
 
   @Test
   public void testCase4_Initial_b10() throws IOException {
-    runInitialJob("testcase4", "database_structure.xml",
+    runInitialJob("testcase4", "t4", "database_structure.xml",
         "testcases/testcase4/test_case_4.xml");
     assertEquals(1, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
@@ -96,7 +96,7 @@ public class JobMainTest {
 
   @Test
   public void testCase5_initial_b1() throws IOException {
-    runInitialJob("testcase5", "database_structure.xml",
+    runInitialJob("testcase5", "t5", "database_structure.xml",
         "testcases/testcase5/test_case_5.xml");
     assertEquals(3, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
@@ -107,7 +107,7 @@ public class JobMainTest {
 
   @Test
   public void testCase6_initial_b2() throws IOException {
-    runInitialJob("testcase6", "database_structure.xml",
+    runInitialJob("testcase6", "t6", "database_structure.xml",
         "testcases/testcase6/test_case_6.xml");
     assertEquals(3, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
@@ -118,7 +118,7 @@ public class JobMainTest {
 
   @Test
   public void testCase7_initial_b1() throws IOException {
-    runInitialJob("testcase7", "database_structure.xml",
+    runInitialJob("testcase7", "t7", "database_structure.xml",
         "testcases/testcase7/test_case_7.xml");
     assertEquals(3, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
@@ -129,10 +129,10 @@ public class JobMainTest {
 
   @Test
   public void testCase8_incremental_b1() throws IOException {
-    runInitialJob("testcase7", "database_structure.xml",
+    runInitialJob("testcase7", "t7", "database_structure.xml",
         "testcases/testcase7/test_case_7.xml");
     TestEntityWriter.reset();
-    runIncrementalJob("testcase7");
+    runIncrementalJob("testcase7", "t7");
     assertEquals(0, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
     assertTrue(savePointContainer.getSavePoint().getTimestamp().equals(
@@ -141,17 +141,17 @@ public class JobMainTest {
 
   @Test
   public void testCase9_incremental_b1() throws IOException {
-    testIncrementalLoad("testcase9");
+    testIncrementalLoad("t9", "testcase9");
   }
 
   @Test
   public void testCase10_incremental_b2() throws IOException {
-    testIncrementalLoad("testcase10");
+    testIncrementalLoad("t10", "testcase10");
   }
 
   @Test
   public void testCase11_incremental_b10() throws IOException {
-    testIncrementalLoad("testcase11");
+    testIncrementalLoad("t11", "testcase11");
   }
 
   @Test
@@ -168,7 +168,7 @@ public class JobMainTest {
       assertEquals(INITIAL_LOAD, savePointContainer.getJobMode());
     }
     TestEntityWriter.reset();
-    runInitialJob("testcase12");
+    runInitialJob("testcase12", "t12", "testcase12");
     assertEquals(2, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
         .readSavePointContainer(LocalDateTimeSavePointContainer.class);
@@ -188,17 +188,17 @@ public class JobMainTest {
         new MultiThreadModule(configuration.getMultiThread()),
         new TestDataAccessModule());
     jobModule.setJobPreparator(
-        new TestJobPreparator(getConfigFilePath("testcase12"), "testcase12",
+        new TestJobPreparator(getConfigFilePath("testcase12"), "t12",
             "database_structure.xml",
             "testcases/testcase12/test_case_12.xml"));
 
     JobRunner.run(jobModule);
   }
 
-  private void testIncrementalLoad(String testCase) {
-    runInitialJob(testCase, "database_structure.xml");
+  private void testIncrementalLoad(String schema, String testCase) {
+    runInitialJob(testCase, schema, "database_structure.xml");
     TestEntityWriter.reset();
-    runIncrementalJob(testCase, "testcases/testcase9/test_case_9.xml");
+    runIncrementalJob(testCase, schema, "testcases/testcase9/test_case_9.xml");
     assertEquals(3, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = getSavePointContainer();
     assertTrue(savePointContainer.getSavePoint().getTimestamp().equals(
@@ -211,7 +211,7 @@ public class JobMainTest {
         .readSavePointContainer(LocalDateTimeSavePointContainer.class);
   }
 
-  private void runJob(String testCase, String... scripts) {
+  private void runJob(String testCase, String schema, String... scripts) {
     TestJobConfiguration configuration = JobConfiguration
         .getJobsConfiguration(TestJobConfiguration.class, getConfigFilePath(testCase));
     String runDir = lastRunDirHelper.getSavepointContainerFolder().toString();
@@ -220,16 +220,16 @@ public class JobMainTest {
         new MultiThreadModule(configuration.getMultiThread()),
         new TestDataAccessModule());
     jobModule.setJobPreparator(
-        new TestJobPreparator(getConfigFilePath(testCase), testCase, scripts));
+        new TestJobPreparator(getConfigFilePath(testCase), schema, scripts));
     JobRunner.run(jobModule);
   }
 
-  private void runIncrementalJob(String testCase, String... scripts) {
-    runJob(testCase, scripts);
+  private void runIncrementalJob(String testCase, String schema, String... scripts) {
+    runJob(testCase, schema, scripts);
   }
 
-  private void runInitialJob(String testCase, String... scripts) {
-    runJob(testCase, scripts);
+  private void runInitialJob(String testCase, String schema, String... scripts) {
+    runJob(testCase, schema, scripts);
   }
 
   private String getConfigFilePath(String testCase) {
@@ -242,12 +242,12 @@ public class JobMainTest {
 
     private String configPath;
     private String[] scripts;
-    private String testCaseName;
+    private String schema;
 
-    public TestJobPreparator(String configPath, String testCaseName, String... scripts) {
+    public TestJobPreparator(String configPath, String schema, String... scripts) {
       this.configPath = configPath;
       this.scripts = scripts;
-      this.testCaseName = testCaseName;
+      this.schema = schema;
     }
 
     @Override
@@ -256,7 +256,7 @@ public class JobMainTest {
       try {
         DatabaseHelper databaseHelper = createDatabaseHelper(configPath);
         for (String script : scripts) {
-          databaseHelper.runScript(script, testCaseName);
+          databaseHelper.runScript(script, schema);
         }
       } catch (LiquibaseException e) {
         LOGGER.error(e.getMessage(), e);
