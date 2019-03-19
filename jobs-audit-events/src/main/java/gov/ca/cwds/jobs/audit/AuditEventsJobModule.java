@@ -72,7 +72,7 @@ public class AuditEventsJobModule extends AbstractModule {
     }).toProvider(AuditEventServiceProvider.class);
     bind(new TypeLiteral<JobBatchIterator<TimestampSavePoint<LocalDateTime>>>() {
     }).to(LocalDateTimeJobBatchIterator.class);
-    install(new NsDataAccessModule());
+    install(new NsDataAccessModule(configuration.getNsDataSourceFactory()));
     bindJobModeImplementor();
   }
 
