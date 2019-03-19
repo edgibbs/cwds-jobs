@@ -65,9 +65,11 @@ public class AuditEventsJobModule extends AbstractModule {
         }).to(LocalDateTimeSavePointContainerService.class);
     bind(new TypeLiteral<SavePointService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
     }).to(LocalDateTimeSavePointService.class);
+    //changes here
     bind(
         new TypeLiteral<ChangedEntitiesIdentifiersService<LocalDateTime>>() {
         }).toProvider(AuditEventIdentifiersServiceProvider.class);
+
     bind(new TypeLiteral<ChangedEntityService<AuditEventChangedDto>>() {
     }).toProvider(AuditEventServiceProvider.class);
     bind(new TypeLiteral<JobBatchIterator<TimestampSavePoint<LocalDateTime>>>() {

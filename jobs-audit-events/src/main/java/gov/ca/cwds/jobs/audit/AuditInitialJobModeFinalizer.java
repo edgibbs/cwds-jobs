@@ -14,9 +14,6 @@ import java.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created by Alexander Serbin on 02/17/2018.
- */
 public class AuditInitialJobModeFinalizer implements JobModeFinalizer {
 
   private static final Logger LOGGER = LoggerFactory

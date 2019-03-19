@@ -8,9 +8,7 @@ import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import java.time.LocalDateTime;
 import org.hibernate.SessionFactory;
 
-/**
- * Created by Alexander Serbin on 3/5/2018.
- */
+
 public class AuditEventsJob extends
     JobImpl<AuditEventChangedDto, TimestampSavePoint<LocalDateTime>, DefaultJobMode> {
 

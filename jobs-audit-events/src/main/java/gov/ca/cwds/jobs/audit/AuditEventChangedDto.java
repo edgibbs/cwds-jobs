@@ -4,9 +4,7 @@ import gov.ca.cwds.idm.persistence.ns.entity.NsAuditEvent;
 import gov.ca.cwds.jobs.common.ChangedDTO;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 
-/**
- * Created by Alexander Serbin on 2/17/2019
- */
+
 public class AuditEventChangedDto implements ChangedDTO<String> {
 
   private final String id;

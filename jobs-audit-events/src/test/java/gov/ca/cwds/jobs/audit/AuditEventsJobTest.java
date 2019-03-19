@@ -34,7 +34,7 @@ public class AuditEventsJobTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AuditEventsJobTest.class);
   private static LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("audit_events_job_temp");
-  private static byte INITIAL_AUDIT_EVENTS_COUNT = 3;
+  private static int INITIAL_AUDIT_EVENTS_COUNT = 3;
   private static LocalDateTime SAVEPOINT_2 = LocalDateTime
       .of(2001, 9, 25, 11, 0, 10);
   private static LocalDateTime SAVEPOINT_3 = LocalDateTime
@@ -61,7 +61,6 @@ public class AuditEventsJobTest {
     runInitialLoad();
     assertEquals(INITIAL_AUDIT_EVENTS_COUNT, AuditEventTestWriter.getItems().size());
     assertEquals("{'test':1}", getAuditEventById("1").getDTO());
-
     LocalDateTimeSavePointContainer savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
         .readSavePointContainer(LocalDateTimeSavePointContainer.class);
     assertEquals(SAVEPOINT_3, savePointContainer.getSavePoint().getTimestamp());

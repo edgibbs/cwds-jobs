@@ -22,7 +22,7 @@ public abstract class AbstractInjectProvider<T> implements Provider<T> {
     this.unitOfWorkAwareProxyFactory = unitOfWorkAwareProxyFactory;
   }
 
-  public abstract Class<T> getServiceClass();
+  public abstract Class<? extends T> getServiceClass();
 
   @Override
   public T get() {
