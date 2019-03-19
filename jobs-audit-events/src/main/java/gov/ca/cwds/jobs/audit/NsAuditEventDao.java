@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import org.hibernate.SessionFactory;
 
+/**
+ * Created by Alexander Serbin on 10/15/2019
+ */
 public class NsAuditEventDao extends CustomDao {
 
   private static final String DATE_AFTER = "dateAfter";

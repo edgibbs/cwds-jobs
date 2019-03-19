@@ -11,6 +11,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Created by Alexander Serbin on 2/17/2019.
+ */
 public abstract class AuditEventIdentifiersService
     implements ChangedEntitiesIdentifiersService<LocalDateTime> {
 
