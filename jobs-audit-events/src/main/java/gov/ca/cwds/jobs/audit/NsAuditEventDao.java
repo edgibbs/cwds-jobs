@@ -32,6 +32,10 @@ public class NsAuditEventDao extends CustomDao {
   private static final String BEFORE_CLAUSE =
       " and entity.eventTimestamp < :" + DATE_BEFORE;
 
+  private static final String MARK_PROCESSED_QUERY =
+      "update NsAuditEvent set processed = 'true' where eventTimestamp < :" + DATE_BEFORE;
+
+
   @Inject
   public NsAuditEventDao(@NsSessionFactory SessionFactory sessionFactory) {
     super(sessionFactory);
@@ -101,5 +105,12 @@ public class NsAuditEventDao extends CustomDao {
     return currentSession().createQuery(GET_IDENTIFIERS_BASE + NOT_PROCESSED_ONLY + ORDER_BY_CLAUSE)
         .setParameter(DATE_AFTER, afterTimestamp)
         .setReadOnly(true).list();
+  }
+
+
+  public void markAllBeforeTimeStampAsProcessed(LocalDateTime timeStamp) {
+    currentSession().createQuery(MARK_PROCESSED_QUERY)
+        .setParameter(DATE_BEFORE, timeStamp)
+        .executeUpdate();
   }
 }

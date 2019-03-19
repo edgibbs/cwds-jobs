@@ -1,21 +1,15 @@
 package gov.ca.cwds.jobs.audit.identifier;
 
-import static gov.ca.cwds.jobs.audit.inject.NsDataAccessModule.NS;
-
 import com.google.inject.Inject;
-import gov.ca.cwds.jobs.audit.NsAuditEventDao;
 import gov.ca.cwds.jobs.common.batch.JobBatchSize;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import gov.ca.cwds.jobs.common.mode.LocalDateTimeDefaultJobModeService;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
-import io.dropwizard.hibernate.UnitOfWork;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.DoubleStream;
 
 public abstract class AuditEventIdentifiersService
     implements ChangedEntitiesIdentifiersService<LocalDateTime> {

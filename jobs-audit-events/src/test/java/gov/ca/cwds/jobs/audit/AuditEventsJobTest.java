@@ -18,6 +18,7 @@ import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
 import gov.ca.cwds.jobs.utils.DataSourceFactoryUtils;
 import gov.ca.cwds.test.support.DatabaseHelper;
 import io.dropwizard.db.DataSourceFactory;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,6 +36,8 @@ public class AuditEventsJobTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(AuditEventsJobTest.class);
   private static LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("audit_events_job_temp");
   private static int INITIAL_AUDIT_EVENTS_COUNT = 3;
+  private static LocalDateTime SAVEPOINT_1 = LocalDateTime
+      .of(2000, 7, 25, 11, 0, 10);
   private static LocalDateTime SAVEPOINT_2 = LocalDateTime
       .of(2001, 9, 25, 11, 0, 10);
   private static LocalDateTime SAVEPOINT_3 = LocalDateTime
@@ -48,17 +51,18 @@ public class AuditEventsJobTest {
     lastRunDirHelper.createSavePointContainerFolder();
     try {
       testInitialLoad();
-      testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD);
+      testInitialResumeLoad();
+      testAllItemsAreMarkedProcessedAfterInitialDone();
       testIncrementalLoad();
+      testInitialWithNewData();
     } finally {
       lastRunDirHelper.deleteSavePointContainerFolder();
     }
   }
 
   private void testInitialLoad() throws JsonProcessingException, JSONException {
-    LocalDateTime now = LocalDateTime.now();
     assertEquals(0, AuditEventTestWriter.getItems().size());
-    runInitialLoad();
+    runLoad();
     assertEquals(INITIAL_AUDIT_EVENTS_COUNT, AuditEventTestWriter.getItems().size());
     assertEquals("{'test':1}", getAuditEventById("1").getDTO());
     LocalDateTimeSavePointContainer savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
@@ -67,7 +71,7 @@ public class AuditEventsJobTest {
     assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
   }
 
-  private void runInitialLoad() {
+  private void runLoad() {
     JobOptions jobOptions = JobOptions.parseCommandLine(getModuleArgs());
     AuditEventsJobConfiguration jobConfiguration = JobConfiguration
         .getJobsConfiguration(AuditEventsJobConfiguration.class,
@@ -83,13 +87,9 @@ public class AuditEventsJobTest {
     JobRunner.run(jobModule);
   }
 
-  private void testInitialResumeLoad(DefaultJobMode jobMode) {
-    LocalDateTimeSavePointContainer container = (LocalDateTimeSavePointContainer) savePointContainerService
-        .readSavePointContainer(LocalDateTimeSavePointContainer.class);
-    container.setJobMode(jobMode);
-    container.getSavePoint().setTimestamp(SAVEPOINT_2);
-    savePointContainerService.writeSavePointContainer(container);
-    runInitialLoad();
+  private void testInitialResumeLoad() {
+    prepareData(DefaultJobMode.INITIAL_LOAD, SAVEPOINT_2);
+    runLoad();
     assertEquals(1, AuditEventTestWriter.getItems().size());
     assertEquals(INCREMENTAL_LOAD, savePointContainerService
         .readSavePointContainer(LocalDateTimeSavePointContainer.class).getJobMode());
@@ -98,8 +98,33 @@ public class AuditEventsJobTest {
         .getTimestamp());
   }
 
+  private void prepareData(DefaultJobMode jobMode, LocalDateTime savepoint) {
+    LocalDateTimeSavePointContainer container = (LocalDateTimeSavePointContainer) savePointContainerService
+        .readSavePointContainer(LocalDateTimeSavePointContainer.class);
+    container.setJobMode(jobMode);
+    container.getSavePoint().setTimestamp(savepoint);
+    savePointContainerService.writeSavePointContainer(container);
+  }
+
+  private void testAllItemsAreMarkedProcessedAfterInitialDone() {
+    prepareData(DefaultJobMode.INCREMENTAL_LOAD, SAVEPOINT_1);
+    runLoad();
+    assertEquals(0, AuditEventTestWriter.getItems().size());
+  }
+
+
+  private void testInitialWithNewData() throws IOException {
+    lastRunDirHelper.deleteSavePointContainerFolder();
+    runLoad();
+    assertEquals(5, AuditEventTestWriter.getItems().size());
+    assertEquals("{'test':1}", getAuditEventById("1").getDTO());
+    LocalDateTimeSavePointContainer savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
+        .readSavePointContainer(LocalDateTimeSavePointContainer.class);
+    assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
+  }
+
   private void runIncrementalLoad() {
-    runInitialLoad();
+    runLoad();
   }
 
   private void testIncrementalLoad() throws Exception {
