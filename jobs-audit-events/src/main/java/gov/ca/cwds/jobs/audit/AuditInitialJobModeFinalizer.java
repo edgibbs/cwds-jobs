@@ -2,7 +2,6 @@ package gov.ca.cwds.jobs.audit;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.audit.inject.NsDataAccessModule;
-import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
@@ -24,7 +23,7 @@ public class AuditInitialJobModeFinalizer implements JobModeFinalizer {
       .getLogger(AuditInitialJobModeFinalizer.class);
 
   @Inject
-  private ChangedEntityService<AuditEventChangedDto> changedEntityService;
+  private NsAuditEventDao dao;
 
   @Inject
   private LocalDateTimeSavePointContainerService savePointContainerService;
@@ -36,7 +35,7 @@ public class AuditInitialJobModeFinalizer implements JobModeFinalizer {
   @UnitOfWork(NsDataAccessModule.NS)
   public void doFinalizeJob() {
     LocalDateTime savePointTimeStamp = savePointService.loadSavePoint().getTimestamp();
-    changedEntityService.markAllBeforeTimeStampAsProcessed(savePointTimeStamp);
+    dao.markAllBeforeTimeStampAsProcessed(savePointTimeStamp);
     DefaultJobMode nextJobMode = DefaultJobMode.INCREMENTAL_LOAD;
     LOGGER.info("Updating next job mode to the {}", nextJobMode);
     LocalDateTimeSavePointContainer savePointContainer = new LocalDateTimeSavePointContainer();

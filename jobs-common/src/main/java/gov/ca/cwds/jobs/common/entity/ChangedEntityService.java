@@ -1,7 +1,6 @@
 package gov.ca.cwds.jobs.common.entity;
 
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
-import java.time.LocalDateTime;
 
 /**
  * This service uses target API to load target entity by identifier.
@@ -18,9 +17,5 @@ public interface ChangedEntityService<E> {
    * @return loaded target entity
    */
   E loadEntity(ChangedEntityIdentifier identifier);
-
-  default void markAllBeforeTimeStampAsProcessed(LocalDateTime timeStamp) {
-    throw new UnsupportedOperationException();
-  }
 
 }
