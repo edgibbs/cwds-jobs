@@ -82,8 +82,8 @@ public class LisFacilityJobModule extends BaseFacilityJobModule<LisFacilityJobCo
     bind(
         new TypeLiteral<SavePointContainerService<LicenseNumberSavePoint, DefaultJobMode>>() {
         }).to(LicenseNumberSavePointContainerService.class);
-    install(new LisDataAccessModule());
-    install(new FasDataAccessModule());
+    install(new LisDataAccessModule(getJobConfiguration().getLisDataSourceFactory()));
+    install(new FasDataAccessModule(getJobConfiguration().getFasDataSourceFactory()));
   }
 
   private void configureJobModes() {

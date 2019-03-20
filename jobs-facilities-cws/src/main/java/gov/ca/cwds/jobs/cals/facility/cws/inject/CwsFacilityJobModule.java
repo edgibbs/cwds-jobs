@@ -90,7 +90,7 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
     bind(new TypeLiteral<JobBatchIterator<TimestampSavePoint<LocalDateTime>>>() {
     }).to(LocalDateTimeJobBatchIterator.class);
 
-    install(new CwsCmsRsDataAccessModule());
+    install(new CwsCmsRsDataAccessModule(getJobConfiguration().getCmsDataSourceFactory()));
   }
 
   private void bindJobModeImplementor() {
