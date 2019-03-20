@@ -32,7 +32,9 @@ dependencies {
 
     compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.26'
 
-    compile group: 'gov.ca.cwds.api', name: 'perry', version: perryVersion
+    compile (group: 'gov.ca.cwds.api', name: 'perry', version: perryVersion) {
+        exclude group: 'com.zaxxer'
+    }
 
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2.2'
 

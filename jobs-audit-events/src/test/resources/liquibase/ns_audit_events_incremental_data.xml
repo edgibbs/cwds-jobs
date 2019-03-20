@@ -8,6 +8,13 @@
       <column name="id" value="inc"/>
       <column name="event_timestamp" valueDate="${now}"/>
       <column name="event_json" value="{'test':'inc'}"/>
+      <column name="processed" value="false"/>
+    </insert>
+    <insert tableName="audit_event">
+      <column name="id" value="inc2"/>
+      <column name="event_timestamp" valueDate="${now}"/>
+      <column name="event_json" value="{'test':'inc2'}"/>
+      <column name="processed" value="true"/>
     </insert>
   </changeSet>
 </databaseChangeLog>

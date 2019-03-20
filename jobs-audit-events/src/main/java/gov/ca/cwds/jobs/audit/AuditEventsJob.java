@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import org.hibernate.SessionFactory;
 
 /**
- * Created by Alexander Serbin on 3/5/2018.
+ * Created by Alexander Serbin on 2/15/2019.
  */
 public class AuditEventsJob extends
     JobImpl<AuditEventChangedDto, TimestampSavePoint<LocalDateTime>, DefaultJobMode> {

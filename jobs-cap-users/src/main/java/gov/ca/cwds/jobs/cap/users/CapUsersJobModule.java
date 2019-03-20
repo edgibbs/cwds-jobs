@@ -89,7 +89,7 @@ public class CapUsersJobModule extends AbstractModule {
     bind(new TypeLiteral<SavePointService<CapUsersSavePoint, DefaultJobMode>>() {
     }).toProvider(CapUsersSavePointServiceProvider.class);
     bind(CapUsersSavePointService.class).toProvider(CapUsersSavePointServiceProvider.class);
-    install(new CwsCmsDataAccessModule());
+    install(new CwsCmsDataAccessModule(getJobsConfiguration().getCmsDataSourceFactory()));
   }
 
   private void configureJobModes() {

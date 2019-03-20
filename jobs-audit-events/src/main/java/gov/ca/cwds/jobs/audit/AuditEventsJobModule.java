@@ -5,9 +5,10 @@ import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
-import gov.ca.cwds.jobs.audit.inject.AuditEventIdentifiersServiceProvider;
 import gov.ca.cwds.jobs.audit.inject.AuditEventServiceProvider;
 import gov.ca.cwds.jobs.audit.inject.AuditInitialJobModeFinalizerProvider;
+import gov.ca.cwds.jobs.audit.inject.IncrementalModeAuditEventIdentifiersServiceProvider;
+import gov.ca.cwds.jobs.audit.inject.InitialModeAuditEventIdentifiersServiceProvider;
 import gov.ca.cwds.jobs.audit.inject.NsDataAccessModule;
 import gov.ca.cwds.jobs.common.BulkWriter;
 import gov.ca.cwds.jobs.common.core.Job;
@@ -65,14 +66,11 @@ public class AuditEventsJobModule extends AbstractModule {
         }).to(LocalDateTimeSavePointContainerService.class);
     bind(new TypeLiteral<SavePointService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
     }).to(LocalDateTimeSavePointService.class);
-    bind(
-        new TypeLiteral<ChangedEntitiesIdentifiersService<LocalDateTime>>() {
-        }).toProvider(AuditEventIdentifiersServiceProvider.class);
     bind(new TypeLiteral<ChangedEntityService<AuditEventChangedDto>>() {
     }).toProvider(AuditEventServiceProvider.class);
     bind(new TypeLiteral<JobBatchIterator<TimestampSavePoint<LocalDateTime>>>() {
     }).to(LocalDateTimeJobBatchIterator.class);
-    install(new NsDataAccessModule());
+    install(new NsDataAccessModule(configuration.getNsDataSourceFactory()));
     bindJobModeImplementor();
   }
 
@@ -84,9 +82,15 @@ public class AuditEventsJobModule extends AbstractModule {
     timestampDefaultJobModeService.setSavePointContainerService(savePointContainerService);
     if (timestampDefaultJobModeService.getCurrentJobMode() == INITIAL_LOAD) {
       bind(JobModeFinalizer.class).toProvider(AuditInitialJobModeFinalizerProvider.class);
+      bind(
+          new TypeLiteral<ChangedEntitiesIdentifiersService<LocalDateTime>>() {
+          }).toProvider(InitialModeAuditEventIdentifiersServiceProvider.class);
     } else { //incremental load
       bind(JobModeFinalizer.class).toInstance(() -> {
       });
+      bind(
+          new TypeLiteral<ChangedEntitiesIdentifiersService<LocalDateTime>>() {
+          }).toProvider(IncrementalModeAuditEventIdentifiersServiceProvider.class);
     }
   }
 

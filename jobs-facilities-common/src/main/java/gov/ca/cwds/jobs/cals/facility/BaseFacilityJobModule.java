@@ -38,7 +38,7 @@ public abstract class BaseFacilityJobModule<T extends BaseFacilityJobConfigurati
     bind(new TypeLiteral<BulkWriter<ChangedFacilityDto>>() {
     }).to(facilityElasticWriterClass);
     install(new MappingModule());
-    install(new CalsnsDataAccessModule());
+    install(new CalsNsDataAccessModule(jobConfiguration.getCalsnsDataSourceFactory()));
   }
 
 }
