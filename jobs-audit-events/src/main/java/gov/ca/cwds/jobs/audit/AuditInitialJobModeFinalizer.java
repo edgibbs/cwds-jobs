@@ -15,12 +15,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by Alexander Serbin on 02/17/2018.
+ * Created by Alexander Serbin on 02/17/2019.
  */
 public class AuditInitialJobModeFinalizer implements JobModeFinalizer {
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(AuditInitialJobModeFinalizer.class);
+
+  @Inject
+  private NsAuditEventDao dao;
 
   @Inject
   private LocalDateTimeSavePointContainerService savePointContainerService;
@@ -31,12 +34,14 @@ public class AuditInitialJobModeFinalizer implements JobModeFinalizer {
   @Override
   @UnitOfWork(NsDataAccessModule.NS)
   public void doFinalizeJob() {
+    LocalDateTime savePointTimeStamp = savePointService.loadSavePoint().getTimestamp();
+    dao.markAllBeforeTimeStampAsProcessed(savePointTimeStamp);
     DefaultJobMode nextJobMode = DefaultJobMode.INCREMENTAL_LOAD;
     LOGGER.info("Updating next job mode to the {}", nextJobMode);
     LocalDateTimeSavePointContainer savePointContainer = new LocalDateTimeSavePointContainer();
     savePointContainer.setJobMode(nextJobMode);
     LocalDateTimeSavePoint savePoint = new LocalDateTimeSavePoint();
-    savePoint.setTimestamp(savePointService.loadSavePoint().getTimestamp());
+    savePoint.setTimestamp(savePointTimeStamp);
     savePointContainer.setSavePoint(savePoint);
     savePointContainerService.writeSavePointContainer(savePointContainer);
   }
