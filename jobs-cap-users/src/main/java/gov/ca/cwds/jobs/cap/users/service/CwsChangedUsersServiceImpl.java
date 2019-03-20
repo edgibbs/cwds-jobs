@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.jobs.cap.users.dao.CwsUsersDao;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
+import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePoint;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import io.dropwizard.hibernate.UnitOfWork;
 import java.util.Collections;
@@ -29,9 +30,9 @@ public class CwsChangedUsersServiceImpl implements CwsChangedUsersService {
   @Inject
   private CwsUsersDao dao;
 
-  @UnitOfWork(CWS)
+
   public List<ChangedUserDto> getCwsChanges() {
-    List<String> changedRacfIds = dao.getChangedRacfIds(savePointService.loadSavePoint());
+    List<String> changedRacfIds = findChangedRacfIds(savePointService.loadSavePoint());
     if (CollectionUtils.isEmpty(changedRacfIds)) {
       LOGGER.info("No changes in CWS/CMS found");
       return Collections.emptyList();
@@ -42,6 +43,11 @@ public class CwsChangedUsersServiceImpl implements CwsChangedUsersService {
     return users.stream()
         .map(e -> new ChangedUserDto(e, RecordChangeOperation.U))
         .collect(Collectors.toList());
+  }
+
+  @UnitOfWork(value = CWS, readOnly = true)
+  public List<String> findChangedRacfIds(CapUsersSavePoint savePoint) {
+    return dao.getChangedRacfIds(savePoint);
   }
 
 }
