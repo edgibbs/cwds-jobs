@@ -11,7 +11,7 @@ import org.hibernate.SessionFactory;
 /**
  * Created by Ievgenii Drozd on 4/30/2018.
  */
-public class CalsNsDataAccessModule extends DataAccessModule {
+public class NsDataAccessModule extends DataAccessModule {
 
   public static final ImmutableList<Class<?>> nsEntityClasses = ImmutableList.<Class<?>>builder()
       .add(
@@ -19,7 +19,7 @@ public class CalsNsDataAccessModule extends DataAccessModule {
           LicenseStatusType.class
       ).build();
 
-  public CalsNsDataAccessModule(DataSourceFactory dataSourceFactory) {
+  public NsDataAccessModule(DataSourceFactory dataSourceFactory) {
     super(dataSourceFactory, DataSourceName.NS.name(), nsEntityClasses);
   }
 
