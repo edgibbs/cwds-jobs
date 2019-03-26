@@ -31,7 +31,7 @@ node ('dora-slave'){
   try {
    stage('Preparation') {
        cleanWs()
-       git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/cals-jobs.git'
+       git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/cwds-jobs.git'
        rtGradle.tool = "Gradle_35"
        rtGradle.resolver repo:'repo', server: serverArti
        rtGradle.deployer.mavenCompatible = true
@@ -79,7 +79,7 @@ node ('dora-slave'){
        publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
        sh ('docker-compose down -v')
        emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-       subject: "Jobs failed with ${e.message}", to: "Leonid.Marushevskiy@osi.ca.gov, Alex.Kuznetsov@osi.ca.gov"
+       subject: "Jobs failed with ${e.message}", to: "Alex.Serbin@osi.ca.gov"
        slackSend channel: "#cals-api", baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', message: "Build Falled: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
        currentBuild.result = "FAILURE"
        throw e
