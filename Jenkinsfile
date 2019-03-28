@@ -8,7 +8,7 @@ node ('dora-slave'){
    def rtGradle = Artifactory.newGradleBuild()
    def tagPrefixes = ['audit-events', 'cap-users', 'facilities-cws', 'facilities-lis']
    def newTag, tagPrefix, newVersion
-   if (env.BUILD_JOB_TYPE=="master" ) {
+   if (env.BUILD_JOB_TYPE == 'master' || env.BUILD_JOB_TYPE == 'hotfix') {
      triggerProperties = pullRequestMergedTriggerProperties('cwds-jobs-master')
      properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '25')),
      pipelineTriggers([triggerProperties]), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
@@ -29,6 +29,9 @@ node ('dora-slave'){
    }
 
   try {
+   if (env.BUILD_JOB_TYPE == 'hotfix' && OVERRIDE_VERSION == '') {
+     error('OVERRIDE_VERSION parameter is mandatory for hotfix builds')
+   }
    stage('Preparation') {
        cleanWs()
        git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/cwds-jobs.git'
@@ -38,10 +41,12 @@ node ('dora-slave'){
        rtGradle.deployer.deployMavenDescriptors = true
        rtGradle.useWrapper = true
    }
-   if (env.BUILD_JOB_TYPE == 'master') {
-     stage('Increment Tag') {
-       newTag = newSemVer('', tagPrefixes)
-       (tagPrefix, newVersion) = (newTag =~ /^(.+)\-(\d+\.\d+\.\d+)/).with { it[0][1,2] }
+   if (env.BUILD_JOB_TYPE == 'master' || env.BUILD_JOB_TYPE == 'hotfix') {
+     if(env.BUILD_JOB_TYPE == 'master') {
+       stage('Increment Tag') {
+         newTag = newSemVer('', tagPrefixes)
+         (tagPrefix, newVersion) = (newTag =~ /^(.+)\-(\d+\.\d+\.\d+)/).with { it[0][1,2] }
+       }
      }
      stage('Build'){
          def buildInfo = rtGradle.run buildFile: "jobs-${tagPrefix}/build.gradle".toString(), tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newVersion}".toString()
@@ -57,14 +62,14 @@ node ('dora-slave'){
    stage('SonarQube analysis'){
        lint(rtGradle)
    }
-   if (env.BUILD_JOB_TYPE == 'master') {
+   if (env.BUILD_JOB_TYPE == 'master' || env.BUILD_JOB_TYPE == 'hotfix') {
         stage('Update License Report') {
           updateLicenseReport('master', GITHUB_CREDENTIALS_ID, [runtimeGradle: rtGradle])
         }
         stage('Tag Repo') {
             tagGithubRepo(newTag, GITHUB_CREDENTIALS_ID)
         }
-        stage ('Push to artifactory'){
+        stage('Push to artifactory') {
             rtGradle.deployer.deployArtifacts = true
             buildInfo = rtGradle.run buildFile: "jobs-${tagPrefix}/build.gradle".toString(), tasks: "publish -DRelease=\$RELEASE_PROJECT -DBuildNumber=\$BUILD_NUMBER -DCustomVersion=\$OVERRIDE_VERSION -DnewVersion=${newVersion}".toString()
             rtGradle.deployer.deployArtifacts = false
@@ -83,7 +88,7 @@ node ('dora-slave'){
        slackSend channel: "#cals-api", baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', message: "Build Falled: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
        currentBuild.result = "FAILURE"
        throw e
-    }finally {
+    } finally {
         cleanWs()
     }
 }
