@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cals.facility.lisfas.identifier.LisChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePoint;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointContainer;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
@@ -15,13 +15,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Alexander Serbin on 7/1/2018.
  */
-public class LisJobModeFinalizer implements JobModeFinalizer {
+public class LisInitialJobModeFinalizer implements JobModeFinalizer {
 
   private static final Logger LOGGER = LoggerFactory
-      .getLogger(LisJobModeFinalizer.class);
+      .getLogger(LisInitialJobModeFinalizer.class);
 
   @Inject
-  private SavePointContainerService<TimestampSavePoint<BigInteger>, DefaultJobMode> savePointContainerService;
+  private SavePointContainerService<TimestampSavePoint<BigInteger>> savePointContainerService;
 
   @Inject
   private LisChangedEntitiesIdentifiersService changedEntitiesIdentifiersService;
@@ -31,7 +31,7 @@ public class LisJobModeFinalizer implements JobModeFinalizer {
     LisTimestampSavePoint lisTimestampSavePoint = new LisTimestampSavePoint(
         changedEntitiesIdentifiersService.findMaxTimestamp());
     LOGGER.info("Updating job save point to the last batch save point {}", lisTimestampSavePoint);
-    DefaultJobMode nextJobMode = DefaultJobMode.INCREMENTAL_LOAD;
+    JobMode nextJobMode = JobMode.INCREMENTAL_LOAD;
     LOGGER.info("Updating next job mode to the {}", nextJobMode);
     LisTimestampSavePointContainer savePointContainer = new LisTimestampSavePointContainer();
     savePointContainer.setJobMode(nextJobMode);

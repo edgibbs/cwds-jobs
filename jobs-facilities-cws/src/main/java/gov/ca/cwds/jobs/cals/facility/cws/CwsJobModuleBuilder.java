@@ -8,6 +8,9 @@ import gov.ca.cwds.jobs.common.elastic.ElasticsearchConfiguration;
 import gov.ca.cwds.jobs.common.inject.ElasticSearchModule;
 import gov.ca.cwds.jobs.common.inject.JobModule;
 import gov.ca.cwds.jobs.common.inject.MultiThreadModule;
+import gov.ca.cwds.jobs.common.mode.JobMode;
+import gov.ca.cwds.jobs.common.mode.LocalDateTimeJobModeService;
+import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 
 /**
  * Created by Alexander Serbin on 11/20/2018
@@ -24,11 +27,20 @@ public class CwsJobModuleBuilder implements JobModuleBuilder {
     ElasticsearchConfiguration elasticsearchConfiguration = jobConfiguration.getElasticsearch();
     elasticsearchConfiguration.setDocumentMapping("facility.mapping.json");
     elasticsearchConfiguration.setIndexSettings("facility.settings.json");
-    jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration));
+    JobMode jobMode = getCurrentJobMode(jobOptions.getLastRunLoc());
+    jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode));
     jobModule.addModules(new MultiThreadModule(jobConfiguration.getMultiThread()));
-    jobModule.addModule(new CwsFacilityJobModule(jobConfiguration,
-        jobOptions.getLastRunLoc()));
+    jobModule.addModule(new CwsFacilityJobModule(jobConfiguration, jobMode));
     return jobModule;
+  }
+
+  private JobMode getCurrentJobMode(String runDir) {
+    LocalDateTimeJobModeService timestampJobModeService =
+        new LocalDateTimeJobModeService();
+    LocalDateTimeSavePointContainerService savePointContainerService =
+        new LocalDateTimeSavePointContainerService(runDir);
+    timestampJobModeService.setSavePointContainerService(savePointContainerService);
+    return timestampJobModeService.getCurrentJobMode();
   }
 
 }

@@ -2,17 +2,19 @@ package gov.ca.cwds.jobs.common.elastic;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.BulkWriter;
 import gov.ca.cwds.jobs.common.ChangedDTO;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.util.ConsumerCounter;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.client.Client;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
@@ -22,22 +24,24 @@ import org.slf4j.LoggerFactory;
  */
 public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
 
-  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ElasticWriter.class);
-  protected ElasticSearchIndexerDao elasticsearchDao;
+  private static final Logger LOGGER = LoggerFactory.getLogger(ElasticWriter.class);
+
+  @Inject
   protected BulkProcessor bulkProcessor;
+
+  @Inject
   protected ObjectMapper objectMapper;
 
-  /**
-   * Constructor.
-   *
-   * @param elasticsearchDao ES DAO
-   * @param objectMapper Jackson object mapper
-   */
-  public ElasticWriter(ElasticSearchIndexerDao elasticsearchDao, ObjectMapper objectMapper) {
-    this.elasticsearchDao = elasticsearchDao;
-    this.objectMapper = objectMapper;
+  @Inject
+  private Client client;
+
+  @Inject
+  private ElasticsearchBulkOperationsService bulkService;
+
+  @Inject
+  public ElasticWriter() {
     bulkProcessor =
-        BulkProcessor.builder(elasticsearchDao.getClient(), new BulkProcessor.Listener() {
+        BulkProcessor.builder(client, new BulkProcessor.Listener() {
           @Override
           public void beforeBulk(long executionId, BulkRequest request) {
             LOGGER.warn("Ready to execute bulk of {} actions", request.numberOfActions());
@@ -64,10 +68,10 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
         if (RecordChangeOperation.I == recordChangeOperation
             || RecordChangeOperation.U == recordChangeOperation) {
           LOGGER.debug("Preparing to insert item: ID {}", item.getId());
-          bulkProcessor.add(elasticsearchDao.bulkAdd(objectMapper, item.getId(), item.getDTO()));
+          bulkProcessor.add(bulkService.bulkAdd(objectMapper, item.getId(), item.getDTO()));
         } else if (RecordChangeOperation.D == recordChangeOperation) {
           LOGGER.debug("Preparing to delete item: ID {}", item.getId());
-          bulkProcessor.add(elasticsearchDao.bulkDelete(item.getId()));
+          bulkProcessor.add(bulkService.bulkDelete(item.getId()));
         } else {
           LOGGER.warn("No operation found for facility with ID: {}", item.getId());
         }
@@ -85,10 +89,18 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
       try {
         bulkProcessor.awaitClose(3000, TimeUnit.MILLISECONDS);
       } finally {
-        elasticsearchDao.close();
+        if (client != null) {
+          this.client.close();
+        }
       }
-    } catch (IOException | InterruptedException e) {
-      throw new JobsException(e);
+    } catch (InterruptedException e) {
+      LOGGER.warn("Interrupted!!!");
+      Thread.currentThread().interrupt();
     }
   }
+
+  public ElasticsearchBulkOperationsService getBulkService() {
+    return bulkService;
+  }
+
 }

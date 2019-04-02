@@ -3,7 +3,6 @@ package gov.ca.cwds.jobs.audit;
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.audit.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.common.core.JobImpl;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import java.time.LocalDateTime;
 import org.hibernate.SessionFactory;
@@ -12,7 +11,7 @@ import org.hibernate.SessionFactory;
  * Created by Alexander Serbin on 2/15/2019.
  */
 public class AuditEventsJob extends
-    JobImpl<AuditEventChangedDto, TimestampSavePoint<LocalDateTime>, DefaultJobMode> {
+    JobImpl<AuditEventChangedDto, TimestampSavePoint<LocalDateTime>> {
 
   @Inject
   @NsSessionFactory

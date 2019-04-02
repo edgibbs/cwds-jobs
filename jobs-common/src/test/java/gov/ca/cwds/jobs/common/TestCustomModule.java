@@ -10,15 +10,16 @@ import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.entity.TestEntity;
 import gov.ca.cwds.jobs.common.entity.TestEntityService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
+import gov.ca.cwds.jobs.common.inject.PrimaryFinalizer;
 import gov.ca.cwds.jobs.common.inject.TestEntityServiceProvider;
 import gov.ca.cwds.jobs.common.inject.TestIdentifiersServiceProvider;
 import gov.ca.cwds.jobs.common.inject.TestSessionFactory;
 import gov.ca.cwds.jobs.common.iterator.JobBatchIterator;
 import gov.ca.cwds.jobs.common.iterator.LocalDateTimeJobBatchIterator;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
-import gov.ca.cwds.jobs.common.mode.LocalDateTimeDefaultJobModeService;
 import gov.ca.cwds.jobs.common.mode.LocalDateTimeJobModeFinalizer;
+import gov.ca.cwds.jobs.common.mode.LocalDateTimeJobModeService;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
@@ -55,28 +56,29 @@ public class TestCustomModule extends AbstractModule {
     bind(Job.class).to(TestJobImpl.class);
     bind(new TypeLiteral<JobBatchIterator<TimestampSavePoint<LocalDateTime>>>() {
     }).to(LocalDateTimeJobBatchIterator.class);
-    if (getCurrentJobMode(runDir) == DefaultJobMode.INITIAL_LOAD) {
-      bind(JobModeFinalizer.class).to(LocalDateTimeJobModeFinalizer.class);
+    if (getCurrentJobMode(runDir) == JobMode.INITIAL_LOAD) {
+      bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class)
+          .to(LocalDateTimeJobModeFinalizer.class);
     } else {
-      bind(JobModeFinalizer.class).toInstance(() -> {
+      bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).toInstance(() -> {
       });
     }
-    bind(new TypeLiteral<SavePointService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
+    bind(new TypeLiteral<SavePointService<TimestampSavePoint<LocalDateTime>>>() {
     }).to(LocalDateTimeSavePointService.class);
     bind(new TypeLiteral<ChangedEntityService<TestEntity>>() {
     }).toProvider(changedEntityServiceProvider);
     bind(new TypeLiteral<BulkWriter<TestEntity>>() {
     }).to(TestEntityWriter.class);
     bind(
-        new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode>>() {
+        new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>>>() {
         }).to(LocalDateTimeSavePointContainerService.class);
     bind(new TypeLiteral<ChangedEntitiesIdentifiersService<LocalDateTime>>() {
     }).toProvider(TestIdentifiersServiceProvider.class);
   }
 
-  private DefaultJobMode getCurrentJobMode(String runDir) {
-    LocalDateTimeDefaultJobModeService timestampDefaultJobModeService =
-        new LocalDateTimeDefaultJobModeService();
+  private JobMode getCurrentJobMode(String runDir) {
+    LocalDateTimeJobModeService timestampDefaultJobModeService =
+        new LocalDateTimeJobModeService();
     LocalDateTimeSavePointContainerService savePointContainerService =
         new LocalDateTimeSavePointContainerService(runDir);
     timestampDefaultJobModeService.setSavePointContainerService(savePointContainerService);

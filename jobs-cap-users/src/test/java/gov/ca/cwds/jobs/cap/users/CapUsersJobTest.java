@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.cap.users;
 
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INCREMENTAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INCREMENTAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
@@ -11,6 +12,8 @@ import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
 import gov.ca.cwds.jobs.common.configuration.JobOptions;
 import gov.ca.cwds.jobs.common.core.JobRunner;
 import gov.ca.cwds.jobs.common.inject.JobModule;
+import gov.ca.cwds.jobs.common.mode.JobMode;
+import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
 import gov.ca.cwds.test.support.DatabaseHelper;
 import io.dropwizard.db.DataSourceFactory;
@@ -73,7 +76,7 @@ public class CapUsersJobTest {
   }
 
   private void testIncrementalLoad() throws LiquibaseException {
-    runJob();
+    runJob(INCREMENTAL_LOAD);
     assertEquals(0, TestCapUserWriter.getItems().size());
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime userIdTimestamp = now.plusSeconds(1);
@@ -81,7 +84,7 @@ public class CapUsersJobTest {
     LocalDateTime staffPersonAndOfficeTimestamp = now.plusSeconds(3);
 
     addCwsDataForIncrementalLoad(1, userIdTimestamp);
-    runJob();
+    runJob(INCREMENTAL_LOAD);
     assertEquals(4, TestCapUserWriter.getItems().size());
     SavePointCheckRequest savePointCheckRequest = new SavePointCheckRequest();
     savePointCheckRequest.timeBeforeStart = now;
@@ -91,7 +94,7 @@ public class CapUsersJobTest {
     assertSavePoint(savePointCheckRequest);
 
     addCwsDataForIncrementalLoad(2, cwsOfficeTimestamp);
-    runJob();
+    runJob(INCREMENTAL_LOAD);
     assertEquals(1, TestCapUserWriter.getItems().size());
     savePointCheckRequest.timeBeforeStart = now;
     savePointCheckRequest.userIdTimestamp = userIdTimestamp;
@@ -100,7 +103,7 @@ public class CapUsersJobTest {
     assertSavePoint(savePointCheckRequest);
 
     addCwsDataForIncrementalLoad(3, staffPersonAndOfficeTimestamp);
-    runJob();
+    runJob(INCREMENTAL_LOAD);
     assertEquals(3, TestCapUserWriter.getItems().size());
     savePointCheckRequest.timeBeforeStart = now;
     savePointCheckRequest.userIdTimestamp = userIdTimestamp;
@@ -109,7 +112,7 @@ public class CapUsersJobTest {
     assertSavePoint(savePointCheckRequest);
 
     MockedIdmService.capChanges = true;
-    runJob();
+    runJob(INCREMENTAL_LOAD);
     assertEquals(2, TestCapUserWriter.getItems().size());
 
   }
@@ -117,7 +120,7 @@ public class CapUsersJobTest {
   private void testInitialLoad() {
     LocalDateTime timestampBeforeStart = LocalDateTime.now();
     assertEquals(0, TestCapUserWriter.getItems().size());
-    runJob();
+    runJob(INITIAL_LOAD);
     assertEquals(MockedIdmService.NUMBER_OF_USERS, TestCapUserWriter.getItems().size());
     SavePointCheckRequest savePointCheckRequest = new SavePointCheckRequest();
     savePointCheckRequest.timeBeforeStart = timestampBeforeStart;
@@ -129,25 +132,25 @@ public class CapUsersJobTest {
 
 
   private void testIncrementalLoadPerformanceMode() {
-    runJob(true);
+    runJob(INCREMENTAL_LOAD, true);
     assertEquals(15, TestCapUserWriter.getItems().size());
-    runJob(true);
+    runJob(INCREMENTAL_LOAD, true);
     assertEquals(15, TestCapUserWriter.getItems().size());
   }
 
-  private void runJob() {
-    runJob(false);
+  private void runJob(JobMode jobMode) {
+    runJob(jobMode,false);
   }
 
-  private void runJob(boolean isPerformanceTestMode) {
+  private void runJob(JobMode jobMode, boolean isPerformanceTestMode) {
     JobOptions jobOptions = JobOptions.parseCommandLine(getModuleArgs());
     CapUsersJobConfiguration jobConfiguration = JobConfiguration
         .getJobsConfiguration(CapUsersJobConfiguration.class, jobOptions.getConfigFileLocation());
     jobConfiguration.setPerformanceTestMode(isPerformanceTestMode);
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
-    CapUsersJobModule capUsersJobModule = new CapUsersJobModule(jobConfiguration,
-        jobOptions.getLastRunLoc());
+    CapUsersJobModule capUsersJobModule = new CapUsersJobModule(jobConfiguration, jobMode);
     capUsersJobModule.setIdmService(MockedIdmService.class);
+    capUsersJobModule.setJobModeFinalizerClass(TestJobModeFinalizer.class);
     jobModule.addModule(capUsersJobModule);
     TestCapUserWriter.reset();
     capUsersJobModule.setCapElasticWriterClass(TestCapUserWriter.class);
@@ -230,6 +233,14 @@ public class CapUsersJobTest {
     private LocalDateTime cwsOfficeTimestamp;
     private LocalDateTime staffPersonTimeStamp;
 
+  }
+
+  private static class TestJobModeFinalizer implements JobModeFinalizer {
+
+    @Override
+    public void doFinalizeJob() {
+      //emty
+    }
   }
 
 }
