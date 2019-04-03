@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.cals.facility.lisfas.inject;
 
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -25,9 +25,8 @@ import gov.ca.cwds.jobs.cals.facility.lisfas.LisInitialFacilityJob;
 import gov.ca.cwds.jobs.cals.facility.lisfas.entity.LisChangedFacilityService;
 import gov.ca.cwds.jobs.cals.facility.lisfas.identifier.LisChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisIncrementalModeIterator;
+import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisInitialJobModeFinalizer;
 import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisInitialModeIterator;
-import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisJobModeFinalizer;
-import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisJobModeService;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePoint;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePointContainerService;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePointService;
@@ -36,8 +35,10 @@ import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LisTimestampSavePointServ
 import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.exception.JobsException;
+import gov.ca.cwds.jobs.common.inject.PrimaryFinalizer;
+import gov.ca.cwds.jobs.common.inject.SecondaryFinalizer;
 import gov.ca.cwds.jobs.common.iterator.JobBatchIterator;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
@@ -56,8 +57,8 @@ public class LisFacilityJobModule extends BaseFacilityJobModule<LisFacilityJobCo
 
   private static final Logger LOG = LoggerFactory.getLogger(LisFacilityJobModule.class);
 
-  public LisFacilityJobModule(LisFacilityJobConfiguration jobConfiguration, String lastRunDir) {
-    super(jobConfiguration, lastRunDir);
+  public LisFacilityJobModule(LisFacilityJobConfiguration jobConfiguration, JobMode jobMode) {
+    super(jobConfiguration, jobMode);
   }
 
   @Override
@@ -65,10 +66,10 @@ public class LisFacilityJobModule extends BaseFacilityJobModule<LisFacilityJobCo
     super.configure();
     configureJobModes();
     bind(
-        new TypeLiteral<SavePointService<TimestampSavePoint<BigInteger>, DefaultJobMode>>() {
+        new TypeLiteral<SavePointService<TimestampSavePoint<BigInteger>>>() {
         }).to(LisTimestampSavePointService.class);
     bind(
-        new TypeLiteral<SavePointContainerService<TimestampSavePoint<BigInteger>, DefaultJobMode>>() {
+        new TypeLiteral<SavePointContainerService<TimestampSavePoint<BigInteger>>>() {
         }).to(LisTimestampSavePointContainerService.class);
     bind(LisChangedEntitiesIdentifiersService.class)
         .toProvider(LisChangedIdentifiersServiceProvider.class);
@@ -77,39 +78,31 @@ public class LisFacilityJobModule extends BaseFacilityJobModule<LisFacilityJobCo
     bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {
     }).to(LisChangedFacilityService.class);
     bind(
-        new TypeLiteral<SavePointService<LicenseNumberSavePoint, DefaultJobMode>>() {
+        new TypeLiteral<SavePointService<LicenseNumberSavePoint>>() {
         }).to(LicenseNumberSavePointService.class);
     bind(
-        new TypeLiteral<SavePointContainerService<LicenseNumberSavePoint, DefaultJobMode>>() {
+        new TypeLiteral<SavePointContainerService<LicenseNumberSavePoint>>() {
         }).to(LicenseNumberSavePointContainerService.class);
     install(new LisDataAccessModule(getJobConfiguration().getLisDataSourceFactory()));
     install(new FasDataAccessModule(getJobConfiguration().getFasDataSourceFactory()));
   }
 
   private void configureJobModes() {
-    DefaultJobMode jobMode = defineJobMode();
-    if (jobMode == INITIAL_LOAD) {
+    if (getJobMode() == INITIAL_LOAD) {
       bind(Job.class).to(LisInitialFacilityJob.class);
-      bind(JobModeFinalizer.class).to(LisJobModeFinalizer.class);
-
+      bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class)
+          .to(LisInitialJobModeFinalizer.class);
+      bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).toProvider(
+          getPrimaryJobFinalizerProviderClass());
       bind(new TypeLiteral<JobBatchIterator<LicenseNumberSavePoint>>() {
       }).to(LisInitialModeIterator.class);
     } else { //incremental mode
       bind(Job.class).to(LisIncrementalFacilityJob.class);
-      bind(JobModeFinalizer.class).toInstance(() -> {
+      bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).toInstance(() -> {
       });
       bind(new TypeLiteral<JobBatchIterator<TimestampSavePoint<BigInteger>>>() {
       }).to(LisIncrementalModeIterator.class);
     }
-  }
-
-  private DefaultJobMode defineJobMode() {
-    LisJobModeService timestampDefaultJobModeService =
-        new LisJobModeService();
-    LicenseNumberSavePointContainerService savePointContainerService =
-        new LicenseNumberSavePointContainerService(getLastRunDir());
-    timestampDefaultJobModeService.setSavePointContainerService(savePointContainerService);
-    return timestampDefaultJobModeService.getCurrentJobMode();
   }
 
   @Provides

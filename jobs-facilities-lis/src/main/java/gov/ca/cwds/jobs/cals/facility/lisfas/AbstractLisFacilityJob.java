@@ -6,7 +6,6 @@ import gov.ca.cwds.cals.inject.FasSessionFactory;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.common.core.JobImpl;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import org.hibernate.SessionFactory;
 
@@ -14,7 +13,7 @@ import org.hibernate.SessionFactory;
  * Created by Alexander Serbin on 3/5/2018.
  */
 public class AbstractLisFacilityJob<S extends SavePoint> extends
-    JobImpl<ChangedFacilityDto, S, DefaultJobMode> {
+    JobImpl<ChangedFacilityDto, S> {
 
   @Inject
   @FasSessionFactory

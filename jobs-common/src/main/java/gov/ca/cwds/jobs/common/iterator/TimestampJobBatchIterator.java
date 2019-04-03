@@ -3,7 +3,6 @@ package gov.ca.cwds.jobs.common.iterator;
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import java.util.Optional;
@@ -19,7 +18,7 @@ public class TimestampJobBatchIterator<T> implements JobBatchIterator<TimestampS
       .getLogger(TimestampJobBatchIterator.class);
 
   @Inject
-  private SavePointService<TimestampSavePoint<T>, DefaultJobMode> savePointService;
+  private SavePointService<TimestampSavePoint<T>> savePointService;
 
   @Inject
   private ChangedEntitiesIdentifiersService<T> identifiersService;

@@ -1,12 +1,11 @@
 package gov.ca.cwds.jobs.common.savepoint;
 
 import gov.ca.cwds.jobs.common.batch.JobBatch;
-import gov.ca.cwds.jobs.common.mode.JobMode;
 
 /**
  * Created by Alexander Serbin on 6/20/2018.
  */
-public interface SavePointService<S extends SavePoint, J extends JobMode> {
+public interface SavePointService<S extends SavePoint> {
 
   /**
    * Loads save point specific to job mode.
@@ -28,6 +27,6 @@ public interface SavePointService<S extends SavePoint, J extends JobMode> {
   /**
    * Get savepoint container class.
    */
-  Class<? extends SavePointContainer<? extends S, J>> getSavePointContainerClass();
+  Class<? extends SavePointContainer<? extends S>> getSavePointContainerClass();
 
 }

@@ -10,6 +10,12 @@ import io.dropwizard.configuration.YamlConfigurationFactory;
 import io.dropwizard.jackson.Jackson;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -18,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public interface JobConfiguration {
 
   @SuppressFBWarnings("PATH_TRAVERSAL_IN") //Path cannot be controlled by the user
-  public static <T extends JobConfiguration> T getJobsConfiguration(Class<T> clazz,
+  static <T extends JobConfiguration> T getJobsConfiguration(Class<T> clazz,
       String path) {
     final String pathToConfiguration = Paths.get(path).toAbsolutePath().toString();
     EnvironmentVariableSubstitutor environmentVariableSubstitutor = new EnvironmentVariableSubstitutor(
@@ -27,15 +33,28 @@ public interface JobConfiguration {
         new SubstitutingSourceProvider(new FileConfigurationSourceProvider(),
             environmentVariableSubstitutor);
     try {
-      return new YamlConfigurationFactory<>(
+      T configuration = new YamlConfigurationFactory<>(
           clazz,
           null,
           Jackson.newObjectMapper(),
           pathToConfiguration).build(configurationSourceProvider, pathToConfiguration);
+      handleValidationError(configuration);
+      return configuration;
     } catch (IOException | io.dropwizard.configuration.ConfigurationException e) {
       LoggerFactory.getLogger(JobConfiguration.class)
           .error("Error reading job configuration: {}", e.getMessage(), e);
       throw new JobsException("Error reading job configuration: " + e.getMessage(), e);
+    }
+  }
+
+  static <T extends JobConfiguration> void handleValidationError(T configuration) {
+    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    Validator validator = factory.getValidator();
+    Set<ConstraintViolation<T>> errors = validator.validate(configuration);
+    if (!errors.isEmpty()) {
+      String message = errors.stream().map(c->"[" + c.getPropertyPath() + "] " + c.getMessage())
+          .collect(Collectors.joining(", "));
+      throw new JobsException(String.format("Configuration validation issues: %s", message));
     }
   }
 

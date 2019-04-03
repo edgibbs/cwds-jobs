@@ -1,17 +1,3 @@
-elasticsearch:
-  elasticsearch.additional.nodes:
-  - localhost:9300
-  - localhost:9300
-
-  elasticsearch.cluster: elasticsearch
-  elasticsearch.alias: auditevents
-  elasticsearch.doctype: auditevent
-  elasticsearch.host: localhost
-  elasticsearch.port: 9300
-  #
-  elasticsearch.xpack.user: elastic
-  elasticsearch.xpack.password: changeme
-
 multiThread:
   batchSize: 10
   elasticSearchBulkSize: 10

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.inject.Inject;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import gov.ca.cwds.jobs.common.inject.LastRunDir;
-import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.rest.api.ApiException;
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +21,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Alexander Serbin on 2/5/2018.
  */
-public abstract class SavePointContainerServiceImpl<S extends SavePoint, J extends JobMode> implements
-    SavePointContainerService<S, J> {
+public abstract class SavePointContainerServiceImpl<S extends SavePoint> implements
+    SavePointContainerService<S> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SavePointContainerServiceImpl.class);
 
@@ -47,8 +46,8 @@ public abstract class SavePointContainerServiceImpl<S extends SavePoint, J exten
   }
 
   @Override
-  public SavePointContainer<? extends S, J> readSavePointContainer(
-      Class<? extends SavePointContainer<? extends S, J>> savePointContainerClass) {
+  public SavePointContainer<? extends S> readSavePointContainer(
+      Class<? extends SavePointContainer<? extends S>> savePointContainerClass) {
     try (Reader reader = Files.newBufferedReader(getSavePointFile())) {
       return mapper.readValue(IOUtils.toString(reader), savePointContainerClass);
     } catch (IOException e) {
@@ -64,7 +63,7 @@ public abstract class SavePointContainerServiceImpl<S extends SavePoint, J exten
   }
 
   @Override
-  public void writeSavePointContainer(SavePointContainer<? extends S, J> savePointContainer) {
+  public void writeSavePointContainer(SavePointContainer<? extends S> savePointContainer) {
     Objects.requireNonNull(savePointContainer.getJobMode());
     Objects.requireNonNull(savePointContainer.getSavePoint());
     try {

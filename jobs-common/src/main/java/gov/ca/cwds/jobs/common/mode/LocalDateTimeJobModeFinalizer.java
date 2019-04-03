@@ -19,17 +19,17 @@ public class LocalDateTimeJobModeFinalizer implements JobModeFinalizer {
       .getLogger(LocalDateTimeJobModeFinalizer.class);
 
   @Inject
-  private SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode> savePointContainerService;
+  private SavePointContainerService<TimestampSavePoint<LocalDateTime>> savePointContainerService;
 
   @Inject
-  private SavePointService<TimestampSavePoint<LocalDateTime>, DefaultJobMode> savePointService;
+  private SavePointService<TimestampSavePoint<LocalDateTime>> savePointService;
 
   @Override
   public void doFinalizeJob() {
     LocalDateTimeSavePoint timestampSavePoint = (LocalDateTimeSavePoint) savePointService
         .loadSavePoint();
     LOGGER.info("Updating job save point to the last batch save point {}", timestampSavePoint);
-    DefaultJobMode nextJobMode = DefaultJobMode.INCREMENTAL_LOAD;
+    JobMode nextJobMode = JobMode.INCREMENTAL_LOAD;
     LOGGER.info("Updating next job mode to the {}", nextJobMode);
     LocalDateTimeSavePointContainer savePointContainer = new LocalDateTimeSavePointContainer();
     savePointContainer.setJobMode(nextJobMode);
