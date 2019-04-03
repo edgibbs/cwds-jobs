@@ -5,6 +5,7 @@ elasticsearch:
 
   elasticsearch.cluster: ${ELASTIC_SEARCH_CLUSTER:-elasticsearch}
   elasticsearch.alias: ${ELASTIC_SEARCH_AUDIT_EVENTS_ALIAS:-auditevents}
+  elasticsearch.index.prefix: auditevents
   elasticsearch.doctype: ${ELASTIC_SEARCH_AUDIT_EVENT_DOCTYPE:-auditevent}
   elasticsearch.host: ${ELASTIC_SEARCH_HOST:-localhost}
   elasticsearch.port: ${ELASTIC_SEARCH_PORT:-9300}

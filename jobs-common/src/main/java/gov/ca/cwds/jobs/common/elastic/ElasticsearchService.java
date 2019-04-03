@@ -9,13 +9,12 @@ import org.apache.commons.lang3.Validate;
 import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest.AliasActions;
-import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
 import org.elasticsearch.action.admin.indices.alias.exists.AliasesExistResponse;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.LoggerFactory;
@@ -44,7 +43,7 @@ public class ElasticsearchService {
       List<String> indexesToDelete = performAliasOperations();
       deleteOldIndexes(indexesToDelete);
     } else {
-      createAlias();
+      createAliasWithOneIndex();
     }
     //release lock
   }
@@ -61,8 +60,6 @@ public class ElasticsearchService {
     GetAliasesRequest request = new GetAliasesRequest(configuration.getElasticsearchAlias());
     client.admin().indices().getAliases(request).actionGet().getAliases()
         .keysIt().forEachRemaining(indexes::add);
-    LOGGER.info("Discovered indexes {} for alias {}", indexes,
-        configuration.getElasticsearchAlias());
     return indexes;
   }
 
@@ -73,8 +70,9 @@ public class ElasticsearchService {
    */
   public String createNewIndex() {
     String newIndexName = configuration.getElasticSearchIndexPrefix() + System.currentTimeMillis();
-    LOGGER.info("Creating new ES index [{}] for type [{}] ...",
-        newIndexName, configuration.getElasticsearchDocType());
+    LOGGER.info("Creating new index [{}] for type [{}]", newIndexName,
+        configuration.getElasticsearchDocType());
+
     CreateIndexRequestBuilder createIndexRequestBuilder =
         client.admin().indices().prepareCreate(newIndexName);
     createIndexRequestBuilder
@@ -85,7 +83,6 @@ public class ElasticsearchService {
 
     CreateIndexRequest indexRequest = createIndexRequestBuilder.request();
     client.admin().indices().create(indexRequest).actionGet();
-    LOGGER.info("Created new index {}", newIndexName);
     return newIndexName;
   }
 
@@ -93,18 +90,19 @@ public class ElasticsearchService {
     Validate.isTrue(checkAliasExists(), "Alias %s does not exist",
         configuration.getElasticsearchAlias());
     List<String> indexes = getIndexesForAlias();
+    LOGGER.info("Discovered indexes {} for alias [{}]", indexes,
+        configuration.getElasticsearchAlias());
     String existingIndexName = indexes.stream()
         .filter(s -> s.startsWith(configuration.getElasticSearchIndexPrefix())).findAny()
         .orElseThrow(IllegalStateException::new);
-    LOGGER.info("Found index name {} to work with", existingIndexName);
+    LOGGER.info("Found index name [{}] to work with", existingIndexName);
     return existingIndexName;
   }
 
   private void deleteOldIndexes(List<String> indexesToDelete) {
-    LOGGER.info("Deleting old indexes {}", indexesToDelete);
-    DeleteIndexResponse response = client.admin().indices()
+    LOGGER.info("Deleting orphan indexes [{}]", indexesToDelete);
+    client.admin().indices()
         .delete(new DeleteIndexRequest(indexesToDelete.toArray(new String[]{}))).actionGet();
-    LOGGER.info("Operation acknowledgment is {}", response.isAcknowledged());
   }
 
   private List<String> performAliasOperations() {
@@ -112,10 +110,10 @@ public class ElasticsearchService {
     List<String> indexesToDelete = indexes.stream()
         .filter(s -> s.startsWith(configuration.getElasticSearchIndexPrefix())).collect(
             Collectors.toList());
-    LOGGER.info("Found old indexes {} for alias {}. Detaching those from alias", indexesToDelete,
+    LOGGER.info("Found old indexes {} for alias [{}]", indexesToDelete,
         configuration.getElasticsearchAlias());
-    LOGGER.info("And adding new index {} for alias {}", indexName,
-        configuration.getElasticsearchAlias());
+    LOGGER.info("Adding new index [{}] and removing old indexes {} for alias [{}] ", indexName,
+        indexesToDelete, configuration.getElasticsearchAlias());
     IndicesAliasesRequest request = new IndicesAliasesRequest();
     AliasActions addIndexToAliasAction = AliasActions.add()
         .index(indexName)
@@ -125,19 +123,39 @@ public class ElasticsearchService {
     removeOldIndexesAction.alias(configuration.getElasticsearchAlias());
     request.addAliasAction(addIndexToAliasAction);
     request.addAliasAction(removeOldIndexesAction);
-    IndicesAliasesResponse indicesAliasesResponse = client.admin().indices().aliases(request)
-        .actionGet();
-    LOGGER.info("Operation acknowledgment is {}", indicesAliasesResponse.isAcknowledged());
+    client.admin().indices().aliases(request).actionGet();
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("Discovered indexes {} for alias [{}]", getIndexesForAlias(),
+          configuration.getElasticsearchAlias());
+    }
     return indexesToDelete;
   }
 
-  private void createAlias() {
+  private void createAliasWithOneIndex() {
+    removeRedundantIndexIfExists();
     IndicesAliasesRequest request = new IndicesAliasesRequest();
     AliasActions aliasAction = AliasActions.add()
         .index(indexName)
         .alias(configuration.getElasticsearchAlias());
     request.addAliasAction(aliasAction);
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("Creating alias [{}] for index [{}] ", configuration.getElasticsearchAlias(),
+          indexName);
+    }
     client.admin().indices().aliases(request).actionGet();
+  }
+
+  private void removeRedundantIndexIfExists() {
+    IndicesExistsRequest request = new IndicesExistsRequest();
+    request.indices(configuration.getElasticsearchAlias());
+    if (client.admin().indices().exists(request).actionGet().isExists()) {
+      LOGGER.warn("Orphan ES index [{}] discovered ", configuration.getElasticsearchAlias());
+      DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest();
+      deleteIndexRequest.indices(configuration.getElasticsearchAlias());
+      LOGGER
+          .info("Removing orphan ES index [{}] discovered ", configuration.getElasticsearchAlias());
+      client.admin().indices().delete(deleteIndexRequest).actionGet();
+    }
   }
 
   public void setConfiguration(ElasticsearchConfiguration configuration) {

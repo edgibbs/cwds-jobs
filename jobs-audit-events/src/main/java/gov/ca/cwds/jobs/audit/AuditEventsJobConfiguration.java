@@ -5,13 +5,16 @@ import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
 import gov.ca.cwds.jobs.common.configuration.MultiThreadConfiguration;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchConfiguration;
 import io.dropwizard.db.DataSourceFactory;
+import javax.validation.Valid;
 
 public class AuditEventsJobConfiguration implements JobConfiguration {
 
+  @Valid
   private ElasticsearchConfiguration elasticsearch;
 
   private DataSourceFactory nsDataSourceFactory;
 
+  @Valid
   private MultiThreadConfiguration multiThread;
 
   @JsonProperty

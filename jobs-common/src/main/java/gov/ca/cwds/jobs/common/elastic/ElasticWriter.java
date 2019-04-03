@@ -7,6 +7,7 @@ import gov.ca.cwds.jobs.common.BulkWriter;
 import gov.ca.cwds.jobs.common.ChangedDTO;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.exception.JobsException;
+import gov.ca.cwds.jobs.common.inject.IndexName;
 import gov.ca.cwds.jobs.common.util.ConsumerCounter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -26,20 +27,23 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticWriter.class);
 
-  @Inject
   protected BulkProcessor bulkProcessor;
 
   @Inject
   protected ObjectMapper objectMapper;
 
-  @Inject
   private Client client;
 
   @Inject
   private ElasticsearchBulkOperationsService bulkService;
 
   @Inject
-  public ElasticWriter() {
+  @IndexName
+  private String indexName;
+
+  @Inject
+  public ElasticWriter(Client client) {
+    this.client = client;
     bulkProcessor =
         BulkProcessor.builder(client, new BulkProcessor.Listener() {
           @Override
@@ -61,6 +65,7 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
 
   @Override
   public void write(List<T> items) {
+    LOGGER.info("Writing to index {}", indexName);
     items.forEach(item -> {
       try {
         RecordChangeOperation recordChangeOperation = item.getRecordChangeOperation();

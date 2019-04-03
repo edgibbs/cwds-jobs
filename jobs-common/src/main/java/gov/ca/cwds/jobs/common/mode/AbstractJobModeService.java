@@ -4,9 +4,9 @@ import static gov.ca.cwds.jobs.common.mode.JobMode.INCREMENTAL_LOAD;
 import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
 
 import com.google.inject.Inject;
+import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
-import gov.ca.cwds.rest.api.ApiException;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -59,7 +59,7 @@ public abstract class AbstractJobModeService<S extends SavePoint> implements
       }
     } catch (IOException | JSONException e) {
       LOG.error(e.getMessage(), e);
-      throw new ApiException("Can't parse save point container file", e);
+      throw new JobsException("Can't parse save point container file", e);
     }
   }
 
