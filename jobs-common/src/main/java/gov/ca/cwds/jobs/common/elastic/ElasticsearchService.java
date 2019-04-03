@@ -125,10 +125,14 @@ public class ElasticsearchService {
     request.addAliasAction(removeOldIndexesAction);
     client.admin().indices().aliases(request).actionGet();
     if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Discovered indexes {} for alias [{}]", getIndexesForAlias(),
-          configuration.getElasticsearchAlias());
+      verifyIndexesForAlias();
     }
     return indexesToDelete;
+  }
+
+  private void verifyIndexesForAlias() {
+      LOGGER.info("Verification: alias {}, indexes [{}]", configuration.getElasticsearchAlias(),
+          getIndexesForAlias());
   }
 
   private void createAliasWithOneIndex() {
