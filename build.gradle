@@ -130,5 +130,5 @@ task jacocoMergeTest(type: JacocoMerge) {
 import com.github.jk1.license.render.CsvReportRenderer
 
 licenseReport {
-   renderers = [new CsvReportRenderer()]
+  renderers = [new CsvReportRenderer()]
 }
