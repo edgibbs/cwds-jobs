@@ -73,19 +73,17 @@ node ('dora-slave') {
       rtGradle.deployer.mavenCompatible = true
       rtGradle.deployer.deployMavenDescriptors = true
       rtGradle.useWrapper = true
+      overrideVersion = ''
+      releaseProject = true
       if (env.BUILD_JOB_TYPE == 'hotfix') {
         if (OVERRIDE_VERSION == '') {
-          echo 'ERROR: OVERRIDE_VERSION parameter is mandatory for hotfix builds'
-          error('OVERRIDE_VERSION parameter is mandatory for hotfix builds')
+          throw new Exception('OVERRIDE_VERSION parameter is mandatory for hotfix builds')
         }
         if (branch == '') {
-          echo 'ERROR: branch parameter is mandatory for hotfix builds'
-          error('branch parameter is mandatory for hotfix builds')
+          throw new Exception('branch parameter is mandatory for hotfix builds')
         }
-      }
-      overrideVersion = OVERRIDE_VERSION ?: ''
-      releaseProject = RELEASE_PROJECT ?: true
-      if (env.BUILD_JOB_TYPE == 'hotfix') {
+        overrideVersion = OVERRIDE_VERSION
+        releaseProject = RELEASE_PROJECT
         tagPrefix = TAG_PREFIX
         newTag = "${tagPrefix}-${overrideVersion}"
         newVersion = ''
@@ -136,13 +134,10 @@ node ('dora-slave') {
       }
     }
   } catch(Exception e) {
-
-    echo "Failed: ${e}"
-
     publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
     sh ('docker-compose down -v')
     emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-    subject: "Jobs failed with ${e.message}", to: "Sergii.Redchuk@osi.ca.gov"
+    subject: "Jobs failed with ${e.message}", to: "Alex.Serbin"
     slackSend channel: '#cals-api', baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', message: "Build Falled: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
     currentBuild.result = 'FAILURE'
     throw e
