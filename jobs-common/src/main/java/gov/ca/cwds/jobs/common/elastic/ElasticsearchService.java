@@ -40,8 +40,7 @@ public class ElasticsearchService {
   public void handleAliases() {
     //acquire lock
     if (checkAliasExists()) {
-      List<String> indexesToDelete = performAliasOperations();
-      deleteOldIndexes(indexesToDelete);
+      performAliasOperations();
     } else {
       createAliasWithOneIndex();
     }
@@ -69,7 +68,8 @@ public class ElasticsearchService {
    * @return name of new index
    */
   public String createNewIndex() {
-    String newIndexName = configuration.getElasticSearchIndexPrefix() + "_" + System.currentTimeMillis();
+    String newIndexName =
+        configuration.getElasticSearchIndexPrefix() + "_" + System.currentTimeMillis();
     LOGGER.info("Creating new index [{}] for type [{}]", newIndexName,
         configuration.getElasticsearchDocType());
 
@@ -99,14 +99,7 @@ public class ElasticsearchService {
     return existingIndexName;
   }
 
-  private void deleteOldIndexes(List<String> indexesToDelete) {
-    LOGGER.info("Enumerating orphan indexes [{}]", indexesToDelete);
-    //As for now, we don't delete orphan indexes
-    //client.admin().indices()
-    //    .delete(new DeleteIndexRequest(indexesToDelete.toArray(new String[]{}))).actionGet();
-  }
-
-  private List<String> performAliasOperations() {
+  private void performAliasOperations() {
     List<String> indexes = getIndexesForAlias();
     List<String> indexesToDelete = indexes.stream()
         .filter(s -> s.startsWith(configuration.getElasticSearchIndexPrefix())).collect(
@@ -128,12 +121,11 @@ public class ElasticsearchService {
     if (LOGGER.isInfoEnabled()) {
       verifyIndexesForAlias();
     }
-    return indexesToDelete;
   }
 
   private void verifyIndexesForAlias() {
-      LOGGER.info("Verification: alias {}, indexes [{}]", configuration.getElasticsearchAlias(),
-          getIndexesForAlias());
+    LOGGER.info("Verification: alias {}, indexes [{}]", configuration.getElasticsearchAlias(),
+        getIndexesForAlias());
   }
 
   private void createAliasWithOneIndex() {
