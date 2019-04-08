@@ -23,6 +23,10 @@ def overrideVersion
 @Field
 def releaseProject
 
+def githubConfig() {
+  githubConfigProperties('https://github.com/ca-cwds/cwds-jobs')
+}
+
 node ('dora-slave') {
   if (env.BUILD_JOB_TYPE == 'master') {
     // for master pipeline set the branch specifier on config UI to: master
@@ -62,7 +66,6 @@ node ('dora-slave') {
 
   try {
     stage('Preparation') {
-      echo env.BUILD_JOB_TYPE
       serverArti = Artifactory.server 'CWDS_DEV'
       rtGradle = Artifactory.newGradleBuild()
       rtGradle.tool = 'Gradle_35'
@@ -70,7 +73,6 @@ node ('dora-slave') {
       rtGradle.deployer.mavenCompatible = true
       rtGradle.deployer.deployMavenDescriptors = true
       rtGradle.useWrapper = true
-      echo '111'
       if (env.BUILD_JOB_TYPE == 'hotfix') {
         if (OVERRIDE_VERSION == '') {
           echo 'ERROR: OVERRIDE_VERSION parameter is mandatory for hotfix builds'
@@ -81,16 +83,13 @@ node ('dora-slave') {
           error('branch parameter is mandatory for hotfix builds')
         }
       }
-      echo '333'
       overrideVersion = OVERRIDE_VERSION ?: ''
       releaseProject = RELEASE_PROJECT ?: true
-      echo '444'
       if (env.BUILD_JOB_TYPE == 'hotfix') {
         tagPrefix = TAG_PREFIX
         newTag = "${tagPrefix}-${overrideVersion}"
         newVersion = ''
       }
-      echo '555'
       cleanWs()
       checkout scm
     }
