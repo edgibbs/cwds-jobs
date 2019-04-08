@@ -1,7 +1,9 @@
 package gov.ca.cwds.jobs.audit;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.elastic.ElasticWriter;
+import gov.ca.cwds.jobs.common.elastic.ElasticsearchBulkOperationsService;
 import gov.ca.cwds.jobs.common.inject.IndexName;
 import gov.ca.cwds.jobs.common.util.ConsumerCounter;
 import java.util.List;
@@ -21,8 +23,9 @@ public class AuditEventElasticWriter extends ElasticWriter<AuditEventChangedDto>
   private String indexName;
 
   @Inject
-  AuditEventElasticWriter(Client client) {
-    super(client);
+  AuditEventElasticWriter(Client client, ObjectMapper objectMapper,
+      ElasticsearchBulkOperationsService bulkService, @IndexName String indexName) {
+    super(client, objectMapper, bulkService, indexName);
   }
 
   @Override
