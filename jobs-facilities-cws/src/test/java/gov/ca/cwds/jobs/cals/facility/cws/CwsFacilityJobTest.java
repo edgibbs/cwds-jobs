@@ -1,7 +1,8 @@
 package gov.ca.cwds.jobs.cals.facility.cws;
 
 import static gov.ca.cwds.jobs.cals.facility.AssertFacilityHelper.assertFacility;
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INCREMENTAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INCREMENTAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
 import static gov.ca.cwds.test.support.DatabaseHelper.setUpDatabase;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -11,6 +12,7 @@ import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.cals.facility.FacilityTestWriter;
 import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsFacilityJobModule;
+import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsInitialModeFinalizerProvider;
 import gov.ca.cwds.jobs.common.TestWriter;
 import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
 import gov.ca.cwds.jobs.common.configuration.JobOptions;
@@ -18,7 +20,7 @@ import gov.ca.cwds.jobs.common.core.JobPreparator;
 import gov.ca.cwds.jobs.common.core.JobRunner;
 import gov.ca.cwds.jobs.common.inject.JobModule;
 import gov.ca.cwds.jobs.common.inject.MultiThreadModule;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
@@ -62,7 +64,7 @@ public class CwsFacilityJobTest {
     try {
       lastRunDirHelper.createSavePointContainerFolder();
       testInitialLoad();
-      testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD);
+      testInitialResumeLoad();
       testIncrementalLoad();
       testDeletedFacilities();
     } finally {
@@ -75,19 +77,19 @@ public class CwsFacilityJobTest {
     lastRunDirHelper.createSavePointContainerFolder();
     lastRunDirHelper.deleteSavePointContainerFolder();
     FacilityTestWriter.reset();
-    runInitialLoad();
+    runJob(INITIAL_LOAD);
     //Initial count + new facility - deleted facility = Initial count
     assertEquals(INITIAL_FACILITIES_COUNT, TestWriter.getItems().size());
   }
 
-  private void testInitialResumeLoad(DefaultJobMode jobMode) {
+  private void testInitialResumeLoad() {
     LocalDateTimeSavePointContainer container = (LocalDateTimeSavePointContainer) savePointContainerService
         .readSavePointContainer(LocalDateTimeSavePointContainer.class);
-    container.setJobMode(jobMode);
+    container.setJobMode(INITIAL_LOAD);
     LocalDateTime savePoint = LocalDateTime.of(2010, 01, 14, 9, 35, 17, 664000000);
     container.getSavePoint().setTimestamp(savePoint);
     savePointContainerService.writeSavePointContainer(container);
-    runInitialLoad();
+    runJob(INITIAL_LOAD);
     assertEquals(2, TestWriter.getItems().size());
     assertFacilityPresent("2qiZOcd04Y");
     assertFacilityPresent("3UGSdyX0Ki");
@@ -102,10 +104,10 @@ public class CwsFacilityJobTest {
 
   private void testIncrementalLoad()
       throws LiquibaseException, JSONException, JsonProcessingException {
-    runIncrementalLoad();
+    runJob(INCREMENTAL_LOAD);
     assertEquals(0, TestWriter.getItems().size());
     addCwsDataForIncrementalLoad();
-    runIncrementalLoad();
+    runJob(INCREMENTAL_LOAD);
     assertEquals(3, TestWriter.getItems().size());
     assertFacility("fixtures/cwsrs_new_facility.json",
         CWSCMS_INCREMENTAL_LOAD_NEW_FACILITY_ID);
@@ -118,7 +120,7 @@ public class CwsFacilityJobTest {
   private void testInitialLoad() throws IOException, JSONException {
     LocalDateTime now = LocalDateTime.now();
     assertEquals(0, TestWriter.getItems().size());
-    runInitialLoad();
+    runJob(INITIAL_LOAD);
     assertEquals(INITIAL_FACILITIES_COUNT, TestWriter.getItems().size());
     assertFacility("fixtures/facilities-initial-load-cwscms.json",
         CWSCMS_INITIAL_LOAD_FACILITY_ID);
@@ -150,23 +152,20 @@ public class CwsFacilityJobTest {
         .runScript("liquibase/cwsrs_facility_incremental_load.xml", parameters, "CWSCMSRS");
   }
 
-  private void runInitialLoad() {
+  private void runJob(JobMode jobMode) {
     JobOptions jobOptions = JobOptions.parseCommandLine(getModuleArgs());
     CwsFacilityJobConfiguration jobConfiguration = JobConfiguration
         .getJobsConfiguration(CwsFacilityJobConfiguration.class, jobOptions.getConfigFileLocation());
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
     jobModule.addModules(new MultiThreadModule(jobConfiguration.getMultiThread()));
     CwsFacilityJobModule cwsFacilityJobModule = new CwsFacilityJobModule(jobConfiguration,
-        jobOptions.getLastRunLoc());
+        jobMode);
     jobModule.setJobPreparator(new CwsJobPreparator());
     jobModule.addModule(cwsFacilityJobModule);
     FacilityTestWriter.reset();
     cwsFacilityJobModule.setFacilityElasticWriterClass(FacilityTestWriter.class);
+    cwsFacilityJobModule.setPrimaryJobFinalizerProviderClass(CwsInitialModeFinalizerProvider.class);
     JobRunner.run(jobModule);
-  }
-
-  private void runIncrementalLoad() {
-    runInitialLoad();
   }
 
   private String[] getModuleArgs() {

@@ -1,12 +1,12 @@
 package gov.ca.cwds.jobs.common.mode;
 
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INCREMENTAL_LOAD;
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INCREMENTAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
 
 import com.google.inject.Inject;
+import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
-import gov.ca.cwds.rest.api.ApiException;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -20,17 +20,17 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Alexander Serbin on 6/20/2018.
  */
-public abstract class AbstractDefaultJobModeService<S extends SavePoint> implements
-    JobModeService<DefaultJobMode> {
+public abstract class AbstractJobModeService<S extends SavePoint> implements
+    JobModeService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(AbstractDefaultJobModeService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractJobModeService.class);
   public static final String CURRENT_JOB_MODE_IS = "Current job mode is {}";
 
   @Inject
-  private SavePointContainerService<S, DefaultJobMode> savePointContainerService;
+  private SavePointContainerService<S> savePointContainerService;
 
   @Override
-  public DefaultJobMode getCurrentJobMode() {
+  public JobMode getCurrentJobMode() {
     if (!savePointContainerService.savePointContainerExists()) {
       LOG.info("Save point container file is not found");
       LOG.info(CURRENT_JOB_MODE_IS, INITIAL_LOAD);
@@ -39,7 +39,7 @@ public abstract class AbstractDefaultJobModeService<S extends SavePoint> impleme
     return extractJobMode();
   }
 
-  private DefaultJobMode extractJobMode() {
+  private JobMode extractJobMode() {
     Path pathToSavePointContainerFile = savePointContainerService.getSavePointFile();
     LOG.info("Path to the save point container file: {}", pathToSavePointContainerFile);
     try (Reader reader = Files.newBufferedReader(pathToSavePointContainerFile)) {
@@ -59,12 +59,12 @@ public abstract class AbstractDefaultJobModeService<S extends SavePoint> impleme
       }
     } catch (IOException | JSONException e) {
       LOG.error(e.getMessage(), e);
-      throw new ApiException("Can't parse save point container file", e);
+      throw new JobsException("Can't parse save point container file", e);
     }
   }
 
   public void setSavePointContainerService(
-      SavePointContainerService<S, DefaultJobMode> savePointContainerService) {
+      SavePointContainerService<S> savePointContainerService) {
     this.savePointContainerService = savePointContainerService;
   }
 

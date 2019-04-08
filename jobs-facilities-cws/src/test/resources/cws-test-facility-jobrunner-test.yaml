@@ -9,6 +9,7 @@ elasticsearch:
   elasticsearch.cluster: ${ELASTIC_SEARCH_CLUSTER:-elasticsearch}
   elasticsearch.alias: ${ELASTIC_SEARCH_ALIAS:-facilities}
   elasticsearch.doctype: ${ELASTIC_SEARCH_DOCTYPE:-facility}
+  elasticsearch.index.prefix: facilities_cws
   #
   elasticsearch.xpack.user: ${ELASTIC_SEARCH_XPACK_USER:-elastic}
   elasticsearch.xpack.password: ${ELASTIC_SEARCH_XPACK_PASSWORD:-changeme}

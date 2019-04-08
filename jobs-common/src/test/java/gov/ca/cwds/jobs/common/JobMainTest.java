@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.common;
 
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INCREMENTAL_LOAD;
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INCREMENTAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
 import static gov.ca.cwds.jobs.utils.DataSourceFactoryUtils.fixDatasourceFactory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

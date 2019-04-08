@@ -9,17 +9,17 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
  * Container to load and store job save point.
  * Created by Alexander Serbin on 6/18/2018.
  */
-public class SavePointContainer<S extends SavePoint, J extends JobMode> {
+public class SavePointContainer<S extends SavePoint> {
 
-  private J jobMode;
+  private JobMode jobMode;
 
   private S savePoint;
 
-  public J getJobMode() {
+  public JobMode getJobMode() {
     return jobMode;
   }
 
-  public void setJobMode(J jobMode) {
+  public void setJobMode(JobMode jobMode) {
     this.jobMode = jobMode;
   }
 

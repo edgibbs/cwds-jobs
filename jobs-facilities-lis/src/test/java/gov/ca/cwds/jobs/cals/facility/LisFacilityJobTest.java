@@ -1,7 +1,8 @@
 package gov.ca.cwds.jobs.cals.facility;
 
 import static gov.ca.cwds.jobs.cals.facility.AssertFacilityHelper.assertFacility;
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INCREMENTAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INCREMENTAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
 import static gov.ca.cwds.test.support.DatabaseHelper.setUpDatabase;
 import static org.junit.Assert.assertEquals;
 
@@ -10,6 +11,7 @@ import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.cals.DatabaseHelper;
 import gov.ca.cwds.jobs.cals.facility.lisfas.LisFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.lisfas.inject.LisFacilityJobModule;
+import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisInitialJobModeFinalizerProvider;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePoint;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePointContainer;
 import gov.ca.cwds.jobs.cals.facility.lisfas.savepoint.LicenseNumberSavePointContainerService;
@@ -23,7 +25,7 @@ import gov.ca.cwds.jobs.common.core.JobPreparator;
 import gov.ca.cwds.jobs.common.core.JobRunner;
 import gov.ca.cwds.jobs.common.inject.JobModule;
 import gov.ca.cwds.jobs.common.inject.MultiThreadModule;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
 import gov.ca.cwds.jobs.utils.DataSourceFactoryUtils;
 import io.dropwizard.db.DataSourceFactory;
@@ -58,7 +60,7 @@ public class LisFacilityJobTest {
     try {
       lastRunDirHelper.deleteSavePointContainerFolder();
       testInitialLoad();
-      testInitialResumeLoad(DefaultJobMode.INITIAL_LOAD);
+      testInitialResumeLoad();
       testIncrementalLoad();
     } finally {
       lastRunDirHelper.deleteSavePointContainerFolder();
@@ -68,11 +70,11 @@ public class LisFacilityJobTest {
 
   private void testIncrementalLoad()
       throws Exception {
-    runIncrementalLoad();
+    runJob(INCREMENTAL_LOAD);
     assertEquals(0, TestWriter.getItems().size());
     assertInitialLoadSuccessful();
     String newTimestamp = addLisDataForIncrementalLoad();
-    runIncrementalLoad();
+    runJob(INCREMENTAL_LOAD);
     assertEquals(1, TestWriter.getItems().size());
     assertFacility("fixtures/facilities-lis.json",
         LIS_INITIAL_LOAD_FACILITY_ID);
@@ -88,20 +90,20 @@ public class LisFacilityJobTest {
     assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
   }
 
-  private void testInitialResumeLoad(DefaultJobMode jobMode) {
+  private void testInitialResumeLoad() {
     LicenseNumberSavePointContainerService licenseNumberSavePointContainerService =
         new LicenseNumberSavePointContainerService(
             lastRunDirHelper.getSavepointContainerFolder().toString());
     LicenseNumberSavePointContainer container = new LicenseNumberSavePointContainer();
-    container.setJobMode(jobMode);
+    container.setJobMode(INITIAL_LOAD);
     container.setSavePoint(new LicenseNumberSavePoint(909045136));
     licenseNumberSavePointContainerService.writeSavePointContainer(container);
-    runInitialLoad();
+    runJob(INITIAL_LOAD);
     assertInitialLoadSuccessful();
   }
 
   private void testInitialLoad() throws JSONException, JsonProcessingException {
-    runInitialLoad();
+    runJob(INITIAL_LOAD);
     assertEquals(316, TestWriter.getItems().size());
     assertFacility("fixtures/facilities-lis.json", LIS_INITIAL_LOAD_FACILITY_ID);
     assertInitialLoadSuccessful();
@@ -143,24 +145,21 @@ public class LisFacilityJobTest {
     return facilityJobConfiguration;
   }
 
-  private void runInitialLoad() {
+  private void runJob(JobMode jobMode) {
     JobOptions jobOptions = JobOptions.parseCommandLine(getModuleArgs());
     LisFacilityJobConfiguration jobConfiguration = JobConfiguration
         .getJobsConfiguration(LisFacilityJobConfiguration.class,
             jobOptions.getConfigFileLocation());
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
     jobModule.addModules(new MultiThreadModule(jobConfiguration.getMultiThread()));
-    LisFacilityJobModule lisFacilityJobModule = new LisFacilityJobModule(jobConfiguration,
-        jobOptions.getLastRunLoc());
+    LisFacilityJobModule lisFacilityJobModule = new LisFacilityJobModule(jobConfiguration, jobMode);
     jobModule.setJobPreparator(new LisJobPreparator());
     jobModule.addModule(lisFacilityJobModule);
     FacilityTestWriter.reset();
     lisFacilityJobModule.setFacilityElasticWriterClass(FacilityTestWriter.class);
+    lisFacilityJobModule
+        .setPrimaryJobFinalizerProviderClass(LisInitialJobModeFinalizerProvider.class);
     JobRunner.run(jobModule);
-  }
-
-  private void runIncrementalLoad() {
-    runInitialLoad();
   }
 
   private String[] getModuleArgs() {

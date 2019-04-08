@@ -1,9 +1,12 @@
 package gov.ca.cwds.jobs.common.inject;
 
+import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
+
 import com.google.inject.AbstractModule;
-import gov.ca.cwds.jobs.common.elastic.ElasticSearchIndexerDao;
 import gov.ca.cwds.jobs.common.elastic.ElasticUtils;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchConfiguration;
+import gov.ca.cwds.jobs.common.elastic.ElasticsearchService;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import org.elasticsearch.client.Client;
 
 /**
@@ -12,9 +15,12 @@ import org.elasticsearch.client.Client;
 public class ElasticSearchModule extends AbstractModule {
 
   private ElasticsearchConfiguration configuration;
+  private JobMode jobMode;
 
-  public ElasticSearchModule(ElasticsearchConfiguration configuration) {
+  public ElasticSearchModule(ElasticsearchConfiguration configuration,
+      JobMode jobMode) {
     this.configuration = configuration;
+    this.jobMode = jobMode;
   }
 
   @Override
@@ -22,16 +28,12 @@ public class ElasticSearchModule extends AbstractModule {
     Client client = ElasticUtils
         .createAndConfigureESClient(configuration); //must be closed when the job done
     bind(Client.class).toInstance(client);
-    bind(ElasticSearchIndexerDao.class).toInstance(createElasticSearchDao(client, configuration));
-  }
-
-  private ElasticSearchIndexerDao createElasticSearchDao(Client client,
-      ElasticsearchConfiguration configuration) {
-    ElasticSearchIndexerDao esIndexerDao = new ElasticSearchIndexerDao(client,
-        configuration);
-    esIndexerDao.createIndexIfMissing();
-
-    return esIndexerDao;
+    bind(ElasticsearchConfiguration.class).toInstance(configuration);
+    ElasticsearchService service = new ElasticsearchService();
+    service.setClient(client);
+    service.setConfiguration(configuration);
+    String indexName = jobMode == INITIAL_LOAD ? service.createNewIndex() : service.getExistingIndex();
+    bindConstant().annotatedWith(IndexName.class).to(indexName);
   }
 
 }

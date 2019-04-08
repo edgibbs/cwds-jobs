@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 /**
  * Created by Alexander Serbin on 6/22/2018.
  */
-public class LocalDateTimeDefaultJobModeService extends
-    AbstractDefaultJobModeService<TimestampSavePoint<LocalDateTime>> {
+public class LocalDateTimeJobModeService extends
+    AbstractJobModeService<TimestampSavePoint<LocalDateTime>> {
 
 }

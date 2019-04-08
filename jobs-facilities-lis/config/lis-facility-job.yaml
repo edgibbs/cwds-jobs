@@ -13,6 +13,7 @@ elasticsearch:
 
   elasticsearch.cluster: ${ELASTIC_SEARCH_CLUSTER:-elasticsearch}
   elasticsearch.alias: ${ELASTIC_SEARCH_ALIAS:-facilities}
+  elasticsearch.index.prefix: facilities_lis
   elasticsearch.doctype: ${ELASTIC_SEARCH_DOCTYPE:-facility}
   #
   elasticsearch.xpack.user: ${ELASTIC_SEARCH_XPACK_USER:-elastic}

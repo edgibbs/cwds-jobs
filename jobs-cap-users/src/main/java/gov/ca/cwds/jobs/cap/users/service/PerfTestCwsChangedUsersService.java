@@ -23,16 +23,20 @@ public class PerfTestCwsChangedUsersService implements CwsChangedUsersService {
 
   @Inject
   private CwsUsersDao dao;
-
-  @UnitOfWork(CWS)
+  
   @Override
   public List<ChangedUserDto> getCwsChanges() {
-    List<String> allRacfIds = dao.getAllRacfIds();
+    List<String> allRacfIds = findChangedRacfIds();
     LOGGER.info("PERFORMANCE TEST MODE: All {} RACFIDs are used", allRacfIds.size());
     allRacfIds = allRacfIds.stream().map(String::trim).collect(Collectors.toList());
     List<User> users = idmService.getUsersByRacfIds(allRacfIds);
     return users.stream()
         .map(e -> new ChangedUserDto(e, RecordChangeOperation.U))
         .collect(Collectors.toList());
+  }
+
+  @UnitOfWork(value = CWS, readOnly = true)
+  public List<String> findChangedRacfIds() {
+    return dao.getAllRacfIds();
   }
 }

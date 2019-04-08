@@ -4,7 +4,7 @@ import static gov.ca.cwds.cals.Constants.UnitOfWork.CMS;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cals.facility.cws.savepoint.CwsTimestampSavePointService;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
@@ -32,7 +32,7 @@ public class CwsInitialJobModeFinalizer implements JobModeFinalizer {
   public void doFinalizeJob() {
     LocalDateTimeSavePoint timestampSavePoint = savePointService.findFirstIncrementalSavePoint();
     LOGGER.info("Updating job save point to the last batch save point {}", timestampSavePoint);
-    DefaultJobMode nextJobMode = DefaultJobMode.INCREMENTAL_LOAD;
+    JobMode nextJobMode = JobMode.INCREMENTAL_LOAD;
     LOGGER.info("Updating next job mode to the {}", nextJobMode);
     LocalDateTimeSavePointContainer savePointContainer = new LocalDateTimeSavePointContainer();
     savePointContainer.setJobMode(nextJobMode);

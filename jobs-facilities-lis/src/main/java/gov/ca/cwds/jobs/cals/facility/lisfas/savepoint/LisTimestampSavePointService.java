@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.cals.facility.lisfas.savepoint;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisJobModeService;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointServiceImpl;
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * Created by Alexander Serbin on 6/29/2018.
  */
 public class LisTimestampSavePointService extends
-    SavePointServiceImpl<TimestampSavePoint<BigInteger>, DefaultJobMode> {
+    SavePointServiceImpl<TimestampSavePoint<BigInteger>> {
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(LisTimestampSavePointService.class);
@@ -24,13 +24,13 @@ public class LisTimestampSavePointService extends
   private LisJobModeService jobModeService;
 
   @Inject
-  private SavePointContainerService<TimestampSavePoint<BigInteger>, DefaultJobMode> savePointContainerService;
+  private SavePointContainerService<TimestampSavePoint<BigInteger>> savePointContainerService;
 
   @Override
   public void saveSavePoint(TimestampSavePoint<BigInteger> savePoint) {
     if (savePoint.getTimestamp() != null) {
-      DefaultJobMode jobMode = jobModeService.getCurrentJobMode();
-      SavePointContainer<LisTimestampSavePoint, DefaultJobMode> savePointContainer = new LisTimestampSavePointContainer();
+      JobMode jobMode = jobModeService.getCurrentJobMode();
+      SavePointContainer<LisTimestampSavePoint> savePointContainer = new LisTimestampSavePointContainer();
       savePointContainer.setJobMode(jobMode);
       savePointContainer.setSavePoint((LisTimestampSavePoint) savePoint);
       savePointContainerService.writeSavePointContainer(savePointContainer);
@@ -40,7 +40,7 @@ public class LisTimestampSavePointService extends
   }
 
   @Override
-  public Class<? extends SavePointContainer<? extends TimestampSavePoint<BigInteger>, DefaultJobMode>> getSavePointContainerClass() {
+  public Class<? extends SavePointContainer<? extends TimestampSavePoint<BigInteger>>> getSavePointContainerClass() {
     return LisTimestampSavePointContainer.class;
   }
 

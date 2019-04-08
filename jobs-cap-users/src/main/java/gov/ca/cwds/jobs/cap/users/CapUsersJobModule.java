@@ -18,7 +18,6 @@ import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersIncrementalJob;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersInitialJob;
 import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePoint;
-import gov.ca.cwds.jobs.cap.users.service.CapUsersJobModeService;
 import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointContainerService;
 import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointService;
 import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersService;
@@ -28,8 +27,12 @@ import gov.ca.cwds.jobs.cap.users.service.IdmServiceImpl;
 import gov.ca.cwds.jobs.cap.users.service.PerfTestCwsChangedUsersService;
 import gov.ca.cwds.jobs.common.BulkWriter;
 import gov.ca.cwds.jobs.common.core.Job;
+import gov.ca.cwds.jobs.common.elastic.ElasticsearchAliasFinalizer;
 import gov.ca.cwds.jobs.common.inject.ElasticsearchBulkSize;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.inject.PrimaryFinalizer;
+import gov.ca.cwds.jobs.common.inject.SecondaryFinalizer;
+import gov.ca.cwds.jobs.common.mode.JobMode;
+import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
@@ -45,13 +48,15 @@ public class CapUsersJobModule extends AbstractModule {
 
   private Class<? extends BulkWriter<ChangedUserDto>> capElasticWriterClass;
   private Class<? extends IdmService> idmService;
+  private Class<? extends JobModeFinalizer> jobModeFinalizerClass;
   private CapUsersJobConfiguration configuration;
-  private String lastRunLoc;
+  private JobMode jobMode;
 
-  public CapUsersJobModule(CapUsersJobConfiguration jobConfiguration, String lastRunLoc) {
+  public CapUsersJobModule(CapUsersJobConfiguration jobConfiguration, JobMode jobMode) {
     this.configuration = jobConfiguration;
-    this.lastRunLoc = lastRunLoc;
+    this.jobMode = jobMode;
     this.capElasticWriterClass = CapUsersWriter.class;
+    this.jobModeFinalizerClass = ElasticsearchAliasFinalizer.class;
     this.idmService = IdmServiceImpl.class;
   }
 
@@ -62,6 +67,11 @@ public class CapUsersJobModule extends AbstractModule {
   public void setCapElasticWriterClass(
       Class<? extends BulkWriter<ChangedUserDto>> capUsersElasticWriterClass) {
     this.capElasticWriterClass = capUsersElasticWriterClass;
+  }
+
+  public void setJobModeFinalizerClass(
+      Class<? extends JobModeFinalizer> jobModeFinalizerClass) {
+    this.jobModeFinalizerClass = jobModeFinalizerClass;
   }
 
   public void setIdmService(Class<? extends IdmService> idmService) {
@@ -84,16 +94,16 @@ public class CapUsersJobModule extends AbstractModule {
     bindConstant().annotatedWith(PerryApiPassword.class)
         .to(getJobsConfiguration().getPerryApiPassword());
     bind(IdmService.class).to(idmService);
-    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint, DefaultJobMode>>() {
+    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
     }).to(CapUsersSavePointContainerService.class);
-    bind(new TypeLiteral<SavePointService<CapUsersSavePoint, DefaultJobMode>>() {
+    bind(new TypeLiteral<SavePointService<CapUsersSavePoint>>() {
     }).toProvider(CapUsersSavePointServiceProvider.class);
     bind(CapUsersSavePointService.class).toProvider(CapUsersSavePointServiceProvider.class);
     install(new CwsCmsDataAccessModule(getJobsConfiguration().getCmsDataSourceFactory()));
   }
 
   private void configureJobModes() {
-    switch (defineJobMode()) {
+    switch (jobMode) {
       case INITIAL_LOAD:
         configureInitialMode();
         break;
@@ -118,16 +128,9 @@ public class CapUsersJobModule extends AbstractModule {
 
   private void configureInitialMode() {
     bind(Job.class).to(CapUsersInitialJob.class);
+    bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).to(jobModeFinalizerClass);
+    bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class).toInstance(()->{});
     bind(CwsChangedUsersService.class).toProvider(CwsChangedUsersServiceProvider.class);
-  }
-
-  private DefaultJobMode defineJobMode() {
-    CapUsersJobModeService capUsersJobModeService =
-        new CapUsersJobModeService();
-    CapUsersSavePointContainerService savePointContainerService =
-        new CapUsersSavePointContainerService(lastRunLoc);
-    capUsersJobModeService.setSavePointContainerService(savePointContainerService);
-    return capUsersJobModeService.getCurrentJobMode();
   }
 
   @Provides

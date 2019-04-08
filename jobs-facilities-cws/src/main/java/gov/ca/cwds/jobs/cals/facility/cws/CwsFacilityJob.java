@@ -5,7 +5,6 @@ import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.common.core.JobImpl;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import java.time.LocalDateTime;
 import org.hibernate.SessionFactory;
@@ -14,7 +13,7 @@ import org.hibernate.SessionFactory;
  * Created by Alexander Serbin on 3/5/2018.
  */
 public class CwsFacilityJob extends
-    JobImpl<ChangedFacilityDto, TimestampSavePoint<LocalDateTime>, DefaultJobMode> {
+    JobImpl<ChangedFacilityDto, TimestampSavePoint<LocalDateTime>> {
 
   @Inject
   @CmsSessionFactory
