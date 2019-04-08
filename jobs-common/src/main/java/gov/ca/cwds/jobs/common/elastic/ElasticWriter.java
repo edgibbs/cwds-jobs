@@ -29,21 +29,21 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
 
   protected BulkProcessor bulkProcessor;
 
-  @Inject
   protected ObjectMapper objectMapper;
 
   private Client client;
 
-  @Inject
   private ElasticsearchBulkOperationsService bulkService;
 
-  @Inject
-  @IndexName
   private String indexName;
 
   @Inject
-  public ElasticWriter(Client client) {
+  public ElasticWriter(Client client, ObjectMapper objectMapper,
+      ElasticsearchBulkOperationsService bulkService, @IndexName String indexName) {
+    this.objectMapper = objectMapper;
+    this.bulkService = bulkService;
     this.client = client;
+    this.indexName = indexName;
     bulkProcessor =
         BulkProcessor.builder(client, new BulkProcessor.Listener() {
           @Override
