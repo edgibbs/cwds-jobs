@@ -30,6 +30,7 @@ import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchAliasFinalizer;
 import gov.ca.cwds.jobs.common.inject.ElasticsearchBulkSize;
 import gov.ca.cwds.jobs.common.inject.PrimaryFinalizer;
+import gov.ca.cwds.jobs.common.inject.SecondaryFinalizer;
 import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
@@ -128,6 +129,7 @@ public class CapUsersJobModule extends AbstractModule {
   private void configureInitialMode() {
     bind(Job.class).to(CapUsersInitialJob.class);
     bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).to(jobModeFinalizerClass);
+    bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class).toInstance(()->{});
     bind(CwsChangedUsersService.class).toProvider(CwsChangedUsersServiceProvider.class);
   }
 
