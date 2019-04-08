@@ -59,6 +59,7 @@ node ('dora-slave') {
 
   try {
     stage('Preparation') {
+      echo env.BUILD_JOB_TYPE
       serverArti = Artifactory.server 'CWDS_DEV'
       rtGradle = Artifactory.newGradleBuild()
       rtGradle.tool = 'Gradle_35'
