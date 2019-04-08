@@ -76,8 +76,7 @@ node ('dora-slave') {
       releaseProject = RELEASE_PROJECT ?: true
       if (env.BUILD_JOB_TYPE == 'hotfix') {
         tagPrefix = TAG_PREFIX
-        newVersion = "${tagPrefix}-${overrideVersion}"
-        overrideVersion = ''
+        newTag = "${tagPrefix}-${overrideVersion}"
       }
       cleanWs()
       checkout scm
