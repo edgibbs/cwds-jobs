@@ -69,7 +69,7 @@ public class ElasticsearchService {
    * @return name of new index
    */
   public String createNewIndex() {
-    String newIndexName = configuration.getElasticSearchIndexPrefix() + System.currentTimeMillis();
+    String newIndexName = configuration.getElasticSearchIndexPrefix() + "_" + System.currentTimeMillis();
     LOGGER.info("Creating new index [{}] for type [{}]", newIndexName,
         configuration.getElasticsearchDocType());
 
@@ -100,9 +100,10 @@ public class ElasticsearchService {
   }
 
   private void deleteOldIndexes(List<String> indexesToDelete) {
-    LOGGER.info("Deleting orphan indexes [{}]", indexesToDelete);
-    client.admin().indices()
-        .delete(new DeleteIndexRequest(indexesToDelete.toArray(new String[]{}))).actionGet();
+    LOGGER.info("Enumerating orphan indexes [{}]", indexesToDelete);
+    //As for now, we don't delete orphan indexes
+    //client.admin().indices()
+    //    .delete(new DeleteIndexRequest(indexesToDelete.toArray(new String[]{}))).actionGet();
   }
 
   private List<String> performAliasOperations() {
@@ -157,7 +158,7 @@ public class ElasticsearchService {
       DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest();
       deleteIndexRequest.indices(configuration.getElasticsearchAlias());
       LOGGER
-          .info("Removing orphan ES index [{}] discovered ", configuration.getElasticsearchAlias());
+          .info("Removing orphan ES index [{}] ", configuration.getElasticsearchAlias());
       client.admin().indices().delete(deleteIndexRequest).actionGet();
     }
   }
