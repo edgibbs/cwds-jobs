@@ -6,15 +6,9 @@ import groovy.transform.Field
 def GITHUB_CREDENTIALS_ID = '433ac100-b3c2-4519-b4d6-207c029a103b'
 
 @Field
-def serverArti = Artifactory.server 'CWDS_DEV'
-
+def serverArti
 @Field
-def rtGradle = Artifactory.newGradleBuild()
-rtGradle.tool = 'Gradle_35'
-rtGradle.resolver repo:'repo', server: serverArti
-rtGradle.deployer.mavenCompatible = true
-rtGradle.deployer.deployMavenDescriptors = true
-rtGradle.useWrapper = true
+def rtGradle
 
 @Field
 def tagPrefixes = ['audit-events', 'cap-users', 'facilities-cws', 'facilities-lis']
@@ -53,7 +47,7 @@ node ('dora-slave') {
       ])
     ])
   } else { // BUILD_JOB_TYPE=pull_request
-    // for PR pipeline set the branch specifier on config UI to: ${ghprbActualCommit}
+    // for PR pipeline set the branch specifier on config UI to: ${ghprbActualCommit} with the "Lightweight checkout" checkbox disabled
     def triggerProperties = githubPullRequestBuilderTriggerProperties()
     properties([
       [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: true],
@@ -64,15 +58,27 @@ node ('dora-slave') {
   }
 
   try {
-    if (env.BUILD_JOB_TYPE == 'hotfix' && OVERRIDE_VERSION == '') {
-      error('OVERRIDE_VERSION parameter is mandatory for hotfix builds')
-    }
-    if (env.BUILD_JOB_TYPE == 'hotfix' && branch == '') {
-      error('branch parameter is mandatory for hotfix builds')
-    }
-    overrideVersion = OVERRIDE_VERSION ?: ''
-    releaseProject = RELEASE_PROJECT ?: true
     stage('Preparation') {
+      serverArti = Artifactory.server 'CWDS_DEV'
+      rtGradle = Artifactory.newGradleBuild()
+      rtGradle.tool = 'Gradle_35'
+      rtGradle.resolver repo:'repo', server: serverArti
+      rtGradle.deployer.mavenCompatible = true
+      rtGradle.deployer.deployMavenDescriptors = true
+      rtGradle.useWrapper = true
+      if (env.BUILD_JOB_TYPE == 'hotfix' && OVERRIDE_VERSION == '') {
+        error('OVERRIDE_VERSION parameter is mandatory for hotfix builds')
+      }
+      if (env.BUILD_JOB_TYPE == 'hotfix' && branch == '') {
+        error('branch parameter is mandatory for hotfix builds')
+      }
+      overrideVersion = OVERRIDE_VERSION ?: ''
+      releaseProject = RELEASE_PROJECT ?: true
+      if (env.BUILD_JOB_TYPE == 'hotfix') {
+        tagPrefix = TAG_PREFIX
+        newVersion = "${tagPrefix}-${overrideVersion}"
+        overrideVersion = ''
+      }
       cleanWs()
       checkout scm
     }
@@ -86,11 +92,6 @@ node ('dora-slave') {
         newTag = newSemVer('', tagPrefixes)
         (tagPrefix, newVersion) = (newTag =~ /^(.+)\-(\d+\.\d+\.\d+)/).with { it[0][1,2] }
       }
-    }
-    if (env.BUILD_JOB_TYPE == 'hotfix') {
-      tagPrefix = TAG_PREFIX
-      newVersion = "${tagPrefix}-${overrideVersion}"
-      overrideVersion = ''
     }
     if (env.BUILD_JOB_TYPE == 'master' || env.BUILD_JOB_TYPE == 'hotfix') {
       stage('Build'){
