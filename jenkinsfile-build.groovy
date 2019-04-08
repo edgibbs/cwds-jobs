@@ -136,6 +136,9 @@ node ('dora-slave') {
       }
     }
   } catch(Exception e) {
+
+    echo "Failed: ${e}"
+
     publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
     sh ('docker-compose down -v')
     emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
