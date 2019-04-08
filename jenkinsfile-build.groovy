@@ -62,10 +62,11 @@ node ('dora-slave') {
       serverArti = Artifactory.server 'CWDS_DEV'
       rtGradle = Artifactory.newGradleBuild()
       rtGradle.tool = 'Gradle_35'
-      rtGradle.resolver repo:'repo', server: serverArti
+      rtGradle.resolver repo: 'repo', server: serverArti
       rtGradle.deployer.mavenCompatible = true
       rtGradle.deployer.deployMavenDescriptors = true
       rtGradle.useWrapper = true
+      echo 111
       if (env.BUILD_JOB_TYPE == 'hotfix') {
         if (OVERRIDE_VERSION == '') {
           echo 'ERROR: OVERRIDE_VERSION parameter is mandatory for hotfix builds'
@@ -76,14 +77,17 @@ node ('dora-slave') {
           error('branch parameter is mandatory for hotfix builds')
         }
       }
+      echo 222
       overrideVersion = OVERRIDE_VERSION ?: ''
       releaseProject = RELEASE_PROJECT ?: true
+      echo 333
       if (env.BUILD_JOB_TYPE == 'hotfix') {
         tagPrefix = TAG_PREFIX
         newTag = "${tagPrefix}-${overrideVersion}"
         newVersion = ''
       }
       cleanWs()
+      echo 444
       checkout scm
     }
     if (env.BUILD_JOB_TYPE == 'pull_request') {
