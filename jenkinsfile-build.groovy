@@ -29,14 +29,16 @@ node ('dora-slave') {
     def triggerProperties = pullRequestMergedTriggerProperties('cwds-jobs-master')
     properties([
       [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: true],
+      githubConfig(),
       disableConcurrentBuilds(),
-      buildDiscarderDefaults('master'),
-      pipelineTriggers([triggerProperties])
+      pipelineTriggers([triggerProperties]),
+      buildDiscarderDefaults('master')
     ])
   } else if (env.BUILD_JOB_TYPE == 'hotfix') {
     // for hotfix pipeline set the branch specifier on config UI to: ${branch} with the "Lightweight checkout" checkbox disabled
     properties([
       [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+      githubConfig(),
       disableConcurrentBuilds(),
       buildDiscarderDefaults('master'),
       parameters([
@@ -51,6 +53,7 @@ node ('dora-slave') {
     def triggerProperties = githubPullRequestBuilderTriggerProperties()
     properties([
       [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: true],
+      githubConfig(),
       disableConcurrentBuilds(),
       pipelineTriggers([triggerProperties]),
       buildDiscarderDefaults()
