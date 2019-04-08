@@ -66,13 +66,15 @@ node ('dora-slave') {
       rtGradle.deployer.mavenCompatible = true
       rtGradle.deployer.deployMavenDescriptors = true
       rtGradle.useWrapper = true
-      if (env.BUILD_JOB_TYPE == 'hotfix' && OVERRIDE_VERSION == '') {
-        echo 'ERROR: OVERRIDE_VERSION parameter is mandatory for hotfix builds'
-        error('OVERRIDE_VERSION parameter is mandatory for hotfix builds')
-      }
-      if (env.BUILD_JOB_TYPE == 'hotfix' && branch == '') {
-        echo 'ERROR: branch parameter is mandatory for hotfix builds'
-        error('branch parameter is mandatory for hotfix builds')
+      if (env.BUILD_JOB_TYPE == 'hotfix') {
+        if (OVERRIDE_VERSION == '') {
+          echo 'ERROR: OVERRIDE_VERSION parameter is mandatory for hotfix builds'
+          error('OVERRIDE_VERSION parameter is mandatory for hotfix builds')
+        }
+        if (branch == '') {
+          echo 'ERROR: branch parameter is mandatory for hotfix builds'
+          error('branch parameter is mandatory for hotfix builds')
+        }
       }
       overrideVersion = OVERRIDE_VERSION ?: ''
       releaseProject = RELEASE_PROJECT ?: true
