@@ -40,7 +40,7 @@ node ('dora-slave') {
       pipelineTriggers([triggerProperties])
     ])
   } else if (env.BUILD_JOB_TYPE == 'hotfix') {
-    // for hotfix pipeline set the branch specifier on config UI to: ${branch}
+    // for hotfix pipeline set the branch specifier on config UI to: ${branch} with the "Lightweight checkout" checkbox disabled
     properties([
       [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
       disableConcurrentBuilds(),
@@ -64,14 +64,14 @@ node ('dora-slave') {
   }
 
   try {
-    if (env.BUILD_JOB_TYPE == 'hotfix' && params.OVERRIDE_VERSION == '') {
+    if (env.BUILD_JOB_TYPE == 'hotfix' && OVERRIDE_VERSION == '') {
       error('OVERRIDE_VERSION parameter is mandatory for hotfix builds')
     }
-    if (env.BUILD_JOB_TYPE == 'hotfix' && params.branch == '') {
+    if (env.BUILD_JOB_TYPE == 'hotfix' && branch == '') {
       error('branch parameter is mandatory for hotfix builds')
     }
-    overrideVersion = params.OVERRIDE_VERSION ?: ''
-    releaseProject = params.RELEASE_PROJECT ?: true
+    overrideVersion = OVERRIDE_VERSION ?: ''
+    releaseProject = RELEASE_PROJECT ?: true
     stage('Preparation') {
       cleanWs()
       checkout scm
@@ -88,7 +88,7 @@ node ('dora-slave') {
       }
     }
     if (env.BUILD_JOB_TYPE == 'hotfix') {
-      tagPrefix = params.TAG_PREFIX
+      tagPrefix = TAG_PREFIX
       newVersion = "${tagPrefix}-${overrideVersion}"
       overrideVersion = ''
     }
