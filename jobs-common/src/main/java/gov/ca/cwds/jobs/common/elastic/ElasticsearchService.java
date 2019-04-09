@@ -116,7 +116,9 @@ public class ElasticsearchService {
     indexesToDelete.forEach(removeOldIndexesAction::index);
     removeOldIndexesAction.alias(configuration.getElasticsearchAlias());
     request.addAliasAction(addIndexToAliasAction);
-    request.addAliasAction(removeOldIndexesAction);
+    if (!indexesToDelete.isEmpty()) {
+      request.addAliasAction(removeOldIndexesAction);
+    }
     client.admin().indices().aliases(request).actionGet();
     if (LOGGER.isInfoEnabled()) {
       verifyIndexesForAlias();
