@@ -3,7 +3,6 @@ package gov.ca.cwds.jobs.cals.facility.lisfas;
 import static org.junit.Assert.assertEquals;
 
 import gov.ca.cwds.jobs.cals.facility.lisfas.inject.LisFacilityJobModule;
-import gov.ca.cwds.jobs.common.inject.ElasticSearchModule;
 import gov.ca.cwds.jobs.common.inject.JobModule;
 import gov.ca.cwds.jobs.common.inject.MultiThreadModule;
 import java.nio.file.Paths;
@@ -13,10 +12,8 @@ public class LisJobModuleBuilderTest {
 
   @Test
   public void buildJobModuleTest() {
-    JobModule jobModule = new LisJobModuleBuilder().buildJobModule(getModuleArgs());
-    assertEquals(3, jobModule.getModules().size());
-    assertEquals(1,
-        jobModule.getModules().stream().filter(m -> m instanceof ElasticSearchModule).count());
+    JobModule jobModule = new LisJobModuleBuilder().buildJobModule(getModuleArgs(), false);
+    assertEquals(2, jobModule.getModules().size());
     assertEquals(1,
         jobModule.getModules().stream().filter(m -> m instanceof LisFacilityJobModule).count());
     assertEquals(1,

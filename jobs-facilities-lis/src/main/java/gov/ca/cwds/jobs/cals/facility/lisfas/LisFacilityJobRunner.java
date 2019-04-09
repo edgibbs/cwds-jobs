@@ -9,7 +9,7 @@ public final class LisFacilityJobRunner {
 
   public static void main(String[] args) {
     LisJobModuleBuilder jobModuleBuilder = new LisJobModuleBuilder();
-    JobRunner.run(jobModuleBuilder.buildJobModule(args));
+    JobRunner.run(jobModuleBuilder.buildJobModule(args, true));
   }
 
 }

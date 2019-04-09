@@ -7,6 +7,6 @@ import gov.ca.cwds.jobs.common.inject.JobModule;
  */
 public interface JobModuleBuilder {
 
-  JobModule buildJobModule(String[] args);
+  JobModule buildJobModule(String[] args, boolean elasticSearchModule);
 
 }

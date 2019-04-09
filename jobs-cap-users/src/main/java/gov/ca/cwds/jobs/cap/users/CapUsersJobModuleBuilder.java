@@ -16,7 +16,7 @@ import gov.ca.cwds.jobs.common.mode.JobMode;
 public class CapUsersJobModuleBuilder implements JobModuleBuilder {
 
   @Override
-  public JobModule buildJobModule(String[] args) {
+  public JobModule buildJobModule(String[] args, boolean elasticSearchModule) {
     JobOptions jobOptions = JobOptions.parseCommandLine(args);
     CapUsersJobConfiguration jobConfiguration = JobConfiguration
         .getJobsConfiguration(CapUsersJobConfiguration.class, jobOptions.getConfigFileLocation());
@@ -25,7 +25,9 @@ public class CapUsersJobModuleBuilder implements JobModuleBuilder {
     elasticsearchConfiguration.setIndexSettings("cap.users.settings.json");
     elasticsearchConfiguration.setDocumentMapping("cap.users.mapping.json");
     JobMode jobMode = getCurrentJobMode(jobOptions.getLastRunLoc());
-    jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode));
+    if (elasticSearchModule) {
+      jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode));
+    }
     jobModule.addModule(new CapUsersJobModule(jobConfiguration, jobMode));
     return jobModule;
   }
