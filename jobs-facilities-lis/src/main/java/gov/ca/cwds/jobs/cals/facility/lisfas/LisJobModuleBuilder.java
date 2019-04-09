@@ -18,7 +18,7 @@ import gov.ca.cwds.jobs.common.mode.JobMode;
 public class LisJobModuleBuilder implements JobModuleBuilder {
 
   @Override
-  public JobModule buildJobModule(String[] args) {
+  public JobModule buildJobModule(String[] args, boolean elasticSearchModule) {
     JobOptions jobOptions = JobOptions.parseCommandLine(args);
     LisFacilityJobConfiguration jobConfiguration = JobConfiguration
         .getJobsConfiguration(LisFacilityJobConfiguration.class,
@@ -28,7 +28,9 @@ public class LisJobModuleBuilder implements JobModuleBuilder {
     elasticsearchConfiguration.setDocumentMapping("facility.mapping.json");
     elasticsearchConfiguration.setIndexSettings("facility.settings.json");
     JobMode jobMode = getCurrentJobMode(jobOptions.getLastRunLoc());
-    jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode));
+    if (elasticSearchModule) {
+      jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode));
+    }
     jobModule.addModules(new MultiThreadModule(jobConfiguration.getMultiThread()));
     jobModule.addModule(new LisFacilityJobModule(jobConfiguration, jobMode));
     return jobModule;

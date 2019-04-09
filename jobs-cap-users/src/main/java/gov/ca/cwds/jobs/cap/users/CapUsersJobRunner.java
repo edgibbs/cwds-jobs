@@ -10,7 +10,7 @@ public final class CapUsersJobRunner {
 
   public static void main(String[] args) {
     CapUsersJobModuleBuilder jobModuleBuilder = new CapUsersJobModuleBuilder();
-    JobRunner.run(jobModuleBuilder.buildJobModule(args));
+    JobRunner.run(jobModuleBuilder.buildJobModule(args, true));
   }
 
 }

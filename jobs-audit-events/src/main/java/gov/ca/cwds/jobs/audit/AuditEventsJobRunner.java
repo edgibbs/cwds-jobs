@@ -9,7 +9,7 @@ public class AuditEventsJobRunner {
 
   public static void main(String[] args) {
     AuditEventsJobModuleBuilder jobModuleBuilder = new AuditEventsJobModuleBuilder();
-    JobRunner.run(jobModuleBuilder.buildJobModule(args));
+    JobRunner.run(jobModuleBuilder.buildJobModule(args, true));
   }
 
 }
