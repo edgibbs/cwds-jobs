@@ -126,7 +126,7 @@ public class ElasticsearchService {
   }
 
   private void verifyIndexesForAlias() {
-    LOGGER.info("Verification: alias {}, indexes [{}]", configuration.getElasticsearchAlias(),
+    LOGGER.info("Verification: alias [{}], indexes {}", configuration.getElasticsearchAlias(),
         getIndexesForAlias());
   }
 
