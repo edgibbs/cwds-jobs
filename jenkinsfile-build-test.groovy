@@ -95,7 +95,11 @@ node ('dora-slave') {
             }
             cleanWs()
             checkout scm
-
+        }
+        if (env.BUILD_JOB_TYPE == 'pull_request') {
+            stage('Check for Labels') {
+                checkForLabel('cwds-jobs', tagPrefixes)
+            }
         }
         if (env.BUILD_JOB_TYPE == 'master') {
             stage('Increment Tag') {
