@@ -39,7 +39,6 @@ node ('dora-slave'){
                 withCredentials([usernamePassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', usernameVariable: 'JENKINS_USER', passwordVariable: 'JENKINS_API_TOKEN')]) {
                     def jobParams = "token=${JENKINS_TRIGGER_TOKEN}&versionIncrement=${versionIncrement}&triggered_by=${jobBackLink}&tagPrefix=${tagPrefix}"
                     def jobLink = "http://jenkins.dev.cwds.io:8080/job/cwds-jobs-test/buildWithParameters?${jobParams}"
-                    debug("Calling cwds-jobs release job")
                     sh "curl -v -u '${JENKINS_USER}:${JENKINS_API_TOKEN}' '${jobLink}'"
                 }
             }
