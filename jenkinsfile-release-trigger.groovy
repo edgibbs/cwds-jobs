@@ -31,7 +31,7 @@ node ('dora-slave'){
         }
         stage('Run release jobs') {
             echo 'run jobs'
-            def labels = getPRLabels('cwds-jobs')
+            def labels = getPRLabels()
             def foundTagPrefixes = labels.findAll { label -> tagPrefixes.contains(label) }
             def versionIncrement = versionIncrement(labels)
 
@@ -58,5 +58,5 @@ node ('dora-slave'){
     }finally {
         cleanWs()
     }
-    
+
 }
