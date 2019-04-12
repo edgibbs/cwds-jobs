@@ -32,14 +32,15 @@ node ('dora-slave'){
         stage('Run release jobs') {
             echo 'run jobs'
             def labels = getPRLabels()
+            for(String lab in labels) {
+                echo lab
+            }
             def foundTagPrefixes = labels.findAll { label -> tagPrefixes.contains(label) }
             def versionIncrement = versionIncrement(labels)
-
             def jobBackLink = "http://jenkins.dev.cwds.io:8080/job/cwds-jobs-pull-request/${env.BUILD_ID}/"
+            echo jobBackLink
             for(String tagPrefix in foundTagPrefixes) {
-                withCredentials([usernamePassword(credentialsId: $ {
-                    GITHUB_CREDENTIALS_ID
-                }, usernameVariable: 'JENKINS_USER', passwordVariable: 'JENKINS_API_TOKEN')]) {
+                withCredentials([usernamePassword(credentialsId: ${GITHUB_CREDENTIALS_ID}, usernameVariable: 'JENKINS_USER', passwordVariable: 'JENKINS_API_TOKEN')]) {
                     def jobParams = "token=${JENKINS_TRIGGER_TOKEN}&versionIncrement=${versionIncrement}&triggered_by=${jobBackLink}&tagPrefix=${tagPrefix}"
                     def jobLink = "http://jenkins.dev.cwds.io:8080/job/cwds-jobs-test/buildWithParameters?${jobParams}"
                     debug("Calling cwds-jobs release job")
