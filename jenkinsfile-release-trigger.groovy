@@ -25,26 +25,25 @@ node ('dora-slave'){
     ])
     try {
         stage('Preparation') {
+            echo 'preparation'
             cleanWs()
-            git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/cwds-jobs.git'
             checkout scm
         }
-        if (env.BUILD_JOB_TYPE == 'master') {
-            stage('Run release jobs') {
-                def labels = getPRLabels('cwds-jobs')
-                def foundTagPrefixes = labels.findAll { label -> tagPrefixes.contains(label) }
-                def versionIncrement = versionIncrement(labels)
+        stage('Run release jobs') {
+            echo 'run jobs'
+            def labels = getPRLabels('cwds-jobs')
+            def foundTagPrefixes = labels.findAll { label -> tagPrefixes.contains(label) }
+            def versionIncrement = versionIncrement(labels)
 
-                def jobBackLink = "http://jenkins.dev.cwds.io:8080/job/cwds-jobs-pull-request/${env.BUILD_ID}/"
-                for(String tagPrefix in foundTagPrefixes) {
-                    withCredentials([usernamePassword(credentialsId: $ {
-                        GITHUB_CREDENTIALS_ID
-                    }, usernameVariable: 'JENKINS_USER', passwordVariable: 'JENKINS_API_TOKEN')]) {
-                        def jobParams = "token=${JENKINS_TRIGGER_TOKEN}&versionIncrement=${versionIncrement}&triggered_by=${jobBackLink}&tagPrefix=${tagPrefix}"
-                        def jobLink = "http://jenkins.dev.cwds.io:8080/job/cwds-jobs-test/buildWithParameters?${jobParams}"
-                        debug("Calling cwds-jobs release job")
-                        sh "curl -v -u '${JENKINS_USER}:${JENKINS_API_TOKEN}' '${jobLink}'"
-                    }
+            def jobBackLink = "http://jenkins.dev.cwds.io:8080/job/cwds-jobs-pull-request/${env.BUILD_ID}/"
+            for(String tagPrefix in foundTagPrefixes) {
+                withCredentials([usernamePassword(credentialsId: $ {
+                    GITHUB_CREDENTIALS_ID
+                }, usernameVariable: 'JENKINS_USER', passwordVariable: 'JENKINS_API_TOKEN')]) {
+                    def jobParams = "token=${JENKINS_TRIGGER_TOKEN}&versionIncrement=${versionIncrement}&triggered_by=${jobBackLink}&tagPrefix=${tagPrefix}"
+                    def jobLink = "http://jenkins.dev.cwds.io:8080/job/cwds-jobs-test/buildWithParameters?${jobParams}"
+                    debug("Calling cwds-jobs release job")
+                    sh "curl -v -u '${JENKINS_USER}:${JENKINS_API_TOKEN}' '${jobLink}'"
                 }
             }
         }
