@@ -34,7 +34,6 @@ node ('dora-slave') {
                 [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: true],
                 githubConfig(),
                 disableConcurrentBuilds(),
-                pipelineTriggers([triggerProperties]),
                 buildDiscarderDefaults('master'),
                 parameters([
                         string(defaultValue: '', description: '', name: 'versionIncrement'),
