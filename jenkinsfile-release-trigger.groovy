@@ -6,11 +6,6 @@ import groovy.transform.Field
 def GITHUB_CREDENTIALS_ID = '433ac100-b3c2-4519-b4d6-207c029a103b'
 
 @Field
-def serverArti
-@Field
-def rtGradle
-
-@Field
 def tagPrefixes = ['audit-events', 'cap-users', 'facilities-cws', 'facilities-lis']
 
 
@@ -19,45 +14,20 @@ def githubConfig() {
 }
 
 node ('dora-slave'){
-    if (env.BUILD_JOB_TYPE == 'master') {
-        // for master pipeline set the branch specifier on config UI to: master
-        def triggerProperties = pullRequestMergedTriggerProperties('cwds-jobs-master')
-        properties([
-                [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: true],
-                githubConfig(),
-                disableConcurrentBuilds(),
-                pipelineTriggers([triggerProperties]),
-                buildDiscarderDefaults('master')
-        ])
-    } else { // BUILD_JOB_TYPE=pull_request
-        // for PR pipeline set the branch specifier on config UI to: ${ghprbActualCommit} with the "Lightweight checkout" checkbox disabled
-        def triggerProperties = githubPullRequestBuilderTriggerProperties()
-        properties([
-                [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: true],
-                githubConfig(),
-                disableConcurrentBuilds(),
-                pipelineTriggers([triggerProperties]),
-                buildDiscarderDefaults()
-        ])
-    }
+    // for master pipeline set the branch specifier on config UI to: master
+    def triggerProperties = pullRequestMergedTriggerProperties('cwds-jobs-master')
+    properties([
+            [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: true],
+            githubConfig(),
+            disableConcurrentBuilds(),
+            pipelineTriggers([triggerProperties]),
+            buildDiscarderDefaults('master')
+    ])
     try {
         stage('Preparation') {
             cleanWs()
             git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/cwds-jobs.git'
-            serverArti = Artifactory.server 'CWDS_DEV'
-            rtGradle = Artifactory.newGradleBuild()
-            rtGradle.tool = "Gradle_35"
-            rtGradle.resolver repo:'repo', server: serverArti
-            rtGradle.deployer.mavenCompatible = true
-            rtGradle.deployer.deployMavenDescriptors = true
-            rtGradle.useWrapper = true
             checkout scm
-        }
-        stage('Tests and Coverage') {
-            rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
-        }
-        stage('SonarQube analysis'){
-            lint(rtGradle)
         }
         if (env.BUILD_JOB_TYPE == 'master') {
             stage('Run release jobs') {
