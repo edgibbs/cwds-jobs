@@ -36,7 +36,7 @@ node ('dora-slave'){
             def versionIncrement = versionIncrement(labels)
             def jobBackLink = "http://jenkins.dev.cwds.io:8080/job/cwds-jobs-pull-request/${env.BUILD_ID}/"
             for(String tagPrefix in foundTagPrefixes) {
-                withCredentials([usernamePassword(credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', usernameVariable: 'JENKINS_USER', passwordVariable: 'JENKINS_API_TOKEN')]) {
+                withCredentials([usernamePassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', usernameVariable: 'JENKINS_USER', passwordVariable: 'JENKINS_API_TOKEN')]) {
                     def jobParams = "token=${JENKINS_TRIGGER_TOKEN}&versionIncrement=${versionIncrement}&triggered_by=${jobBackLink}&tagPrefix=${tagPrefix}"
                     def jobLink = "http://jenkins.dev.cwds.io:8080/job/cwds-jobs-test/buildWithParameters?${jobParams}"
                     debug("Calling cwds-jobs release job")
