@@ -6,7 +6,6 @@ import gov.ca.cwds.idm.dto.UsersPage;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 public interface IdmService {
   UsersPage getUserPage(String paginationToken);

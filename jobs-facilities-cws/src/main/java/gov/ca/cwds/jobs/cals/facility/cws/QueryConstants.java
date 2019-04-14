@@ -8,6 +8,7 @@ import gov.ca.cwds.jobs.common.RecordChangeOperation;
 public final class QueryConstants {
 
   private QueryConstants() {
+    // utility class
   }
 
   public static final String DATE_AFTER = "dateAfter";
@@ -32,6 +33,7 @@ public final class QueryConstants {
   public static class InitialMode {
 
     private InitialMode() {
+      // utility class
     }
 
     private static String TIMESTAMP_FIELD_NAME = "home.lastUpdatedTime";
@@ -60,6 +62,7 @@ public final class QueryConstants {
   public static class IncrementalMode {
 
     private IncrementalMode() {
+      // utility class
     }
 
     private static String TIMESTAMP_FIELD_NAME = "home.replicationLastUpdated";

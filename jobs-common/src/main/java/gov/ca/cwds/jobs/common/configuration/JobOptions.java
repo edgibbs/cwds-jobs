@@ -180,10 +180,8 @@ public class JobOptions {
 
     // check option: -l
     File timeFilesDir = new File(jobOptions.getLastRunLoc());
-    if (!timeFilesDir.exists()) {
-      if (timeFilesDir.mkdir() && (LOGGER.isInfoEnabled())) {
-        LOGGER.info("{} was created in file system", getPathToOutputDirectory(jobOptions));
-      }
+    if (createTimeFilesDirIfMissing(timeFilesDir) && LOGGER.isInfoEnabled()) {
+      LOGGER.info("{} was created in file system", getPathToOutputDirectory(jobOptions));
     }
 
     if (LOGGER.isInfoEnabled()) {
@@ -192,4 +190,7 @@ public class JobOptions {
     return jobOptions;
   }
 
+  private static boolean createTimeFilesDirIfMissing(File timeFilesDir) {
+    return !timeFilesDir.exists() && timeFilesDir.mkdir();
+  }
 }
