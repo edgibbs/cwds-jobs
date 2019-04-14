@@ -8,8 +8,11 @@ import gov.ca.cwds.jobs.cap.users.service.CwsChangedUsersService;
 import gov.ca.cwds.jobs.cap.users.service.exception.IdmServiceException;
 import gov.ca.cwds.jobs.common.elastic.BulkCollector;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CapUsersIncrementalUpdatesProcessor {
+  private static final Logger LOGGER = LoggerFactory.getLogger(CapUsersIncrementalUpdatesProcessor.class);
 
   @Inject
   private BulkCollector<ChangedUserDto> elasticSearchBulkCollector;
@@ -25,11 +28,13 @@ public class CapUsersIncrementalUpdatesProcessor {
     try {
       loadEntities(cwsChangedUsersService.getCwsChanges());
     } catch (IdmServiceException e) {
+      LOGGER.error(e.getMessage(), e);
       jobResult.setCwsPartSuccess(false);
     }
     try {
       loadEntities(capChangedUsersService.getCapChanges());
     } catch (IdmServiceException e) {
+      LOGGER.error(e.getMessage(), e);
       jobResult.setCapPartSuccess(false);
     }
     elasticSearchBulkCollector.flush();
