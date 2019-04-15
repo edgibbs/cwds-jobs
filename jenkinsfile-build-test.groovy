@@ -102,7 +102,7 @@ node ('dora-slave') {
         }
         if (env.BUILD_JOB_TYPE == 'master') {
             stage('Increment Tag') {
-                newTag = newSemVer(env.versionIncrement, env.tagPrefix)
+                newTag = newSemVer(env.versionIncrement, tagPrefixes, env.tagPrefix)
                 (tagPrefix, newVersion) = (newTag =~ /^(.+)\-(\d+\.\d+\.\d+)/).with { it[0][1,2] }
             }
         }
