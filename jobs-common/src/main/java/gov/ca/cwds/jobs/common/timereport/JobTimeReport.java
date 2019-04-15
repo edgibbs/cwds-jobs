@@ -19,7 +19,7 @@ public class JobTimeReport {
     TimeSpentUtil.printTimeSpent("Overall batch processing", jobStartTime);
   }
 
-  public float getCompletionPercent(int finishedBatchNumber) {
+  public float getCompletionPercent() {
     return 0;
   }
 }

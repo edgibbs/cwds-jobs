@@ -23,6 +23,6 @@ public class JobTimeReportTest {
         RecordChangeOperation.I,
         new LocalDateTimeSavePoint(null));
     JobTimeReport jobTimeReport = new JobTimeReport();
-    assertEquals(50, jobTimeReport.getCompletionPercent(0), 0.0000001);
+    assertEquals(50, jobTimeReport.getCompletionPercent(), 0.0000001);
   }
 }
