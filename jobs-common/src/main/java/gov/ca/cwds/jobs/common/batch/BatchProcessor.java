@@ -59,9 +59,6 @@ public class BatchProcessor<E, S extends SavePoint> {
     if (!JobExceptionHandler.isExceptionHappened()) {
       LOGGER.info("Save point has been reached. Batch save point is {}. Trying to save", savePoint);
       savePointService.saveSavePoint(savePoint);
-      if (LOGGER.isInfoEnabled()) {
-        //TODO  jobTimeReport.printTimeReport(portionBatchNumber);
-      }
     } else {
       LOGGER.error("Exception occured during batch processing. Job has been terminated." +
           " Batch timestamp {} has not been recorded", savePoint);
