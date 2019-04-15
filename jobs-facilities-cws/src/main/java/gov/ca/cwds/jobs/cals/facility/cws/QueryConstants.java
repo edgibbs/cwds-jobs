@@ -32,7 +32,7 @@ public final class QueryConstants {
 
   public static class InitialMode {
 
-    @SuppressWarnings("squid:S00115") // the name TIMESTAMP_FIELD_NAME matches the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'
+    @SuppressWarnings("squid:S3008") // the name TIMESTAMP_FIELD_NAME matches the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'
     private static String TIMESTAMP_FIELD_NAME = "home.lastUpdatedTime";
 
     public static final String GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY =
@@ -62,7 +62,7 @@ public final class QueryConstants {
 
   public static class IncrementalMode {
 
-    @SuppressWarnings("squid:S00115") // the name TIMESTAMP_FIELD_NAME matches the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'
+    @SuppressWarnings("squid:S3008") // the name TIMESTAMP_FIELD_NAME matches the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'
     private static String TIMESTAMP_FIELD_NAME = "home.replicationLastUpdated";
 
     public static final String GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY =
