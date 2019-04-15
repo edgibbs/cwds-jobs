@@ -17,6 +17,7 @@ public abstract class DataAccessModule extends AbstractModule {
 
   private SessionFactory sessionFactory;
 
+  @SuppressWarnings("squid:S1147") // suppressing "Exit methods should not be called" since we really need it here
   public DataAccessModule(DataSourceFactory dataSourceFactory,
       String dataSourceName, List<Class<?>> entityClasses) {
     try {
