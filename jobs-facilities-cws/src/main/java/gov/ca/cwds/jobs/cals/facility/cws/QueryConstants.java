@@ -7,10 +7,6 @@ import gov.ca.cwds.jobs.common.RecordChangeOperation;
  */
 public final class QueryConstants {
 
-  private QueryConstants() {
-    // utility class
-  }
-
   public static final String DATE_AFTER = "dateAfter";
 
   public static final String DATE_BEFORE = "dateBefore";
@@ -30,11 +26,11 @@ public final class QueryConstants {
       "select max(home.replicationLastUpdated)"
           + SHARED_PART;
 
-  public static class InitialMode {
+  private QueryConstants() {
+    // utility class
+  }
 
-    private InitialMode() {
-      // utility class
-    }
+  public static class InitialMode {
 
     private static String TIMESTAMP_FIELD_NAME = "home.lastUpdatedTime";
 
@@ -57,13 +53,13 @@ public final class QueryConstants {
         "select " + InitialMode.TIMESTAMP_FIELD_NAME + SHARED_PART
             + AND + InitialMode.TIMESTAMP_FIELD_NAME + " > :" + DATE_AFTER +
             ORDER_BY + InitialMode.TIMESTAMP_FIELD_NAME + ", " + HOME_IDENTIFIER_FIELD_NAME;
+
+    private InitialMode() {
+      // utility class
+    }
   }
 
   public static class IncrementalMode {
-
-    private IncrementalMode() {
-      // utility class
-    }
 
     private static String TIMESTAMP_FIELD_NAME = "home.replicationLastUpdated";
 
@@ -86,6 +82,9 @@ public final class QueryConstants {
             + AND + IncrementalMode.TIMESTAMP_FIELD_NAME + " > :" + DATE_AFTER +
             ORDER_BY + IncrementalMode.TIMESTAMP_FIELD_NAME + ", " + HOME_IDENTIFIER_FIELD_NAME;
 
+    private IncrementalMode() {
+      // utility class
+    }
   }
 
 }
