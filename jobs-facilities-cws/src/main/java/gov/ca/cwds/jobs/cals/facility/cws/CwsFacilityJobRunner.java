@@ -9,7 +9,7 @@ public final class CwsFacilityJobRunner {
 
   public static void main(String[] args) {
     CwsJobModuleBuilder jobModuleBuilder = new CwsJobModuleBuilder();
-    JobRunner.run(jobModuleBuilder.buildJobModule(args));
+    JobRunner.run(jobModuleBuilder.buildJobModule(args, true));
   }
 
 }

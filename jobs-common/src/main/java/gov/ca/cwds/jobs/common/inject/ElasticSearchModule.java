@@ -14,25 +14,26 @@ import org.elasticsearch.client.Client;
  */
 public class ElasticSearchModule extends AbstractModule {
 
+
+  private final Client client;
   private ElasticsearchConfiguration configuration;
-  private JobMode jobMode;
+  private String indexName;
 
   public ElasticSearchModule(ElasticsearchConfiguration configuration,
       JobMode jobMode) {
     this.configuration = configuration;
-    this.jobMode = jobMode;
+    this.client = ElasticUtils
+        .createAndConfigureESClient(configuration); //must be closed when the job done
+    ElasticsearchService service = new ElasticsearchService();
+    service.setClient(client);
+    service.setConfiguration(configuration);
+    indexName = jobMode == INITIAL_LOAD ? service.createNewIndex() : service.getExistingIndex();
   }
 
   @Override
   protected void configure() {
-    Client client = ElasticUtils
-        .createAndConfigureESClient(configuration); //must be closed when the job done
     bind(Client.class).toInstance(client);
     bind(ElasticsearchConfiguration.class).toInstance(configuration);
-    ElasticsearchService service = new ElasticsearchService();
-    service.setClient(client);
-    service.setConfiguration(configuration);
-    String indexName = jobMode == INITIAL_LOAD ? service.createNewIndex() : service.getExistingIndex();
     bindConstant().annotatedWith(IndexName.class).to(indexName);
   }
 

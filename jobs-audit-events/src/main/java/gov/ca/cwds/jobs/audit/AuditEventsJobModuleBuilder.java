@@ -17,7 +17,7 @@ import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 public class AuditEventsJobModuleBuilder implements JobModuleBuilder {
 
   @Override
-  public JobModule buildJobModule(String[] args) {
+  public JobModule buildJobModule(String[] args, boolean elasticSearchModule) {
     JobOptions jobOptions = JobOptions.parseCommandLine(args);
     AuditEventsJobConfiguration jobConfiguration = JobConfiguration
         .getJobsConfiguration(AuditEventsJobConfiguration.class,
@@ -27,8 +27,10 @@ public class AuditEventsJobModuleBuilder implements JobModuleBuilder {
     elasticsearchConfiguration.setIndexSettings("audit.events.settings.json");
     elasticsearchConfiguration.setDocumentMapping("audit.events.mapping.json");
     JobMode jobMode = getJobMode(jobOptions.getLastRunLoc());
-    jobModule
-        .addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode));
+    if (elasticSearchModule) {
+      jobModule
+          .addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode));
+    }
     jobModule.addModule(new MultiThreadModule(jobConfiguration.getMultiThread()));
     jobModule.addModule(new AuditEventsJobModule(jobConfiguration, jobMode));
     return jobModule;

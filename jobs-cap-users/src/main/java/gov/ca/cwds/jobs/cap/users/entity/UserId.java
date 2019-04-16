@@ -43,6 +43,8 @@ public class UserId extends CmsPersistentObject {
 
   public static final String CWSCMS_INCREMENTAL_LOAD_QUERY_NAME = "UserId.cwscmsIncrementalLoadQuery";
   public static final String GET_MAX_LAST_UPDATED_TIME_QUERY_NAME = "UserId.getMaxLastUpdatedTime";
+  
+  @SuppressWarnings("squid:S00115") // the name CWSCMS_All_RACFIDS_QUERY_NAME matches the regular expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'
   public static final String CWSCMS_All_RACFIDS_QUERY_NAME = "UserId.cwscmsAllRacfIds";
 
   @Id

@@ -104,7 +104,7 @@ public class ElasticsearchService {
             Collectors.toList());
     LOGGER.info("Found old indexes {} for alias [{}]", indexesToDelete,
         configuration.getElasticsearchAlias());
-    LOGGER.info("Adding new index [{}] and removing old indexes {} for alias [{}] ", getIndexName(),
+    LOGGER.info("Adding new index [{}] and removing old indexes {} for alias [{}] ", indexName,
         indexesToDelete, configuration.getElasticsearchAlias());
     IndicesAliasesRequest request = new IndicesAliasesRequest();
     AliasActions addIndexToAliasAction = AliasActions.add()
@@ -114,7 +114,9 @@ public class ElasticsearchService {
     indexesToDelete.forEach(removeOldIndexesAction::index);
     removeOldIndexesAction.alias(configuration.getElasticsearchAlias());
     request.addAliasAction(addIndexToAliasAction);
-    request.addAliasAction(removeOldIndexesAction);
+    if (!indexesToDelete.isEmpty()) {
+      request.addAliasAction(removeOldIndexesAction);
+    }
     getAliasesAction(request);
     if (LOGGER.isInfoEnabled()) {
       verifyIndexesForAlias();

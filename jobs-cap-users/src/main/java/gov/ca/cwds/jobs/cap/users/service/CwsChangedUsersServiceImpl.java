@@ -11,7 +11,6 @@ import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import io.dropwizard.hibernate.UnitOfWork;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.shiro.util.CollectionUtils;
 import org.slf4j.Logger;

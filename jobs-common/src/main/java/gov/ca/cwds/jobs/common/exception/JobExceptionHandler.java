@@ -14,6 +14,10 @@ public class JobExceptionHandler {
 
   private static AtomicBoolean exceptionHappened = new AtomicBoolean(false);
 
+  private JobExceptionHandler() {
+    // utility class
+  }
+
   public static void handleException(String message, Throwable e) {
     LOGGER.error(message, e);
     exceptionHappened.set(true);
