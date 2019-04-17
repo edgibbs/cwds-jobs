@@ -1,6 +1,6 @@
 import groovy.transform.Field
 
-@Library('jenkins-pipeline-utils-FIT-525') _
+@Library('jenkins-pipeline-utils') _
 
 @Field
 def GITHUB_CREDENTIALS_ID = '433ac100-b3c2-4519-b4d6-207c029a103b'
@@ -141,9 +141,9 @@ node ('dora-slave') {
         echo e.message
         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
         sh ('docker-compose down -v')
-        //   emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-        //           subject: "Jobs failed with ${e.message}", to: "Alex.Serbin@osi.ca.gov"
-        //   slackSend channel: '#cals-api', baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', message: "Build Falled: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+        emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+        subject: "Jobs failed with ${e.message}", to: "Alex.Serbin@osi.ca.gov"
+        slackSend channel: '#cals-api', baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', message: "Build Falled: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
         currentBuild.result = 'FAILURE'
         throw e
     } finally {
