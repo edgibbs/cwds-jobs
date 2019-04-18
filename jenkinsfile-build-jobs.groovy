@@ -114,9 +114,9 @@ node ('dora-slave') {
         stage('Tests and Coverage') {
             rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
         }
-        stage('SonarQube analysis'){
-            lint(rtGradle)
-        }
+//        stage('SonarQube analysis'){
+//            lint(rtGradle)
+//        }
         if (env.BUILD_JOB_TYPE == 'master') {
             stage('Update License Report') {
                 updateLicenseReport('master', GITHUB_CREDENTIALS_ID, [runtimeGradle: rtGradle])
