@@ -6,14 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.Validate;
-import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest.AliasActions;
-import org.elasticsearch.action.admin.indices.alias.exists.AliasesExistResponse;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -50,8 +49,7 @@ public class ElasticsearchService {
   public boolean checkAliasExists() {
     GetAliasesRequest request = new GetAliasesRequest();
     request.aliases(configuration.getElasticsearchAlias());
-    ActionFuture<AliasesExistResponse> response = client.admin().indices().aliasesExist(request);
-    return response.actionGet().exists();
+    return checkAliasExists(request);
   }
 
   public List<String> getIndexesForAlias() {
@@ -110,7 +108,7 @@ public class ElasticsearchService {
         indexesToDelete, configuration.getElasticsearchAlias());
     IndicesAliasesRequest request = new IndicesAliasesRequest();
     AliasActions addIndexToAliasAction = AliasActions.add()
-        .index(indexName)
+        .index(getIndexName())
         .alias(configuration.getElasticsearchAlias());
     AliasActions removeOldIndexesAction = AliasActions.remove();
     indexesToDelete.forEach(removeOldIndexesAction::index);
@@ -119,7 +117,7 @@ public class ElasticsearchService {
     if (!indexesToDelete.isEmpty()) {
       request.addAliasAction(removeOldIndexesAction);
     }
-    client.admin().indices().aliases(request).actionGet();
+    getAliasesAction(request);
     if (LOGGER.isInfoEnabled()) {
       verifyIndexesForAlias();
     }
@@ -134,26 +132,26 @@ public class ElasticsearchService {
     removeRedundantIndexIfExists();
     IndicesAliasesRequest request = new IndicesAliasesRequest();
     AliasActions aliasAction = AliasActions.add()
-        .index(indexName)
+        .index(getIndexName())
         .alias(configuration.getElasticsearchAlias());
     request.addAliasAction(aliasAction);
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Creating alias [{}] for index [{}] ", configuration.getElasticsearchAlias(),
-          indexName);
+          getIndexName());
     }
-    client.admin().indices().aliases(request).actionGet();
+    getAliasesAction(request);
   }
 
   private void removeRedundantIndexIfExists() {
     IndicesExistsRequest request = new IndicesExistsRequest();
     request.indices(configuration.getElasticsearchAlias());
-    if (client.admin().indices().exists(request).actionGet().isExists()) {
+    if (checkIndicesExists(request)) {
       LOGGER.warn("Orphan ES index [{}] discovered ", configuration.getElasticsearchAlias());
       DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest();
       deleteIndexRequest.indices(configuration.getElasticsearchAlias());
       LOGGER
           .info("Removing orphan ES index [{}] ", configuration.getElasticsearchAlias());
-      client.admin().indices().delete(deleteIndexRequest).actionGet();
+      deleteIndex(deleteIndexRequest);
     }
   }
 
@@ -163,5 +161,25 @@ public class ElasticsearchService {
 
   public void setClient(Client client) {
     this.client = client;
+  }
+
+  public String getIndexName() {
+    return indexName;
+  }
+
+  protected boolean checkAliasExists(GetAliasesRequest request) {
+    return client.admin().indices().aliasesExist(request).actionGet().exists();
+  }
+
+  protected void getAliasesAction(IndicesAliasesRequest request) {
+    client.admin().indices().aliases(request).actionGet();
+  }
+
+  protected DeleteIndexResponse deleteIndex(DeleteIndexRequest deleteIndexRequest) {
+    return client.admin().indices().delete(deleteIndexRequest).actionGet();
+  }
+
+  protected boolean checkIndicesExists(IndicesExistsRequest request) {
+    return client.admin().indices().exists(request).actionGet().isExists();
   }
 }

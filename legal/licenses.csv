@@ -225,7 +225,7 @@
 "gov.ca.cwds.api:legacy-data-access:1.7.4_829-RC",,,,
 "gov.ca.cwds.api:legacy-data-access-services:1.7.4_829-RC",,,,
 "gov.ca.cwds.api:perry:6.2.0",,,,
-"gov.ca.cwds.cals:cals-api:1.7.19",,,,
+"gov.ca.cwds.cals:cals-api:1.7.21",,,,
 "gov.ca.cwds.cals:cals-ns-data-model:0.10.2_706-RC",,,,
 "gov.ca.cwds.cals:perry-data-model:0.11.2_726-RC",,,,
 "gov.ca.cwds.services:dms-client:0.7.4_113-RC",,,,

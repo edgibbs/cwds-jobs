@@ -48,8 +48,7 @@ node ('dora-slave') {
       parameters([
         string(defaultValue: 'master', description: '', name: 'branch'),
         choice(choices: tagPrefixes, description: 'tag prefix', name: 'TAG_PREFIX'),
-        string(defaultValue: '', description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
-        booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT')
+        string(defaultValue: '', description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION')
       ])
     ])
   } else { // BUILD_JOB_TYPE=pull_request
@@ -83,7 +82,6 @@ node ('dora-slave') {
           throw new Exception('branch parameter is mandatory for hotfix builds')
         }
         overrideVersion = OVERRIDE_VERSION
-        releaseProject = RELEASE_PROJECT
         tagPrefix = TAG_PREFIX
         newTag = "${tagPrefix}-${overrideVersion}"
         newVersion = ''
