@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Provides;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.cals.inject.XaCmsSessionFactory;
+import gov.ca.cwds.cals.persistence.model.cwscms.SecondarySubstituteCareProviderInfo;
 import gov.ca.cwds.cms.data.access.inject.DataAccessServicesSessionFactory;
 import gov.ca.cwds.data.legacy.cms.dao.ClientDao;
 import gov.ca.cwds.data.legacy.cms.dao.CountiesDao;
@@ -102,6 +103,7 @@ public class CwsCmsRsDataAccessModule extends DataAccessModule {
           , SubCareProviderPhoneticName.class
           , NameType.class
           , ApplicationAndLicenseStatusHistory.class
+          , SecondarySubstituteCareProviderInfo.class
       ).build();
 
   public CwsCmsRsDataAccessModule(DataSourceFactory dataSourceFactory) {
