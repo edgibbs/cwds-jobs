@@ -6,6 +6,10 @@
       "keyword_lowercase": {
         "tokenizer": "keyword",
         "filter": ["lowercase"]
+      },
+      "dbl_metaphone": {
+        "tokenizer": "standard",
+        "filter":    "dbl_metaphone"
       }
     }
   }
