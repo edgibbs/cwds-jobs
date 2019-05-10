@@ -4,16 +4,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gov.ca.cwds.jobs.common.exception.JobsException;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.junit.Before;
@@ -26,12 +33,47 @@ import org.mockito.Spy;
 
 public class ElasticsearchServiceTest {
 
-  @Spy @InjectMocks private ElasticsearchService elasticsearchService;
-  @Mock private ElasticsearchConfiguration configuration;
+  @Spy
+  @InjectMocks
+  private ElasticsearchService elasticsearchService;
+
+  @Mock
+  private ElasticsearchConfiguration configuration;
+
+  @Mock
+  private ElasticApiWrapper elasticApiWrapper;
+
+  @Mock
+  private CreateIndexRequestBuilder createIndexRequestBuilder;
 
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
+  }
+
+  @Test(expected = JobsException.class)
+  public void testIndexIsNotCreatedProperly() throws IOException {
+    Map<String, Object> mapping = new HashMap<>();
+    Map<String, Object> propertiesMap = new HashMap<>();
+    mapping.put("properties", propertiesMap);
+    runCreateIndexTest(mapping);
+  }
+
+  @Test
+  public void testIndexCreatedWithCustomMapping() throws IOException {
+    Map<String, Object> mapping = new HashMap<>();
+    Map<String, Object> propertiesMap = new HashMap<>();
+    propertiesMap.put(ElasticsearchService.CUSTOM_CHECK, "");
+    mapping.put("properties", propertiesMap);
+    runCreateIndexTest(mapping);
+  }
+
+  private void runCreateIndexTest(Map<String, Object> expecedMapping) throws IOException {
+    when(elasticApiWrapper.prepareCreateIndexBuilder(anyString()))
+        .thenReturn(createIndexRequestBuilder);
+    when(elasticApiWrapper.getIndexMapping(anyObject(), anyString()))
+        .thenReturn(expecedMapping);
+    elasticsearchService.createNewIndex();
   }
 
   @Test
@@ -39,11 +81,11 @@ public class ElasticsearchServiceTest {
     when(configuration.getElasticsearchAlias()).thenReturn("elasticsearchAlias");
     ArgumentCaptor<GetAliasesRequest> getAliasesRequestCaptor =
         ArgumentCaptor.forClass(GetAliasesRequest.class);
-    doReturn(true).when(elasticsearchService).checkAliasExists(any(GetAliasesRequest.class));
+    doReturn(true).when(elasticApiWrapper).checkAliasExists(any(GetAliasesRequest.class));
 
     boolean result = elasticsearchService.checkAliasExists();
 
-    verify(elasticsearchService, times(1)).checkAliasExists(getAliasesRequestCaptor.capture());
+    verify(elasticApiWrapper, times(1)).checkAliasExists(getAliasesRequestCaptor.capture());
     List<GetAliasesRequest> capturedRequest = getAliasesRequestCaptor.getAllValues();
     assertEquals(1, capturedRequest.size());
     assertFalse(capturedRequest.get(0).getShouldStoreResult());
@@ -87,8 +129,8 @@ public class ElasticsearchServiceTest {
   public void testHandleAliasesCreateAliasWithOneIndex() {
     initHandleAliases(false);
 
-    doReturn(true).when(elasticsearchService).checkIndicesExists(any(IndicesExistsRequest.class));
-    doReturn(null).when(elasticsearchService).deleteIndex(any(DeleteIndexRequest.class));
+    doReturn(true).when(elasticApiWrapper).checkIndicesExists(any(IndicesExistsRequest.class));
+    doReturn(null).when(elasticApiWrapper).deleteIndex(any(DeleteIndexRequest.class));
 
     verifyHandleAliases();
   }
@@ -98,13 +140,13 @@ public class ElasticsearchServiceTest {
     List<String> indexes = Arrays.asList("indexName", "anotherIndex");
     doReturn(checkAliasExists).when(elasticsearchService).checkAliasExists();
     doReturn(indexes).when(elasticsearchService).getIndexesForAlias();
-    doNothing().when(elasticsearchService).getAliasesAction(any(IndicesAliasesRequest.class));
+    doNothing().when(elasticApiWrapper).getAliasesAction(any(IndicesAliasesRequest.class));
     doReturn("index").when(configuration).getElasticSearchIndexPrefix();
     doReturn("index_Name").when(elasticsearchService).getIndexName();
   }
 
   private void verifyHandleAliases() {
     elasticsearchService.handleAliases();
-    verify(elasticsearchService, times(1)).getAliasesAction(any(IndicesAliasesRequest.class));
+    verify(elasticApiWrapper, times(1)).getAliasesAction(any(IndicesAliasesRequest.class));
   }
 }
