@@ -1,19 +1,21 @@
 package gov.ca.cwds.jobs.common.elastic;
 
 import com.google.inject.Inject;
+import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.inject.IndexName;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.Validate;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest.AliasActions;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,7 @@ public class ElasticsearchService {
 
   private static final org.slf4j.Logger LOGGER = LoggerFactory
       .getLogger(ElasticsearchService.class);
+  public static final String CUSTOM_CHECK = "custom_check";
 
   @Inject
   private ElasticsearchConfiguration configuration;
@@ -35,6 +38,9 @@ public class ElasticsearchService {
 
   @Inject
   private Client client;
+
+  @Inject
+  private ElasticApiWrapper elasticApiWrapper;
 
   public void handleAliases() {
     //acquire lock
@@ -49,7 +55,7 @@ public class ElasticsearchService {
   public boolean checkAliasExists() {
     GetAliasesRequest request = new GetAliasesRequest();
     request.aliases(configuration.getElasticsearchAlias());
-    return checkAliasExists(request);
+    return elasticApiWrapper.checkAliasExists(request);
   }
 
   public List<String> getIndexesForAlias() {
@@ -71,17 +77,34 @@ public class ElasticsearchService {
     LOGGER.info("Creating new index [{}] for type [{}]", newIndexName,
         configuration.getElasticsearchDocType());
 
-    CreateIndexRequestBuilder createIndexRequestBuilder =
-        client.admin().indices().prepareCreate(newIndexName);
+    CreateIndexRequestBuilder createIndexRequestBuilder = elasticApiWrapper
+        .prepareCreateIndexBuilder(newIndexName);
     createIndexRequestBuilder
         .setSettings(configuration.getIndexSettings(), XContentType.JSON);
     createIndexRequestBuilder
         .addMapping(configuration.getElasticsearchDocType(), configuration.getDocumentMapping(),
             XContentType.JSON);
 
-    CreateIndexRequest indexRequest = createIndexRequestBuilder.request();
-    client.admin().indices().create(indexRequest).actionGet();
+    elasticApiWrapper.createIndex(createIndexRequestBuilder);
+    checkIndexCreatedProperly(newIndexName);
     return newIndexName;
+  }
+
+  private void checkIndexCreatedProperly(String newIndexName) {
+    try {
+      GetMappingsRequest mappingsRequest = new GetMappingsRequest();
+      mappingsRequest.indices(newIndexName);
+
+      Map<String, Object> mapping = elasticApiWrapper
+          .getIndexMapping(mappingsRequest, newIndexName);
+
+      if (!((Map) mapping.get("properties")).containsKey(CUSTOM_CHECK)) {
+        throw new JobsException("Index was not created properly. Please restart the job");
+      }
+      LOGGER.info("Index has been created properly. Custom mapping is found");
+    } catch (IOException e) {
+      throw new JobsException("Can't check index created properly", e);
+    }
   }
 
   public String getExistingIndex() {
@@ -117,7 +140,7 @@ public class ElasticsearchService {
     if (!indexesToDelete.isEmpty()) {
       request.addAliasAction(removeOldIndexesAction);
     }
-    getAliasesAction(request);
+    elasticApiWrapper.getAliasesAction(request);
     if (LOGGER.isInfoEnabled()) {
       verifyIndexesForAlias();
     }
@@ -139,19 +162,19 @@ public class ElasticsearchService {
       LOGGER.info("Creating alias [{}] for index [{}] ", configuration.getElasticsearchAlias(),
           getIndexName());
     }
-    getAliasesAction(request);
+    elasticApiWrapper.getAliasesAction(request);
   }
 
   private void removeRedundantIndexIfExists() {
     IndicesExistsRequest request = new IndicesExistsRequest();
     request.indices(configuration.getElasticsearchAlias());
-    if (checkIndicesExists(request)) {
+    if (elasticApiWrapper.checkIndicesExists(request)) {
       LOGGER.warn("Orphan ES index [{}] discovered ", configuration.getElasticsearchAlias());
       DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest();
       deleteIndexRequest.indices(configuration.getElasticsearchAlias());
       LOGGER
           .info("Removing orphan ES index [{}] ", configuration.getElasticsearchAlias());
-      deleteIndex(deleteIndexRequest);
+      elasticApiWrapper.deleteIndex(deleteIndexRequest);
     }
   }
 
@@ -167,19 +190,7 @@ public class ElasticsearchService {
     return indexName;
   }
 
-  protected boolean checkAliasExists(GetAliasesRequest request) {
-    return client.admin().indices().aliasesExist(request).actionGet().exists();
-  }
-
-  protected void getAliasesAction(IndicesAliasesRequest request) {
-    client.admin().indices().aliases(request).actionGet();
-  }
-
-  protected DeleteIndexResponse deleteIndex(DeleteIndexRequest deleteIndexRequest) {
-    return client.admin().indices().delete(deleteIndexRequest).actionGet();
-  }
-
-  protected boolean checkIndicesExists(IndicesExistsRequest request) {
-    return client.admin().indices().exists(request).actionGet().isExists();
+  public void setElasticApiWrapper(ElasticApiWrapper elasticApiWrapper) {
+    this.elasticApiWrapper = elasticApiWrapper;
   }
 }
