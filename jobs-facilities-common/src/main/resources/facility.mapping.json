@@ -5,11 +5,10 @@
   "properties": {
     "name": {
       "type": "text",
-      "analyzer": "whitespace_lowercase",
       "fields": {
         "for_sort": {
           "type": "text",
-          "analyzer": "whitespace_lowercase",
+          "analyzer": "keyword_lowercase",
           "fielddata": true
         }
       }
@@ -19,11 +18,11 @@
     },
     "full_residential_address": {
       "type": "text",
-      "analyzer": "whitespace_lowercase"
+      "analyzer": "keyword_lowercase"
     },
     "full_mailing_address": {
       "type": "text",
-      "analyzer": "whitespace_lowercase"
+      "analyzer": "keyword_lowercase"
     },
     "phones": {
       "type": "nested"
