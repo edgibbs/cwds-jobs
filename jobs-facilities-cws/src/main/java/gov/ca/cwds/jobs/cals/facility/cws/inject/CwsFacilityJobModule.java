@@ -14,7 +14,9 @@ import gov.ca.cwds.cals.service.CwsFacilityService;
 import gov.ca.cwds.cals.service.LegacyDictionariesCache;
 import gov.ca.cwds.cals.service.LegacyDictionariesCache.LegacyDictionariesCacheBuilder;
 import gov.ca.cwds.cms.data.access.mapper.CountyOwnershipMapper;
+import gov.ca.cwds.cms.data.access.mapper.CountyOwnershipMapperImpl;
 import gov.ca.cwds.cms.data.access.mapper.ExternalInterfaceMapper;
+import gov.ca.cwds.cms.data.access.mapper.ExternalInterfaceMapperImpl;
 import gov.ca.cwds.data.legacy.cms.dao.CountiesDao;
 import gov.ca.cwds.data.legacy.cms.dao.LicenseStatusDao;
 import gov.ca.cwds.data.legacy.cms.dao.StateDao;
@@ -85,10 +87,8 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
     bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
     bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {
     }).to(CwsChangedFacilityService.class);
-    bind(CountyOwnershipMapper.class).to(CountyOwnershipMapper.INSTANCE.getClass())
-        .asEagerSingleton();
-    bind(ExternalInterfaceMapper.class).to(ExternalInterfaceMapper.INSTANCE.getClass())
-        .asEagerSingleton();
+    bind(CountyOwnershipMapper.class).to(CountyOwnershipMapperImpl.class);
+    bind(ExternalInterfaceMapper.class).to(ExternalInterfaceMapperImpl.class);
     bind(new TypeLiteral<JobBatchIterator<TimestampSavePoint<LocalDateTime>>>() {
     }).to(LocalDateTimeJobBatchIterator.class);
 

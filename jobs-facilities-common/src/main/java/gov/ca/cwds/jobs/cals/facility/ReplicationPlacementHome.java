@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.cals.facility;
 
-import gov.ca.cwds.data.legacy.cms.entity.BaseCountyLicenseCase;
 import gov.ca.cwds.data.legacy.cms.entity.BasePlacementHome;
+import gov.ca.cwds.data.legacy.cms.entity.CountyLicenseCase;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
@@ -48,7 +48,7 @@ public class ReplicationPlacementHome extends BasePlacementHome {
   }
 
   @Override
-  public BaseCountyLicenseCase getCountyLicenseCase() {
+  public CountyLicenseCase getCountyLicenseCase() {
     throw new UnsupportedOperationException();
   }
 

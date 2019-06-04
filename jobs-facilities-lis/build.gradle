@@ -33,8 +33,8 @@ dependencies {
         exclude group: 'gov.ca.cwds.api'
     }
 
-    testCompile(group: 'gov.ca.cwds.cals', name: 'lis-data-model', version: cwdsModelVersion, changing: true)
-    testCompile(group: 'gov.ca.cwds.cals', name: 'fas-data-model', version: cwdsModelVersion, changing: true)
+    testCompile(group: 'gov.ca.cwds', name: 'lis-data-model', version: cwdsModelVersion, changing: true)
+    testCompile(group: 'gov.ca.cwds', name: 'fas-data-model', version: cwdsModelVersion, changing: true)
     testCompile group: 'org.skyscreamer', name: 'jsonassert', version: jsonAssertVersion
 
     testCompile project(':jobs-common').sourceSets.test.output

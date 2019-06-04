@@ -5,7 +5,8 @@ import com.google.inject.Provides;
 import gov.ca.cwds.DataSourceName;
 import gov.ca.cwds.cals.inject.XaCmsSessionFactory;
 import gov.ca.cwds.cals.persistence.model.cwscms.SecondarySubstituteCareProviderInfo;
-import gov.ca.cwds.cms.data.access.inject.DataAccessServicesSessionFactory;
+import gov.ca.cwds.cms.data.access.inject.NonXaDasSessionFactory;
+import gov.ca.cwds.cms.data.access.inject.XaDasSessionFactory;
 import gov.ca.cwds.data.legacy.cms.dao.ClientDao;
 import gov.ca.cwds.data.legacy.cms.dao.CountiesDao;
 import gov.ca.cwds.data.legacy.cms.entity.AddressPhoneticName;
@@ -20,6 +21,7 @@ import gov.ca.cwds.data.legacy.cms.entity.CountyOwnershipPK;
 import gov.ca.cwds.data.legacy.cms.entity.EmergencyContactDetail;
 import gov.ca.cwds.data.legacy.cms.entity.ExternalInterface;
 import gov.ca.cwds.data.legacy.cms.entity.ExternalInterfacePK;
+import gov.ca.cwds.data.legacy.cms.entity.LicensingIssue;
 import gov.ca.cwds.data.legacy.cms.entity.LicensingVisit;
 import gov.ca.cwds.data.legacy.cms.entity.OtherAdultsInPlacementHome;
 import gov.ca.cwds.data.legacy.cms.entity.OtherChildrenInPlacementHome;
@@ -46,6 +48,7 @@ import gov.ca.cwds.data.legacy.cms.entity.syscodes.FacilityType;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.LicenseStatus;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.NameType;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.State;
+import gov.ca.cwds.data.legacy.cms.entity.syscodes.SystemCode;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.VisitType;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ReplicationPlacementHome;
@@ -69,7 +72,9 @@ public class CwsCmsRsDataAccessModule extends DataAccessModule {
           , ReplicationPlacementHome.class
           , PlacementHome.class
           , CountyLicenseCase.class
+          , SystemCode.class
           , LicensingVisit.class
+          , LicensingIssue.class
           , StaffPerson.class
           , FacilityType.class
           , County.class
@@ -130,8 +135,14 @@ public class CwsCmsRsDataAccessModule extends DataAccessModule {
   }
 
   @Provides
-  @DataAccessServicesSessionFactory
-  public SessionFactory dataAccessSessionFactory() {
+  @XaDasSessionFactory
+  public SessionFactory xaDasSessionFactory() {
+    return getSessionFactory();
+  }
+
+  @Provides
+  @NonXaDasSessionFactory
+  public SessionFactory nonXaDasSessionFactory() {
     return getSessionFactory();
   }
 
