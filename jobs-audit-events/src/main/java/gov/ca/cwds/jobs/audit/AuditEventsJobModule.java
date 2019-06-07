@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs.audit;
 
-import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
@@ -16,6 +14,8 @@ import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchAliasFinalizerProvider;
 import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntitiesIdentifiersService;
+import gov.ca.cwds.jobs.common.inject.BaseContainerService;
+import gov.ca.cwds.jobs.common.inject.PrimaryContainerService;
 import gov.ca.cwds.jobs.common.inject.PrimaryFinalizer;
 import gov.ca.cwds.jobs.common.inject.SecondaryFinalizer;
 import gov.ca.cwds.jobs.common.iterator.JobBatchIterator;
@@ -24,6 +24,7 @@ import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.mode.JobModeService;
 import gov.ca.cwds.jobs.common.mode.LocalDateTimeJobModeService;
+import gov.ca.cwds.jobs.common.savepoint.IndexAwareSavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
@@ -71,7 +72,12 @@ public class AuditEventsJobModule extends AbstractModule {
     }).to(LocalDateTimeJobModeService.class);
     bind(
         new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>>>() {
-        }).to(LocalDateTimeSavePointContainerService.class);
+        }).annotatedWith(BaseContainerService.class)
+        .to(LocalDateTimeSavePointContainerService.class);
+    bind(
+        new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>>>() {
+        }).annotatedWith(PrimaryContainerService.class)
+        .to(SavePointContainerServiceDecorator.class);
     bind(new TypeLiteral<SavePointService<TimestampSavePoint<LocalDateTime>>>() {
     }).to(LocalDateTimeSavePointService.class);
     bind(new TypeLiteral<ChangedEntityService<AuditEventChangedDto>>() {
@@ -83,22 +89,34 @@ public class AuditEventsJobModule extends AbstractModule {
   }
 
   private void bindJobModeImplementor() {
-    if (jobMode == INITIAL_LOAD) {
-      bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class)
-          .toProvider(AuditInitialJobModeFinalizerProvider.class);
-      bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class)
-          .toProvider(primaryJobFinalizerProviderClass);
-      bind(
-          new TypeLiteral<ChangedEntitiesIdentifiersService<LocalDateTime>>() {
-          }).toProvider(InitialModeAuditEventIdentifiersServiceProvider.class);
-    } else { //incremental load
-      bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).toInstance(() -> {
-      });
-      bind(
-          new TypeLiteral<ChangedEntitiesIdentifiersService<LocalDateTime>>() {
-          }).toProvider(IncrementalModeAuditEventIdentifiersServiceProvider.class);
+    switch (jobMode) {
+      case INITIAL_RESUME:
+      case INITIAL_LOAD:
+        bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class)
+            .toProvider(AuditInitialJobModeFinalizerProvider.class);
+        bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class)
+            .toProvider(primaryJobFinalizerProviderClass);
+        bind(
+            new TypeLiteral<ChangedEntitiesIdentifiersService<LocalDateTime>>() {
+            }).toProvider(InitialModeAuditEventIdentifiersServiceProvider.class);
+        break;
+      case INCREMENTAL_LOAD:
+        bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).toInstance(() -> {
+        });
+        bind(
+            new TypeLiteral<ChangedEntitiesIdentifiersService<LocalDateTime>>() {
+            }).toProvider(IncrementalModeAuditEventIdentifiersServiceProvider.class);
+        break;
+      default:
+        throw new IllegalStateException(String.format("Unknown job mode %s", jobMode));
     }
   }
+
+  static class SavePointContainerServiceDecorator extends
+      IndexAwareSavePointContainerService<TimestampSavePoint<LocalDateTime>> {
+
+  }
+
 
 }
 

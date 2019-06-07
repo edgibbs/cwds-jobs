@@ -23,6 +23,7 @@ import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
 import gov.ca.cwds.jobs.common.configuration.JobOptions;
 import gov.ca.cwds.jobs.common.core.JobPreparator;
 import gov.ca.cwds.jobs.common.core.JobRunner;
+import gov.ca.cwds.jobs.common.inject.IndexName;
 import gov.ca.cwds.jobs.common.inject.JobModule;
 import gov.ca.cwds.jobs.common.inject.MultiThreadModule;
 import gov.ca.cwds.jobs.common.mode.JobMode;
@@ -53,6 +54,7 @@ public class LisFacilityJobTest {
 
   public static final DateTimeFormatter lisTimestampFormatter = DateTimeFormatter
       .ofPattern("yyyyMMddHHmmss");
+  private static final String INDEX_NAME = "index_name";
 
   @Test
   public void lisFacilityJobTest()
@@ -152,7 +154,7 @@ public class LisFacilityJobTest {
             jobOptions.getConfigFileLocation());
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
     jobModule.addModules(new MultiThreadModule(jobConfiguration.getMultiThread()));
-    LisFacilityJobModule lisFacilityJobModule = new LisFacilityJobModule(jobConfiguration, jobMode);
+    LisFacilityJobModule lisFacilityJobModule = new TestLisFacilityJobModule(jobConfiguration, jobMode);
     jobModule.setJobPreparator(new LisJobPreparator());
     jobModule.addModule(lisFacilityJobModule);
     FacilityTestWriter.reset();
@@ -188,4 +190,19 @@ public class LisFacilityJobTest {
       LOGGER.info("Setup database has been finished!!!");
     }
   }
+
+  class TestLisFacilityJobModule extends LisFacilityJobModule {
+
+    public TestLisFacilityJobModule(LisFacilityJobConfiguration jobConfiguration,
+        JobMode jobMode) {
+      super(jobConfiguration, jobMode);
+    }
+
+    @Override
+    protected void configure() {
+      bindConstant().annotatedWith(IndexName.class).to(INDEX_NAME);
+      super.configure();
+    }
+  }
+
 }

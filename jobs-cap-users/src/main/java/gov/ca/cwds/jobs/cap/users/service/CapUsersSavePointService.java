@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cap.users.dao.CwsUsersDao;
 import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePoint;
 import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePointContainer;
+import gov.ca.cwds.jobs.common.inject.PrimaryContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointServiceImpl;
@@ -20,6 +21,7 @@ public class CapUsersSavePointService extends
     SavePointServiceImpl<CapUsersSavePoint> {
 
   @Inject
+  @PrimaryContainerService
   private SavePointContainerService<CapUsersSavePoint> savePointContainerService;
 
   @Inject

@@ -28,11 +28,14 @@ import gov.ca.cwds.jobs.cap.users.service.PerfTestCwsChangedUsersService;
 import gov.ca.cwds.jobs.common.BulkWriter;
 import gov.ca.cwds.jobs.common.core.Job;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchAliasFinalizer;
+import gov.ca.cwds.jobs.common.inject.BaseContainerService;
 import gov.ca.cwds.jobs.common.inject.ElasticsearchBulkSize;
+import gov.ca.cwds.jobs.common.inject.PrimaryContainerService;
 import gov.ca.cwds.jobs.common.inject.PrimaryFinalizer;
 import gov.ca.cwds.jobs.common.inject.SecondaryFinalizer;
 import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
+import gov.ca.cwds.jobs.common.savepoint.IndexAwareSavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
@@ -95,7 +98,9 @@ public class CapUsersJobModule extends AbstractModule {
         .to(getJobsConfiguration().getPerryApiPassword());
     bind(IdmService.class).to(idmService);
     bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
-    }).to(CapUsersSavePointContainerService.class);
+    }).annotatedWith(BaseContainerService.class).to(CapUsersSavePointContainerService.class);
+    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
+    }).annotatedWith(PrimaryContainerService.class).to(SavePointContainerServiceDecorator.class);
     bind(new TypeLiteral<SavePointService<CapUsersSavePoint>>() {
     }).toProvider(CapUsersSavePointServiceProvider.class);
     bind(CapUsersSavePointService.class).toProvider(CapUsersSavePointServiceProvider.class);
@@ -105,6 +110,7 @@ public class CapUsersJobModule extends AbstractModule {
   private void configureJobModes() {
     switch (jobMode) {
       case INITIAL_LOAD:
+      case INITIAL_RESUME:
         configureInitialMode();
         break;
       case INCREMENTAL_LOAD:
@@ -129,7 +135,7 @@ public class CapUsersJobModule extends AbstractModule {
   private void configureInitialMode() {
     bind(Job.class).to(CapUsersInitialJob.class);
     bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).to(jobModeFinalizerClass);
-    bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class).toInstance(()->{});
+    bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class).toInstance(() -> {});
     bind(CwsChangedUsersService.class).toProvider(CwsChangedUsersServiceProvider.class);
   }
 
@@ -210,6 +216,10 @@ public class CapUsersJobModule extends AbstractModule {
     }
 
   }
+
+  static class SavePointContainerServiceDecorator extends
+      IndexAwareSavePointContainerService<CapUsersSavePoint> {  }
+
 
 }
 

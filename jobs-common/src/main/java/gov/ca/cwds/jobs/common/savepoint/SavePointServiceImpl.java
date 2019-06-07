@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.common.savepoint;
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.batch.JobBatch;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.inject.PrimaryContainerService;
 import java.util.List;
 
 /**
@@ -12,6 +13,7 @@ public abstract class SavePointServiceImpl<S extends SavePoint> implements
     SavePointService<S> {
 
   @Inject
+  @PrimaryContainerService
   private SavePointContainerService<S> savePointContainerService;
 
   @Override

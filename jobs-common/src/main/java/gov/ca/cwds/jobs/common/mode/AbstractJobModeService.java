@@ -2,18 +2,13 @@ package gov.ca.cwds.jobs.common.mode;
 
 import static gov.ca.cwds.jobs.common.mode.JobMode.INCREMENTAL_LOAD;
 import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_RESUME;
+import static gov.ca.cwds.jobs.common.util.SavePointUtil.extractProperty;
 
 import com.google.inject.Inject;
-import gov.ca.cwds.jobs.common.exception.JobsException;
+import gov.ca.cwds.jobs.common.inject.PrimaryContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import org.apache.commons.io.IOUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +22,7 @@ public abstract class AbstractJobModeService<S extends SavePoint> implements
   public static final String CURRENT_JOB_MODE_IS = "Current job mode is {}";
 
   @Inject
+  @PrimaryContainerService
   private SavePointContainerService<S> savePointContainerService;
 
   @Override
@@ -40,26 +36,16 @@ public abstract class AbstractJobModeService<S extends SavePoint> implements
   }
 
   private JobMode extractJobMode() {
-    Path pathToSavePointContainerFile = savePointContainerService.getSavePointFile();
-    LOG.info("Path to the save point container file: {}", pathToSavePointContainerFile);
-    try (Reader reader = Files.newBufferedReader(pathToSavePointContainerFile)) {
-      String savePointContainer = IOUtils.toString(reader);
-      LOG.info("Save point container is {}", savePointContainer);
-      JSONObject jsonObject = new JSONObject(savePointContainer);
-      String jobMode = jsonObject.getString("jobMode");
-      switch (jobMode) {
-        case "INITIAL_LOAD":
-          LOG.info(CURRENT_JOB_MODE_IS, INITIAL_LOAD);
-          return INITIAL_LOAD;
-        case "INCREMENTAL_LOAD":
-          LOG.info(CURRENT_JOB_MODE_IS, INCREMENTAL_LOAD);
-          return INCREMENTAL_LOAD;
-        default:
-          throw new IllegalStateException(String.format("Unexpected job mode %s", jobMode));
-      }
-    } catch (IOException | JSONException e) {
-      LOG.error(e.getMessage(), e);
-      throw new JobsException("Can't parse save point container file", e);
+    String jobMode = extractProperty(savePointContainerService.getSavePointFile(), "jobMode");
+    switch (jobMode) {
+      case "INITIAL_RESUME": case "INITIAL_LOAD":
+        LOG.info(CURRENT_JOB_MODE_IS, INITIAL_RESUME);
+        return INITIAL_RESUME;
+      case "INCREMENTAL_LOAD":
+        LOG.info(CURRENT_JOB_MODE_IS, INCREMENTAL_LOAD);
+        return INCREMENTAL_LOAD;
+      default:
+        throw new IllegalStateException(String.format("Unexpected job mode %s", jobMode));
     }
   }
 

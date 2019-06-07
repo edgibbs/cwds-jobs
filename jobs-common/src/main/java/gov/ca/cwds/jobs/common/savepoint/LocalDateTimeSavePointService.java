@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.common.savepoint;
 
 import com.google.inject.Inject;
+import gov.ca.cwds.jobs.common.inject.PrimaryContainerService;
 import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.mode.LocalDateTimeJobModeService;
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ public class LocalDateTimeSavePointService extends
   private LocalDateTimeJobModeService jobModeService;
 
   @Inject
+  @PrimaryContainerService
   private SavePointContainerService<TimestampSavePoint<LocalDateTime>> savePointContainerService;
 
   @Override

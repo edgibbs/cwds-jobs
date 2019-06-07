@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.common;
 
+import static gov.ca.cwds.jobs.common.TestCustomModule.INDEX_NAME;
 import static gov.ca.cwds.jobs.common.mode.JobMode.INCREMENTAL_LOAD;
 import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
 import static gov.ca.cwds.jobs.utils.DataSourceFactoryUtils.fixDatasourceFactory;
@@ -14,8 +15,10 @@ import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.inject.BrokenTestEntityServiceProvider;
 import gov.ca.cwds.jobs.common.inject.JobModule;
 import gov.ca.cwds.jobs.common.inject.MultiThreadModule;
+import gov.ca.cwds.jobs.common.savepoint.IndexAwareSavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
+import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
 import gov.ca.cwds.test.support.DatabaseHelper;
 import io.dropwizard.db.DataSourceFactory;
@@ -36,9 +39,16 @@ public class JobMainTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobMainTest.class);
   private LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("temp");
-  private LocalDateTimeSavePointContainerService savePointContainerService =
-      new LocalDateTimeSavePointContainerService(
-          lastRunDirHelper.getSavepointContainerFolder().toString());
+
+  private IndexAwareSavePointContainerService<TimestampSavePoint<LocalDateTime>> savePointContainerService =
+      new IndexAwareSavePointContainerService<>();
+
+  {
+    savePointContainerService.setIndexName(INDEX_NAME);
+    savePointContainerService
+        .setSavePointContainerService(new LocalDateTimeSavePointContainerService(
+            lastRunDirHelper.getSavepointContainerFolder().toString()));
+  }
 
   @Before
   public void beforeMethod() throws IOException {
@@ -165,6 +175,7 @@ public class JobMainTest {
           .readSavePointContainer(LocalDateTimeSavePointContainer.class);
       assertEquals(LocalDateTime.of(2016, 10, 10, 1, 2, 15),
           savePointContainer.getSavePoint().getTimestamp());
+      assertEquals(INDEX_NAME, savePointContainer.getIndexName());
       assertEquals(INITIAL_LOAD, savePointContainer.getJobMode());
     }
     TestEntityWriter.reset();

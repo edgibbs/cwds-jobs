@@ -18,6 +18,7 @@ import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
 import gov.ca.cwds.jobs.common.configuration.JobOptions;
 import gov.ca.cwds.jobs.common.core.JobPreparator;
 import gov.ca.cwds.jobs.common.core.JobRunner;
+import gov.ca.cwds.jobs.common.inject.IndexName;
 import gov.ca.cwds.jobs.common.inject.JobModule;
 import gov.ca.cwds.jobs.common.inject.MultiThreadModule;
 import gov.ca.cwds.jobs.common.mode.JobMode;
@@ -57,6 +58,7 @@ public class CwsFacilityJobTest {
   private static final String CWSCMS_INCREMENTAL_LOAD_DELETED_FACILITY_ID = "AyT7r860AB";
 
   private static final int INITIAL_FACILITIES_COUNT = 167;
+  private static final String INDEX_NAME = "index_name";
 
   @Test
   public void cwsFacilityJobTest()
@@ -158,7 +160,7 @@ public class CwsFacilityJobTest {
         .getJobsConfiguration(CwsFacilityJobConfiguration.class, jobOptions.getConfigFileLocation());
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
     jobModule.addModules(new MultiThreadModule(jobConfiguration.getMultiThread()));
-    CwsFacilityJobModule cwsFacilityJobModule = new CwsFacilityJobModule(jobConfiguration,
+    CwsFacilityJobModule cwsFacilityJobModule = new TestCwsFacilityJobModule(jobConfiguration,
         jobMode);
     jobModule.setJobPreparator(new CwsJobPreparator());
     jobModule.addModule(cwsFacilityJobModule);
@@ -194,5 +196,20 @@ public class CwsFacilityJobTest {
       LOGGER.info("Setup database has been finished!!!");
     }
   }
+
+  class TestCwsFacilityJobModule extends CwsFacilityJobModule {
+
+    public TestCwsFacilityJobModule(CwsFacilityJobConfiguration jobConfiguration,
+        JobMode jobMode) {
+      super(jobConfiguration, jobMode);
+    }
+
+    @Override
+    protected void configure() {
+      bindConstant().annotatedWith(IndexName.class).to(INDEX_NAME);
+      super.configure();
+    }
+  }
+
 
 }

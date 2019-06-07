@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.cals.facility.lisfas.savepoint;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisJobModeService;
+import gov.ca.cwds.jobs.common.inject.PrimaryContainerService;
 import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
@@ -24,6 +25,7 @@ public class LisTimestampSavePointService extends
   private LisJobModeService jobModeService;
 
   @Inject
+  @PrimaryContainerService
   private SavePointContainerService<TimestampSavePoint<BigInteger>> savePointContainerService;
 
   @Override

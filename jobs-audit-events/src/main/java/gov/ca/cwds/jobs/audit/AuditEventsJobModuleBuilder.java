@@ -29,7 +29,8 @@ public class AuditEventsJobModuleBuilder implements JobModuleBuilder {
     JobMode jobMode = getJobMode(jobOptions.getLastRunLoc());
     if (elasticSearchModule) {
       jobModule
-          .addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode));
+          .addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode,
+              new LocalDateTimeSavePointContainerService(jobOptions.getLastRunLoc())));
     }
     jobModule.addModule(new MultiThreadModule(jobConfiguration.getMultiThread()));
     jobModule.addModule(new AuditEventsJobModule(jobConfiguration, jobMode));

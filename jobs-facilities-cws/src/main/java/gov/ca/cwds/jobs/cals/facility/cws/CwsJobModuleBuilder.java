@@ -29,7 +29,8 @@ public class CwsJobModuleBuilder implements JobModuleBuilder {
     elasticsearchConfiguration.setIndexSettings("facility.settings.json");
     JobMode jobMode = getCurrentJobMode(jobOptions.getLastRunLoc());
     if (elasticSearchModule) {
-      jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode));
+      jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode,
+          new LocalDateTimeSavePointContainerService(jobOptions.getLastRunLoc())));
     }
     jobModule.addModules(new MultiThreadModule(jobConfiguration.getMultiThread()));
     jobModule.addModule(new CwsFacilityJobModule(jobConfiguration, jobMode));
