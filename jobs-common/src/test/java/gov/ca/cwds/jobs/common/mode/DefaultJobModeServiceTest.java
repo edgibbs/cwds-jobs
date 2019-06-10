@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.common.mode;
 
 import static gov.ca.cwds.jobs.common.mode.JobMode.INCREMENTAL_LOAD;
 import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_RESUME;
 import static org.junit.Assert.assertEquals;
 
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
@@ -42,7 +43,7 @@ public class DefaultJobModeServiceTest {
     savePointContainer.setJobMode(INITIAL_LOAD);
     savePointContainer.setSavePoint(new LocalDateTimeSavePoint(LocalDateTime.of(2017, 1, 1, 5, 4)));
     savePointContainerService.writeSavePointContainer(savePointContainer);
-    assertEquals(INITIAL_LOAD, defaultJobModeService.getCurrentJobMode());
+    assertEquals(INITIAL_RESUME, defaultJobModeService.getCurrentJobMode());
   }
 
   @Test

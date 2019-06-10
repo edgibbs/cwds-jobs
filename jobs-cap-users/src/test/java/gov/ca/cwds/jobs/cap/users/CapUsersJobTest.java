@@ -11,6 +11,7 @@ import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointContainerService;
 import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
 import gov.ca.cwds.jobs.common.configuration.JobOptions;
 import gov.ca.cwds.jobs.common.core.JobRunner;
+import gov.ca.cwds.jobs.common.inject.IndexName;
 import gov.ca.cwds.jobs.common.inject.JobModule;
 import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
@@ -41,6 +42,7 @@ public class CapUsersJobTest {
   private static final LocalDateTime INITIAL_STAFF_PERSON_TIMESTAMP = LocalDateTime
       .of(2017, 9, 25, 11, 52, 3, 699000000);
 
+  private static final String INDEX_NAME = "index_name";
   private static LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("cap_job_temp");
   private CapUsersSavePointContainerService savePointContainerService =
       new CapUsersSavePointContainerService(
@@ -148,7 +150,7 @@ public class CapUsersJobTest {
         .getJobsConfiguration(CapUsersJobConfiguration.class, jobOptions.getConfigFileLocation());
     jobConfiguration.setPerformanceTestMode(isPerformanceTestMode);
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
-    CapUsersJobModule capUsersJobModule = new CapUsersJobModule(jobConfiguration, jobMode);
+    CapUsersJobModule capUsersJobModule = new TestCapUsersJobModule(jobConfiguration, jobMode);
     capUsersJobModule.setIdmService(MockedIdmService.class);
     capUsersJobModule.setJobModeFinalizerClass(TestJobModeFinalizer.class);
     jobModule.addModule(capUsersJobModule);
@@ -240,6 +242,20 @@ public class CapUsersJobTest {
     @Override
     public void doFinalizeJob() {
       //emty
+    }
+  }
+
+  class TestCapUsersJobModule extends CapUsersJobModule {
+
+    public TestCapUsersJobModule(CapUsersJobConfiguration jobConfiguration,
+        JobMode jobMode) {
+      super(jobConfiguration, jobMode);
+    }
+
+    @Override
+    protected void configure() {
+      bindConstant().annotatedWith(IndexName.class).to(INDEX_NAME);
+      super.configure();
     }
   }
 

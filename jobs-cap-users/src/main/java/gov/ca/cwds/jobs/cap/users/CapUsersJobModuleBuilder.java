@@ -26,7 +26,8 @@ public class CapUsersJobModuleBuilder implements JobModuleBuilder {
     elasticsearchConfiguration.setDocumentMapping("cap.users.mapping.json");
     JobMode jobMode = getCurrentJobMode(jobOptions.getLastRunLoc());
     if (elasticSearchModule) {
-      jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode));
+      jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode,
+          new CapUsersSavePointContainerService(jobOptions.getLastRunLoc())));
     }
     jobModule.addModule(new CapUsersJobModule(jobConfiguration, jobMode));
     return jobModule;

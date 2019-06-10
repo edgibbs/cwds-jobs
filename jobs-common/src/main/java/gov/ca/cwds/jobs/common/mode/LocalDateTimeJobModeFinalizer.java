@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.common.mode;
 
 import com.google.inject.Inject;
+import gov.ca.cwds.jobs.common.inject.PrimaryContainerService;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
@@ -19,6 +20,7 @@ public class LocalDateTimeJobModeFinalizer implements JobModeFinalizer {
       .getLogger(LocalDateTimeJobModeFinalizer.class);
 
   @Inject
+  @PrimaryContainerService
   private SavePointContainerService<TimestampSavePoint<LocalDateTime>> savePointContainerService;
 
   @Inject

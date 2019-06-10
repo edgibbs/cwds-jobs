@@ -5,12 +5,12 @@ import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import gov.ca.cwds.jobs.audit.inject.AuditInitialJobModeFinalizerProvider;
 import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
 import gov.ca.cwds.jobs.common.configuration.JobOptions;
 import gov.ca.cwds.jobs.common.core.JobPreparator;
 import gov.ca.cwds.jobs.common.core.JobRunner;
+import gov.ca.cwds.jobs.common.inject.IndexName;
 import gov.ca.cwds.jobs.common.inject.JobModule;
 import gov.ca.cwds.jobs.common.inject.MultiThreadModule;
 import gov.ca.cwds.jobs.common.mode.JobMode;
@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import liquibase.exception.LiquibaseException;
-import org.json.JSONException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +46,8 @@ public class AuditEventsJobTest {
   private LocalDateTimeSavePointContainerService savePointContainerService =
       new LocalDateTimeSavePointContainerService(
           lastRunDirHelper.getSavepointContainerFolder().toString());
+
+  private static final String INDEX_NAME = "indexName";
 
   @Test
   public void auditJobTest() throws Exception {
@@ -80,7 +81,7 @@ public class AuditEventsJobTest {
             jobOptions.getConfigFileLocation());
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
     jobModule.addModules(new MultiThreadModule(jobConfiguration.getMultiThread()));
-    AuditEventsJobModule auditEventsJobModule = new AuditEventsJobModule(jobConfiguration,
+    AuditEventsJobModule auditEventsJobModule = new TestAuditEventsJobModule(jobConfiguration,
         jobMode);
     auditEventsJobModule.setAuditEventWriterClass(AuditEventTestWriter.class);
     auditEventsJobModule.setPrimaryJobFinalizerClass(AuditInitialJobModeFinalizerProvider.class);
@@ -191,5 +192,20 @@ public class AuditEventsJobTest {
     assertTrue(optional.isPresent());
     return optional.orElse(null);
   }
+
+  class TestAuditEventsJobModule extends AuditEventsJobModule {
+
+    public TestAuditEventsJobModule(AuditEventsJobConfiguration jobConfiguration,
+        JobMode jobMode) {
+      super(jobConfiguration, jobMode);
+    }
+
+    @Override
+    protected void configure() {
+      bindConstant().annotatedWith(IndexName.class).to(INDEX_NAME);
+      super.configure();
+    }
+  }
+
 
 }

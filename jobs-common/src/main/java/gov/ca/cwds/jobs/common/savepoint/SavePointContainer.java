@@ -15,6 +15,16 @@ public class SavePointContainer<S extends SavePoint> {
 
   private S savePoint;
 
+  private String indexName;
+
+  public String getIndexName() {
+    return indexName;
+  }
+
+  public void setIndexName(String indexName) {
+    this.indexName = indexName;
+  }
+
   public JobMode getJobMode() {
     return jobMode;
   }
