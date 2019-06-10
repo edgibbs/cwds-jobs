@@ -2,11 +2,12 @@ package gov.ca.cwds.jobs.audit;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.audit.inject.NsDataAccessModule;
+import gov.ca.cwds.jobs.common.inject.PrimaryContainerService;
 import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
-import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
+import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -26,7 +27,8 @@ public class AuditInitialJobModeFinalizer implements JobModeFinalizer {
   private NsAuditEventDao dao;
 
   @Inject
-  private LocalDateTimeSavePointContainerService savePointContainerService;
+  @PrimaryContainerService
+  private SavePointContainerService<TimestampSavePoint<LocalDateTime>> savePointContainerService;
 
   @Inject
   private SavePointService<TimestampSavePoint<LocalDateTime>> savePointService;

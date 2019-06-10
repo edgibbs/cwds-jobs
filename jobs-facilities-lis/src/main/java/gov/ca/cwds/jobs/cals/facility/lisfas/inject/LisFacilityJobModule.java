@@ -71,7 +71,12 @@ public class LisFacilityJobModule extends BaseFacilityJobModule<LisFacilityJobCo
         }).to(LisTimestampSavePointService.class);
     bind(
         new TypeLiteral<SavePointContainerService<TimestampSavePoint<BigInteger>>>() {
-        }).annotatedWith(PrimaryContainerService.class).to(LisTimestampSavePointContainerService.class);
+        }).annotatedWith(BaseContainerService.class).to(LisTimestampSavePointContainerService.class);
+    bind(
+        new TypeLiteral<SavePointContainerService<TimestampSavePoint<BigInteger>>>() {
+        }).annotatedWith(PrimaryContainerService.class)
+        .to(TimestampSavePointContainerServiceDecorator.class);
+
     bind(LisChangedEntitiesIdentifiersService.class)
         .toProvider(LisChangedIdentifiersServiceProvider.class);
     bind(LisFacilityService.class).toProvider(LisFacilityServiceProvider.class);
@@ -88,7 +93,7 @@ public class LisFacilityJobModule extends BaseFacilityJobModule<LisFacilityJobCo
     bind(
         new TypeLiteral<SavePointContainerService<LicenseNumberSavePoint>>() {
         }).annotatedWith(PrimaryContainerService.class)
-        .to(SavePointContainerServiceDecorator.class);
+        .to(LicenseNumberSavePointContainerServiceDecorator.class);
     install(new LisDataAccessModule(getJobConfiguration().getLisDataSourceFactory()));
     install(new FasDataAccessModule(getJobConfiguration().getFasDataSourceFactory()));
   }
@@ -152,8 +157,13 @@ public class LisFacilityJobModule extends BaseFacilityJobModule<LisFacilityJobCo
     }
   }
 
-  static class SavePointContainerServiceDecorator extends
+  static class LicenseNumberSavePointContainerServiceDecorator extends
       IndexAwareSavePointContainerService<LicenseNumberSavePoint> {
+
+  }
+
+  static class TimestampSavePointContainerServiceDecorator extends
+      IndexAwareSavePointContainerService<TimestampSavePoint<BigInteger>> {
 
   }
 

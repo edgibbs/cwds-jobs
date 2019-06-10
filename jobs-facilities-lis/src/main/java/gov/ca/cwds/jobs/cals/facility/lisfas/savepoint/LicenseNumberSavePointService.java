@@ -2,8 +2,10 @@ package gov.ca.cwds.jobs.cals.facility.lisfas.savepoint;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisJobModeService;
+import gov.ca.cwds.jobs.common.inject.PrimaryContainerService;
 import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
+import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +23,8 @@ public class LicenseNumberSavePointService extends
   private LisJobModeService jobModeService;
 
   @Inject
-  private LicenseNumberSavePointContainerService savePointContainerService;
+  @PrimaryContainerService
+  private SavePointContainerService<LicenseNumberSavePoint> savePointContainerService;
 
   @Override
   public void saveSavePoint(LicenseNumberSavePoint savePoint) {
