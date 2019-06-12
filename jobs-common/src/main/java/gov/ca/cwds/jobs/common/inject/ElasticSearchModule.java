@@ -1,12 +1,16 @@
 package gov.ca.cwds.jobs.common.inject;
 
+import static gov.ca.cwds.jobs.common.util.SavePointUtil.extractProperty;
+
 import com.google.inject.AbstractModule;
-import gov.ca.cwds.jobs.common.elastic.ElasticSearchIndexerDao;
+import gov.ca.cwds.jobs.common.elastic.ElasticApiWrapper;
 import gov.ca.cwds.jobs.common.elastic.ElasticUtils;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchConfiguration;
-import java.io.IOException;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.LoggerFactory;
+import gov.ca.cwds.jobs.common.elastic.ElasticsearchService;
+import gov.ca.cwds.jobs.common.mode.JobMode;
+import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 
 /**
  * Created by Alexander Serbin on 3/18/2018.
@@ -16,28 +20,42 @@ public class ElasticSearchModule extends AbstractModule {
   private static final org.slf4j.Logger LOGGER = LoggerFactory
       .getLogger(ElasticSearchModule.class);
 
-
+  private final RestHighLevelClient client;
   private ElasticsearchConfiguration configuration;
+  private String indexName;
 
-  public ElasticSearchModule(ElasticsearchConfiguration configuration) {
+  public ElasticSearchModule(ElasticsearchConfiguration configuration,
+      JobMode jobMode, SavePointContainerService savePointContainerService) {
     this.configuration = configuration;
+    this.client = ElasticUtils
+        .createAndConfigureESClient(configuration); //must be closed when the job done
+    ElasticApiWrapper elasticApiWrapper = new ElasticApiWrapper();
+    elasticApiWrapper.setClient(client);
+    ElasticsearchService service = new ElasticsearchService();
+    service.setClient(client);
+    service.setElasticApiWrapper(elasticApiWrapper);
+    service.setConfiguration(configuration);
+    switch (jobMode) {
+      case INITIAL_LOAD:
+        indexName = service.createNewIndex();
+        break;
+      case INCREMENTAL_LOAD:
+        indexName = service.getExistingIndex();
+        break;
+      case INITIAL_RESUME:
+        indexName = extractProperty(savePointContainerService.getSavePointFile(), "indexName");
+        break;
+      default:
+        throw new IllegalStateException("Unknown job mode !!!");
+    }
+    LOGGER.info("Current index name is {}", indexName);
   }
 
   @Override
   protected void configure() {
-    RestHighLevelClient client = ElasticUtils
-        .createAndConfigureESClient(configuration); //must be closed when the job done
     bind(RestHighLevelClient.class).toInstance(client);
-    bind(ElasticSearchIndexerDao.class).toInstance(createElasticSearchDao(client, configuration));
-  }
-
-  private ElasticSearchIndexerDao createElasticSearchDao(RestHighLevelClient client,
-      ElasticsearchConfiguration configuration) {
-    ElasticSearchIndexerDao esIndexerDao = new ElasticSearchIndexerDao(client,
-        configuration);
-    esIndexerDao.createIndexIfMissing();
-
-    return esIndexerDao;
+    bind(ElasticsearchConfiguration.class).toInstance(configuration);
+    bindConstant().annotatedWith(IndexName.class).to(indexName);
   }
 
 }

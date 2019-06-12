@@ -1,11 +1,12 @@
 package gov.ca.cwds.jobs.cals.facility.cws.inject;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 import com.google.inject.Provides;
 import gov.ca.cwds.DataSourceName;
-import gov.ca.cwds.cms.data.access.inject.DataAccessServicesSessionFactory;
+import gov.ca.cwds.cals.inject.XaCmsSessionFactory;
+import gov.ca.cwds.cals.persistence.model.cwscms.SecondarySubstituteCareProviderInfo;
+import gov.ca.cwds.cms.data.access.inject.NonXaDasSessionFactory;
+import gov.ca.cwds.cms.data.access.inject.XaDasSessionFactory;
 import gov.ca.cwds.data.legacy.cms.dao.ClientDao;
 import gov.ca.cwds.data.legacy.cms.dao.CountiesDao;
 import gov.ca.cwds.data.legacy.cms.entity.AddressPhoneticName;
@@ -20,6 +21,7 @@ import gov.ca.cwds.data.legacy.cms.entity.CountyOwnershipPK;
 import gov.ca.cwds.data.legacy.cms.entity.EmergencyContactDetail;
 import gov.ca.cwds.data.legacy.cms.entity.ExternalInterface;
 import gov.ca.cwds.data.legacy.cms.entity.ExternalInterfacePK;
+import gov.ca.cwds.data.legacy.cms.entity.LicensingIssue;
 import gov.ca.cwds.data.legacy.cms.entity.LicensingVisit;
 import gov.ca.cwds.data.legacy.cms.entity.OtherAdultsInPlacementHome;
 import gov.ca.cwds.data.legacy.cms.entity.OtherChildrenInPlacementHome;
@@ -46,22 +48,20 @@ import gov.ca.cwds.data.legacy.cms.entity.syscodes.FacilityType;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.LicenseStatus;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.NameType;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.State;
+import gov.ca.cwds.data.legacy.cms.entity.syscodes.SystemCode;
 import gov.ca.cwds.data.legacy.cms.entity.syscodes.VisitType;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ReplicationPlacementHome;
-import gov.ca.cwds.jobs.cals.facility.cws.CwsFacilityJobConfiguration;
 import gov.ca.cwds.jobs.cals.facility.cws.dao.CwsChangedIdentifierDao;
 import gov.ca.cwds.jobs.cals.facility.cws.identifier.CwsChangedIdentifier;
-import gov.ca.cwds.jobs.common.util.SessionFactoryUtil;
-import java.util.Optional;
+import gov.ca.cwds.jobs.common.inject.DataAccessModule;
+import io.dropwizard.db.DataSourceFactory;
 import org.hibernate.SessionFactory;
 
 /**
  * @author CWDS TPT-2
  */
-public class CwsCmsRsDataAccessModule extends AbstractModule {
-
-  private SessionFactory sessionFactory;
+public class CwsCmsRsDataAccessModule extends DataAccessModule {
 
   public static final ImmutableList<Class<?>> cwsrsEntityClasses = ImmutableList.<Class<?>>builder()
       .add(
@@ -72,7 +72,9 @@ public class CwsCmsRsDataAccessModule extends AbstractModule {
           , ReplicationPlacementHome.class
           , PlacementHome.class
           , CountyLicenseCase.class
+          , SystemCode.class
           , LicensingVisit.class
+          , LicensingIssue.class
           , StaffPerson.class
           , FacilityType.class
           , County.class
@@ -106,7 +108,12 @@ public class CwsCmsRsDataAccessModule extends AbstractModule {
           , SubCareProviderPhoneticName.class
           , NameType.class
           , ApplicationAndLicenseStatusHistory.class
+          , SecondarySubstituteCareProviderInfo.class
       ).build();
+
+  public CwsCmsRsDataAccessModule(DataSourceFactory dataSourceFactory) {
+    super(dataSourceFactory, DataSourceName.CWSRS.name(), cwsrsEntityClasses);
+  }
 
   @Override
   protected void configure() {
@@ -115,24 +122,28 @@ public class CwsCmsRsDataAccessModule extends AbstractModule {
     bind(ClientDao.class);
   }
 
-  @Inject
   @Provides
   @CmsSessionFactory
-  public SessionFactory cmsSessionFactory(CwsFacilityJobConfiguration facilityJobConfiguration) {
-    return getCurrentSessionFactory(facilityJobConfiguration);
+  public SessionFactory cmsSessionFactory() {
+    return getSessionFactory();
   }
 
-  @Inject
   @Provides
-  @DataAccessServicesSessionFactory
-  public SessionFactory dataAccessSessionFactory(CwsFacilityJobConfiguration facilityJobConfiguration) {
-    return getCurrentSessionFactory(facilityJobConfiguration);
+  @XaCmsSessionFactory
+  public SessionFactory xaCmsSessionFactory() {
+    return getSessionFactory();
   }
 
-  private SessionFactory getCurrentSessionFactory(CwsFacilityJobConfiguration facilityJobConfiguration) {
-    return Optional.ofNullable(sessionFactory).orElseGet(() -> sessionFactory = SessionFactoryUtil
-        .buildSessionFactory(facilityJobConfiguration.getCmsDataSourceFactory(),
-            DataSourceName.CWSRS.name(), cwsrsEntityClasses));
+  @Provides
+  @XaDasSessionFactory
+  public SessionFactory xaDasSessionFactory() {
+    return getSessionFactory();
+  }
+
+  @Provides
+  @NonXaDasSessionFactory
+  public SessionFactory nonXaDasSessionFactory() {
+    return getSessionFactory();
   }
 
 }

@@ -12,6 +12,13 @@ lisDataSourceFactory:
     hibernate.connection.url: jdbc:h2:mem:lis;INIT=create schema if not exists lis\;set schema lis
     #hibernate.connection.url: jdbc:h2:file:C:/data/LIS;INIT=create schema if not exists LIS\;set schema LIS
     hibernate.dialect: org.hibernate.dialect.H2Dialect
+    hibernate.connection.provider_class: org.hibernate.hikaricp.internal.HikariCPConnectionProvider
+    hibernate.hikari.minimumIdle: 4
+    hibernate.hikari.maximumPoolSize: 10
+    hibernate.hikari.maxLifetime: 900000
+    hibernate.hikari.idleTimeout: 90000
+    hibernate.hikari.connectionTimeout: 45000
+    hibernate.hikari.registerMbeans: true
 
 fasDataSourceFactory:
   properties:
@@ -21,6 +28,13 @@ fasDataSourceFactory:
     hibernate.connection.password: ''
     hibernate.connection.url: jdbc:h2:mem:fas;INIT=create schema if not exists fas\;set schema fas
     hibernate.dialect: org.hibernate.dialect.H2Dialect
+    hibernate.connection.provider_class: org.hibernate.hikaricp.internal.HikariCPConnectionProvider
+    hibernate.hikari.minimumIdle: 4
+    hibernate.hikari.maximumPoolSize: 10
+    hibernate.hikari.maxLifetime: 900000
+    hibernate.hikari.idleTimeout: 90000
+    hibernate.hikari.connectionTimeout: 45000
+    hibernate.hikari.registerMbeans: true
 
 calsnsDataSourceFactory:
   properties:
@@ -34,3 +48,10 @@ calsnsDataSourceFactory:
     hibernate.connection.url: jdbc:h2:mem:calsns;INIT=create schema if not exists calsns\;set schema calsns
     hibernate.id.new_generator_mappings: false
     hibernate.connection.autocommit: false
+    hibernate.connection.provider_class: org.hibernate.hikaricp.internal.HikariCPConnectionProvider
+    hibernate.hikari.minimumIdle: 4
+    hibernate.hikari.maximumPoolSize: 10
+    hibernate.hikari.maxLifetime: 900000
+    hibernate.hikari.idleTimeout: 90000
+    hibernate.hikari.connectionTimeout: 45000
+    hibernate.hikari.registerMbeans: true

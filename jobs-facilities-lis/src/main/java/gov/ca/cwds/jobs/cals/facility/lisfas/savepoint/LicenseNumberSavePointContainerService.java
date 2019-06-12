@@ -2,7 +2,7 @@ package gov.ca.cwds.jobs.cals.facility.lisfas.savepoint;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.inject.LastRunDir;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerServiceImpl;
 
@@ -10,7 +10,7 @@ import gov.ca.cwds.jobs.common.savepoint.SavePointContainerServiceImpl;
  * Created by Alexander Serbin on 6/29/2018.
  */
 public class LicenseNumberSavePointContainerService extends
-    SavePointContainerServiceImpl<LicenseNumberSavePoint, DefaultJobMode> {
+    SavePointContainerServiceImpl<LicenseNumberSavePoint> {
 
   @Inject
   public LicenseNumberSavePointContainerService(@LastRunDir String outputDir) {
@@ -18,13 +18,13 @@ public class LicenseNumberSavePointContainerService extends
   }
 
   @Override
-  public SavePointContainer<? extends LicenseNumberSavePoint, DefaultJobMode> readSavePointContainer(
-      Class<? extends SavePointContainer<? extends LicenseNumberSavePoint, DefaultJobMode>> savePointContainerClass) {
+  public SavePointContainer<? extends LicenseNumberSavePoint> readSavePointContainer(
+      Class<? extends SavePointContainer<? extends LicenseNumberSavePoint>> savePointContainerClass) {
     if (savePointContainerExists()) {
       return super.readSavePointContainer(savePointContainerClass);
     } else {
       LicenseNumberSavePointContainer container = new LicenseNumberSavePointContainer();
-      container.setJobMode(DefaultJobMode.INITIAL_LOAD);
+      container.setJobMode(JobMode.INITIAL_LOAD);
       LicenseNumberSavePoint savePoint = new LicenseNumberSavePoint(0);
       container.setSavePoint(savePoint);
       return container;

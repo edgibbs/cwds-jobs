@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.cals.facility;
 
-import gov.ca.cwds.cals.service.dto.FacilityDTO;
+import gov.ca.cwds.cals.service.dto.FacilityDto;
 import gov.ca.cwds.jobs.common.entity.ChangedEntityService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import org.slf4j.Logger;
@@ -19,13 +19,13 @@ public abstract class AbstractChangedFacilityService implements
     String facilityId = null;
     try {
       facilityId = identifier.getId();
-      LOG.info("Loading entity by id {}", facilityId);
-      FacilityDTO facilityDTO = loadEntityById(identifier);
-      if (facilityDTO == null) {
+      LOG.debug("Loading entity by id {}", facilityId);
+      FacilityDto facilityDto = loadEntityById(identifier);
+      if (facilityDto == null) {
         LOG.error("Can't get facility by id {}", facilityId);
         throw new IllegalStateException("FacilityDTO must not be null!!!");
       }
-      return new ChangedFacilityDto(facilityDTO, identifier.getRecordChangeOperation());
+      return new ChangedFacilityDto(facilityDto, identifier.getRecordChangeOperation());
     } catch (Exception e) {
       LOG.error("Can't get facility by id {}", facilityId, e);
       throw new IllegalStateException(
@@ -33,7 +33,7 @@ public abstract class AbstractChangedFacilityService implements
     }
   }
 
-  protected abstract FacilityDTO loadEntityById(ChangedEntityIdentifier identifier);
+  protected abstract FacilityDto loadEntityById(ChangedEntityIdentifier identifier);
 
 }
 

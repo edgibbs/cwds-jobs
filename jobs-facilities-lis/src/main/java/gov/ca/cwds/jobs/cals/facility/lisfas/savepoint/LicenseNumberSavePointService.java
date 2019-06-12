@@ -2,8 +2,10 @@ package gov.ca.cwds.jobs.cals.facility.lisfas.savepoint;
 
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cals.facility.lisfas.mode.LisJobModeService;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
+import gov.ca.cwds.jobs.common.inject.PrimaryContainerService;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
+import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * Created by Alexander Serbin on 6/29/2018.
  */
 public class LicenseNumberSavePointService extends
-    SavePointServiceImpl<LicenseNumberSavePoint, DefaultJobMode> {
+    SavePointServiceImpl<LicenseNumberSavePoint> {
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(LicenseNumberSavePointService.class);
@@ -21,12 +23,13 @@ public class LicenseNumberSavePointService extends
   private LisJobModeService jobModeService;
 
   @Inject
-  private LicenseNumberSavePointContainerService savePointContainerService;
+  @PrimaryContainerService
+  private SavePointContainerService<LicenseNumberSavePoint> savePointContainerService;
 
   @Override
   public void saveSavePoint(LicenseNumberSavePoint savePoint) {
     if (savePoint.getLicenseNumber() != 0) {
-      DefaultJobMode jobMode = jobModeService.getCurrentJobMode();
+      JobMode jobMode = jobModeService.getCurrentJobMode();
       LicenseNumberSavePointContainer savePointContainer = new LicenseNumberSavePointContainer();
       savePointContainer.setJobMode(jobMode);
       savePointContainer.setSavePoint(savePoint);
@@ -37,7 +40,7 @@ public class LicenseNumberSavePointService extends
   }
 
   @Override
-  public Class<? extends SavePointContainer<? extends LicenseNumberSavePoint, DefaultJobMode>> getSavePointContainerClass() {
+  public Class<? extends SavePointContainer<? extends LicenseNumberSavePoint>> getSavePointContainerClass() {
     return LicenseNumberSavePointContainer.class;
   }
 }

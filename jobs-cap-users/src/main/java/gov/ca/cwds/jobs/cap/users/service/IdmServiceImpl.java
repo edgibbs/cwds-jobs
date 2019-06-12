@@ -4,21 +4,25 @@ import com.google.inject.Inject;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UsersPage;
+import gov.ca.cwds.jobs.cap.users.inject.BatchSize;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiPassword;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
+import gov.ca.cwds.jobs.cap.users.service.exception.IdmServiceException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +50,11 @@ public class IdmServiceImpl implements IdmService {
   @PerryApiPassword
   private String perryApiPassword;
 
+  @Inject
+  @BatchSize
+  private int batchSize;
+
+
   private String basicAuthHeader;
 
   @Inject
@@ -67,13 +76,29 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   @SuppressWarnings("unchecked")
-  public List<User> getUsersByRacfIds(Set<String> racfIds) {
+  public List<User> getUsersByRacfIds(List<String> racfIds) {
+    List<List<String>> batches = ListUtils.partition(racfIds, batchSize);
+    LOGGER.info("Start working on {} batche(s) of RACFIDs", batches.size());
+    List<User> users = new ArrayList<>();
+    int i = 0;
+    for (List<String> batch : batches) {
+      LOGGER.info("PROCESSING THE UPDATE FOR RACFID BATCH #{}", i++);
+      users.addAll(processRequest(batch));
+    }
+    return users;
+  }
 
+  private List<User> processRequest(List<String> racfIds) {
     Response response = client
         .target(apiURL + "/users/search")
         .request(MediaType.APPLICATION_JSON)
         .header(HttpHeaders.AUTHORIZATION, basicAuthHeader)
         .post(Entity.entity(racfIds, MediaType.APPLICATION_JSON));
+
+    if (response.getStatus() != Status.OK.getStatusCode()) {
+      LOGGER.warn("IDM search by RACFIDs responded with status {}", response.getStatus());
+      throw new IdmServiceException();
+    }
 
     return response.readEntity(new GenericType<List<User>>() {
     });
@@ -90,6 +115,11 @@ public class IdmServiceImpl implements IdmService {
         .request(MediaType.APPLICATION_JSON)
         .header(HttpHeaders.AUTHORIZATION, basicAuthHeader)
         .get();
+
+    if (response.getStatus() != Status.OK.getStatusCode()) {
+      LOGGER.warn("IDM getCapChanges responded with status {}", response.getStatus());
+      throw new IdmServiceException();
+    }
 
     return response.readEntity(new GenericType<List<UserAndOperation>>() {
     });

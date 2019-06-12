@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.cals.facility.cws.identifier;
 
+import gov.ca.cwds.jobs.cals.facility.cws.QueryConstants;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
@@ -16,21 +17,12 @@ import javax.persistence.NamedQuery;
 
 @NamedQueries({@NamedQuery(
     name = CwsChangedIdentifier.CWSCMS_GET_MAX_TIMESTAMP_QUERY_NAME,
-    query = CwsChangedIdentifier.CWS_CMS_GET_MAX_TIMESTAMP_QUERY
+    query = QueryConstants.CWS_CMS_GET_MAX_TIMESTAMP_QUERY
 )
 })
 @Entity
 public class CwsChangedIdentifier extends
     ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> {
-
-  public static final String SHARED_PART =
-      " from ReplicationPlacementHome as home"
-          + " where home.licensrCd <> 'CL' "
-          + " and home.facilityType <> 1420 ";  //medical facility
-
-  static final String CWS_CMS_GET_MAX_TIMESTAMP_QUERY =
-      "select max(home.replicationLastUpdated)"
-          + SHARED_PART;
 
   public static final String CWSCMS_GET_MAX_TIMESTAMP_QUERY_NAME = "RecordChange.cwscmsMaxTimestampQuery";
 

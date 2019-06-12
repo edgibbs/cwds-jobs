@@ -5,4 +5,5 @@ include 'jobs-facilities-lis'
 include 'jobs-facilities-cws'
 //include 'jobs-rfa'
 include 'jobs-cap-users'
+include 'jobs-audit-events'
 

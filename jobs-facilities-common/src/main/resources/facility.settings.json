@@ -5,9 +5,14 @@
     "analyzer": {
       "keyword_lowercase": {
         "tokenizer": "keyword",
+        "filter": ["lowercase"]
+      },
+      "whitespace_lowercase": {
+        "type": "custom",
         "filter": [
           "lowercase"
-        ]
+        ],
+        "tokenizer": "whitespace"
       }
     }
   }

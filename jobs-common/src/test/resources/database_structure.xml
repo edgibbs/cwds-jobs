@@ -2,7 +2,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
-    <changeSet author="serbin" id="10130320">
+    <changeSet author="serbin" id="10130320" runAlways="true">
         <createTable  tableName="TEST_ENTITY">
             <column name="ID" type="CHAR(8)"/>
             <column name="TIMESTAMP" type="timestamp(6)"/>

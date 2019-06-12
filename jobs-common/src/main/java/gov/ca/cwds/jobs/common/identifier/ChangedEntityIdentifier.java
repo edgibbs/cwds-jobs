@@ -21,6 +21,7 @@ public abstract class ChangedEntityIdentifier<S extends SavePoint> implements
 
   private RecordChangeOperation recordChangeOperation;
 
+  @SuppressWarnings("squid:S1948") // suppressing sonarqube warning about non-transient field
   @Transient
   private S savePoint;
 

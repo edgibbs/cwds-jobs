@@ -13,6 +13,7 @@ elasticsearch:
 
   elasticsearch.cluster: ${ELASTIC_SEARCH_CLUSTER:-elasticsearch}
   elasticsearch.alias: ${ELASTIC_SEARCH_ALIAS:-facilities}
+  elasticsearch.index.prefix: facilities_lis
   elasticsearch.doctype: ${ELASTIC_SEARCH_DOCTYPE:-facility}
   #
   elasticsearch.xpack.user: ${ELASTIC_SEARCH_XPACK_USER:-elastic}
@@ -29,8 +30,13 @@ lisDataSourceFactory:
       hibernate.show_sql: false
       hibernate.format_sql: true
       hibernate.use_sql_comments: false
-      hibernate.c3p0.min_size: 5
-      hibernate.c3p0.max_size: 5
+      hibernate.connection.provider_class: org.hibernate.hikaricp.internal.HikariCPConnectionProvider
+      hibernate.hikari.minimumIdle: 4
+      hibernate.hikari.maximumPoolSize: 10
+      hibernate.hikari.maxLifetime: 900000
+      hibernate.hikari.idleTimeout: 90000
+      hibernate.hikari.connectionTimeout: 45000
+      hibernate.hikari.registerMbeans: true
 
 fasDataSourceFactory:
   properties:
@@ -42,8 +48,18 @@ fasDataSourceFactory:
       hibernate.connection.password: ${DB_FAS_PASSWORD:-postgres_data}
       hibernate.connection.url: ${DB_FAS_JDBC_URL:-jdbc:postgresql://192.168.99.100:5432/?currentSchema=fas}
       hibernate.show_sql: false
-      hibernate.c3p0.min_size: 5
-      hibernate.c3p0.max_size: 5
+      hibernate.connection.ssl: ${FAS_SSL_ENABLED:-false}
+      hibernate.connection.sslmode: ${FAS_SSL_MODE:-disable}
+      hibernate.connection.sslcert: ${FAS_SSL_CERT:-config/cerf.crt}
+      hibernate.connection.sslkey: ${FAS_SSL_KEY:-config/key.pk8}
+      hibernate.connection.sslpassword: ${DB_FAS_PASSWORD:-password}
+      hibernate.connection.provider_class: org.hibernate.hikaricp.internal.HikariCPConnectionProvider
+      hibernate.hikari.minimumIdle: 4
+      hibernate.hikari.maximumPoolSize: 10
+      hibernate.hikari.maxLifetime: 900000
+      hibernate.hikari.idleTimeout: 90000
+      hibernate.hikari.connectionTimeout: 45000
+      hibernate.hikari.registerMbeans: true
 
 calsnsDataSourceFactory:
   properties:
@@ -62,10 +78,15 @@ calsnsDataSourceFactory:
       hibernate.connection.keepAliveTimeOut: 8
       hibernate.jdbc.time_zone: America/Los_Angeles
       hibernate.jdbc.use_scrollable_resultset: true
-      hibernate.c3p0.min_size: 5
-      hibernate.c3p0.max_size: 5
       hibernate.id.new_generator_mappings: false
       hibernate.cache.use_second_level_cache: true
       hibernate.cache.region.factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
       hibernate.cache.use_query_cache: true
       hibernate.connection.autocommit: false
+      hibernate.connection.provider_class: org.hibernate.hikaricp.internal.HikariCPConnectionProvider
+      hibernate.hikari.minimumIdle: 4
+      hibernate.hikari.maximumPoolSize: 10
+      hibernate.hikari.maxLifetime: 900000
+      hibernate.hikari.idleTimeout: 90000
+      hibernate.hikari.connectionTimeout: 45000
+      hibernate.hikari.registerMbeans: true

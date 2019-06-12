@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.core.JobImpl;
 import gov.ca.cwds.jobs.common.entity.TestEntity;
 import gov.ca.cwds.jobs.common.inject.TestSessionFactory;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import java.time.LocalDateTime;
 import org.hibernate.SessionFactory;
@@ -13,7 +12,7 @@ import org.hibernate.SessionFactory;
  * Created by Alexander Serbin on 10/13/2018
  */
 public class TestJobImpl extends
-    JobImpl<TestEntity, TimestampSavePoint<LocalDateTime>, DefaultJobMode> {
+    JobImpl<TestEntity, TimestampSavePoint<LocalDateTime>> {
 
     @Inject
     @TestSessionFactory

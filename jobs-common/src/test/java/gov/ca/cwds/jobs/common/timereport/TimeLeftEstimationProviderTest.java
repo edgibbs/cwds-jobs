@@ -19,6 +19,7 @@ import org.junit.Test;
  */
 public class TimeLeftEstimationProviderTest {
 
+  @SuppressWarnings("squid:S2925") // we need the Thread.sleep calls in this test method
   @Test
   public void getEstimationTest() throws Exception {
     TimeLeftEstimationProvider timeLeftEstimationProvider = createEstimationProvider(0);

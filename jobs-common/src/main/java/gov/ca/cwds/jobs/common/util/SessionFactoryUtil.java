@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.common.util;
 
-import com.google.common.collect.ImmutableList;
 import io.dropwizard.db.DataSourceFactory;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import org.apache.commons.lang3.Validate;
@@ -20,17 +20,13 @@ public final class SessionFactoryUtil {
 
   public static SessionFactory buildSessionFactory(DataSourceFactory dataSourceFactory,
       String dataSourceName,
-      ImmutableList<Class<?>> entityClasses,
+      List<Class<?>> entityClasses,
       Function<Configuration, Configuration> function) {
     Validate.notNull(dataSourceFactory,
         String.format("%s data source configuration is empty", dataSourceName));
     Configuration configuration = new Configuration();
     for (Map.Entry<String, String> property : dataSourceFactory.getProperties().entrySet()) {
       configuration.setProperty(property.getKey(), property.getValue());
-    }
-
-    if (!dataSourceFactory.getProperties().containsKey("hibernate.c3p0.min_size")) {
-      configuration.setProperty("hibernate.c3p0.min_size", "1");
     }
     configuration.setProperty("hibernate.current_session_context_class", "managed");
 
@@ -45,7 +41,7 @@ public final class SessionFactoryUtil {
 
   public static SessionFactory buildSessionFactory(DataSourceFactory dataSourceFactory,
       String dataSourceName,
-      ImmutableList<Class<?>> entityClasses) {
+      List<Class<?>> entityClasses) {
     Function<Configuration, Configuration> emptyFunction = configuration -> configuration;
     return buildSessionFactory(dataSourceFactory, dataSourceName, entityClasses, emptyFunction);
   }

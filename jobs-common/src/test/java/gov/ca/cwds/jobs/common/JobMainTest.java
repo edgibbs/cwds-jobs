@@ -1,7 +1,8 @@
 package gov.ca.cwds.jobs.common;
 
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INCREMENTAL_LOAD;
-import static gov.ca.cwds.jobs.common.mode.DefaultJobMode.INITIAL_LOAD;
+import static gov.ca.cwds.jobs.common.TestCustomModule.INDEX_NAME;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INCREMENTAL_LOAD;
+import static gov.ca.cwds.jobs.common.mode.JobMode.INITIAL_LOAD;
 import static gov.ca.cwds.jobs.utils.DataSourceFactoryUtils.fixDatasourceFactory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -14,8 +15,10 @@ import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.inject.BrokenTestEntityServiceProvider;
 import gov.ca.cwds.jobs.common.inject.JobModule;
 import gov.ca.cwds.jobs.common.inject.MultiThreadModule;
+import gov.ca.cwds.jobs.common.savepoint.IndexAwareSavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainerService;
+import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import gov.ca.cwds.jobs.common.util.LastRunDirHelper;
 import gov.ca.cwds.test.support.DatabaseHelper;
 import io.dropwizard.db.DataSourceFactory;
@@ -36,9 +39,16 @@ public class JobMainTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobMainTest.class);
   private LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("temp");
-  private LocalDateTimeSavePointContainerService savePointContainerService =
-      new LocalDateTimeSavePointContainerService(
-          lastRunDirHelper.getSavepointContainerFolder().toString());
+
+  private IndexAwareSavePointContainerService<TimestampSavePoint<LocalDateTime>> savePointContainerService =
+      new IndexAwareSavePointContainerService<>();
+
+  {
+    savePointContainerService.setIndexName(INDEX_NAME);
+    savePointContainerService
+        .setSavePointContainerService(new LocalDateTimeSavePointContainerService(
+            lastRunDirHelper.getSavepointContainerFolder().toString()));
+  }
 
   @Before
   public void beforeMethod() throws IOException {
@@ -49,7 +59,7 @@ public class JobMainTest {
   public void afterMethod() throws IOException {
     lastRunDirHelper.deleteSavePointContainerFolder();
     TestEntityWriter.reset();
-
+    clearTestEntities();
   }
 
   @Test
@@ -165,14 +175,15 @@ public class JobMainTest {
           .readSavePointContainer(LocalDateTimeSavePointContainer.class);
       assertEquals(LocalDateTime.of(2016, 10, 10, 1, 2, 15),
           savePointContainer.getSavePoint().getTimestamp());
+      assertEquals(INDEX_NAME, savePointContainer.getIndexName());
       assertEquals(INITIAL_LOAD, savePointContainer.getJobMode());
     }
     TestEntityWriter.reset();
-    runInitialJob("testcase12");
+    runInitialJob("testcase12", "t12", "testcase12");
     assertEquals(2, TestEntityWriter.getItems().size());
     LocalDateTimeSavePointContainer savePointContainer = (LocalDateTimeSavePointContainer) savePointContainerService
         .readSavePointContainer(LocalDateTimeSavePointContainer.class);
-    assertEquals(LocalDateTime.of(2018, 5, 6, 2, 3,45),
+    assertEquals(LocalDateTime.of(2018, 5, 6, 2, 3, 45),
         savePointContainer.getSavePoint().getTimestamp());
     assertEquals(INCREMENTAL_LOAD, savePointContainer.getJobMode());
   }
@@ -188,7 +199,7 @@ public class JobMainTest {
         new MultiThreadModule(configuration.getMultiThread()),
         new TestDataAccessModule());
     jobModule.setJobPreparator(
-        new TestJobPreparator(getConfigFilePath("testcase12"), "testcase12",
+        new TestJobPreparator(getConfigFilePath("testcase12"),
             "database_structure.xml",
             "testcases/testcase12/test_case_12.xml"));
 
@@ -220,7 +231,7 @@ public class JobMainTest {
         new MultiThreadModule(configuration.getMultiThread()),
         new TestDataAccessModule());
     jobModule.setJobPreparator(
-        new TestJobPreparator(getConfigFilePath(testCase), testCase, scripts));
+        new TestJobPreparator(getConfigFilePath(testCase), scripts));
     JobRunner.run(jobModule);
   }
 
@@ -242,12 +253,10 @@ public class JobMainTest {
 
     private String configPath;
     private String[] scripts;
-    private String testCaseName;
 
-    public TestJobPreparator(String configPath, String testCaseName, String... scripts) {
+    public TestJobPreparator(String configPath, String... scripts) {
       this.configPath = configPath;
       this.scripts = scripts;
-      this.testCaseName = testCaseName;
     }
 
     @Override
@@ -256,13 +265,14 @@ public class JobMainTest {
       try {
         DatabaseHelper databaseHelper = createDatabaseHelper(configPath);
         for (String script : scripts) {
-          databaseHelper.runScript(script, testCaseName);
+          databaseHelper.runScript(script, "test");
         }
       } catch (LiquibaseException e) {
         LOGGER.error(e.getMessage(), e);
       }
       LOGGER.info("Setup database has been finished!!!");
     }
+
   }
 
   private DatabaseHelper createDatabaseHelper(String configPath) {
@@ -273,5 +283,11 @@ public class JobMainTest {
     return new DatabaseHelper(dataSourceFactory.getUrl(),
         dataSourceFactory.getUser(), dataSourceFactory.getPassword());
   }
+
+  private void clearTestEntities() throws IOException {
+    new TestJobPreparator(getConfigFilePath("testcase1"), "clear_entities.xml")
+        .run();
+  }
+
 
 }

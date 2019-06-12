@@ -1,41 +1,54 @@
 package gov.ca.cwds.jobs.cap.users.job;
 
 import com.google.inject.Inject;
+import gov.ca.cwds.jobs.cap.users.dto.CapJobResult;
+import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePoint;
+import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointService;
 import gov.ca.cwds.jobs.common.core.Job;
-import gov.ca.cwds.jobs.common.mode.DefaultJobMode;
-import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
-import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePointContainer;
-import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
-import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import gov.ca.cwds.jobs.common.timereport.JobTimeReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
-
 public abstract class AbstractCapUsersJob implements Job {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCapUsersJob.class);
 
   @Inject
-  private SavePointContainerService<TimestampSavePoint<LocalDateTime>, DefaultJobMode> savePointContainerService;
+  private CapUsersSavePointService savePointService;
 
   @Override
   public void run() {
     JobTimeReport jobTimeReport = new JobTimeReport();
-    runJob();
+    CapUsersSavePoint newSavePoint = savePointService.createSavePoint();
+    CapJobResult jobResult = runJob();
+    processJobResult(jobResult, newSavePoint);
     if (LOGGER.isInfoEnabled()) {
       jobTimeReport.printTimeSpent();
     }
   }
 
-  abstract void runJob();
-
-  void createSavePoint(LocalDateTime dateTime){
-    LocalDateTimeSavePoint timestampSavePoint = new LocalDateTimeSavePoint(dateTime);
-    DefaultJobMode nextJobMode = DefaultJobMode.INCREMENTAL_LOAD;
-    LocalDateTimeSavePointContainer savePointContainer = new LocalDateTimeSavePointContainer();
-    savePointContainer.setJobMode(nextJobMode);
-    savePointContainer.setSavePoint(timestampSavePoint);
-    savePointContainerService.writeSavePointContainer(savePointContainer);
+  private void processJobResult(CapJobResult jobResult,
+      CapUsersSavePoint newSavePoint) {
+    if (!jobResult.isCwsPartSuccess() || !jobResult.isCapPartSuccess()) {
+      newSavePoint = editSavePoint(jobResult, newSavePoint);
+    }
+    LOGGER.info("Creating save point savePoint {}", newSavePoint);
+    savePointService.saveSavePoint(newSavePoint);
   }
+
+  private CapUsersSavePoint editSavePoint(CapJobResult jobResult, CapUsersSavePoint savePoint) {
+    CapUsersSavePoint previousSavePoint = savePointService.loadSavePoint();
+    if (!jobResult.isCapPartSuccess()) {
+      savePoint.setCognitoTimestamp(previousSavePoint.getCognitoTimestamp());
+    }
+    if (!jobResult.isCwsPartSuccess()) {
+      savePoint.setCwsOfficeTimestamp(previousSavePoint.getCwsOfficeTimestamp());
+      savePoint.setStaffPersonTimestamp(previousSavePoint.getStaffPersonTimestamp());
+      savePoint.setUserIdTimestamp(previousSavePoint.getUserIdTimestamp());
+    }
+    return savePoint;
+  }
+
+  abstract CapJobResult runJob();
+
 }

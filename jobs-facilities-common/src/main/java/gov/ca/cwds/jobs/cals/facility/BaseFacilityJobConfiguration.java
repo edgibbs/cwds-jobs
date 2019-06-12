@@ -5,6 +5,7 @@ import gov.ca.cwds.jobs.common.configuration.JobConfiguration;
 import gov.ca.cwds.jobs.common.configuration.MultiThreadConfiguration;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchConfiguration;
 import io.dropwizard.db.DataSourceFactory;
+import javax.validation.Valid;
 
 /**
  * Created by Ievgenii Drozd on 4/30/2018.
@@ -15,6 +16,7 @@ public class BaseFacilityJobConfiguration implements JobConfiguration {
 
   private MultiThreadConfiguration multiThread;
 
+  @Valid
   private ElasticsearchConfiguration elasticsearch;
 
   @JsonProperty

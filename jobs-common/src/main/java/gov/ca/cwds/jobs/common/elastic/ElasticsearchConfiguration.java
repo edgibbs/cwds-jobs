@@ -20,6 +20,10 @@ public class ElasticsearchConfiguration implements JobConfiguration {
   private String indexSettings;
 
   @NotNull
+  @JsonProperty("elasticsearch.index.prefix")
+  private String elasticSearchIndexPrefix;
+
+  @NotNull
   @JsonProperty("elasticsearch.cluster")
   private String elasticsearchCluster;
 
@@ -164,6 +168,14 @@ public class ElasticsearchConfiguration implements JobConfiguration {
   private String getElasticSearchIndexSettings(String indexSettingsFilename) {
     return readElasticSettingsFile(indexSettingsFilename,
         "Can't read elastic search index settings");
+  }
+
+  public String getElasticSearchIndexPrefix() {
+    return elasticSearchIndexPrefix;
+  }
+
+  public void setElasticSearchIndexPrefix(String elasticSearchIndexPrefix) {
+    this.elasticSearchIndexPrefix = elasticSearchIndexPrefix;
   }
 
   private String readElasticSettingsFile(String filename, String errorMessage) {

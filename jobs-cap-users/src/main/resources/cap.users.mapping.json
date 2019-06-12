@@ -11,6 +11,10 @@
         "keyword": {
           "type": "keyword",
           "ignore_above": 256
+        },
+        "phonetic": {
+          "type": "text",
+          "analyzer": "dbl_metaphone"
         }
       }
     },
@@ -22,6 +26,19 @@
           "analyzer": "keyword_lowercase",
           "fielddata": true
         },
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "phonetic": {
+          "type": "text",
+          "analyzer": "dbl_metaphone"
+        }
+      }
+    },
+    "custom_check": {
+      "type": "text",
+      "fields": {
         "keyword": {
           "type": "keyword",
           "ignore_above": 256

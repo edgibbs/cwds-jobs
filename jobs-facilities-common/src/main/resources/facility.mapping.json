@@ -2,6 +2,7 @@
   "properties": {
     "name": {
       "type": "text",
+      "analyzer": "whitespace_lowercase",
       "fields": {
         "for_sort": {
           "type": "text",
@@ -12,6 +13,14 @@
     },
     "addresses": {
       "type": "nested"
+    },
+    "full_residential_address": {
+      "type": "text",
+      "analyzer": "whitespace_lowercase"
+    },
+    "full_mailing_address": {
+      "type": "text",
+      "analyzer": "whitespace_lowercase"
     },
     "phones": {
       "type": "nested"
@@ -24,6 +33,15 @@
         "value": {
           "type": "text",
           "copy_to": "_all"
+        }
+      }
+    },
+    "custom_check": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
         }
       }
     }

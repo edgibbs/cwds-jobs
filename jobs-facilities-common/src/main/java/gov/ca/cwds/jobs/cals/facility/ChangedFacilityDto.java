@@ -1,6 +1,6 @@
 package gov.ca.cwds.jobs.cals.facility;
 
-import gov.ca.cwds.cals.service.dto.FacilityDTO;
+import gov.ca.cwds.cals.service.dto.FacilityDto;
 import gov.ca.cwds.dto.BaseDTO;
 import gov.ca.cwds.jobs.common.ChangedDTO;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
@@ -10,16 +10,16 @@ import java.util.Objects;
 /**
  * @author CWDS TPT-2
  */
-public class ChangedFacilityDto extends BaseDTO implements ChangedDTO<FacilityDTO>, Serializable {
+public class ChangedFacilityDto extends BaseDTO implements ChangedDTO<FacilityDto>, Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private FacilityDTO facilityDTO;
+  private FacilityDto facilityDto;
 
   private RecordChangeOperation recordChangeOperation;
 
-  public ChangedFacilityDto(FacilityDTO facilityDTO, RecordChangeOperation recordChangeOperation) {
-    this.facilityDTO = facilityDTO;
+  public ChangedFacilityDto(FacilityDto facilityDto, RecordChangeOperation recordChangeOperation) {
+    this.facilityDto = facilityDto;
     this.recordChangeOperation = recordChangeOperation;
   }
 
@@ -33,13 +33,13 @@ public class ChangedFacilityDto extends BaseDTO implements ChangedDTO<FacilityDT
   }
 
   @Override
-  public FacilityDTO getDTO() {
-    return facilityDTO;
+  public FacilityDto getDTO() {
+    return facilityDto;
   }
 
   @Override
   public String getId() {
-    return facilityDTO.getId();
+    return facilityDto.getId();
   }
 
   @Override
@@ -52,11 +52,11 @@ public class ChangedFacilityDto extends BaseDTO implements ChangedDTO<FacilityDT
     }
     ChangedFacilityDto that = (ChangedFacilityDto) o;
     return recordChangeOperation == that.recordChangeOperation && Objects
-        .equals(facilityDTO, that.facilityDTO);
+        .equals(facilityDto, that.facilityDto);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(facilityDTO, recordChangeOperation);
+    return Objects.hash(facilityDto, recordChangeOperation);
   }
 }

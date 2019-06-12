@@ -1,8 +1,10 @@
 package gov.ca.cwds.jobs.common.mode;
 
 /**
- * Created by Alexander Serbin on 6/20/2018.
+ * Created by Alexander Serbin on 4/6/2018.
  */
-public interface JobMode {
-
+public enum JobMode {
+  INITIAL_LOAD,
+  INITIAL_RESUME,
+  INCREMENTAL_LOAD
 }

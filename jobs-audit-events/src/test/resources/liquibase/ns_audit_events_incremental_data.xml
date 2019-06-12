@@ -1,0 +1,20 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+  <changeSet author="test" id="02170917">
+    <insert tableName="audit_event">
+      <column name="id" value="inc"/>
+      <column name="event_timestamp" valueDate="${now}"/>
+      <column name="event_json" value="{'test':'inc'}"/>
+      <column name="processed" value="false"/>
+    </insert>
+    <insert tableName="audit_event">
+      <column name="id" value="inc2"/>
+      <column name="event_timestamp" valueDate="${now}"/>
+      <column name="event_json" value="{'test':'inc2'}"/>
+      <column name="processed" value="true"/>
+    </insert>
+  </changeSet>
+</databaseChangeLog>
