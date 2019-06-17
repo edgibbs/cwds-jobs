@@ -23,6 +23,7 @@ import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -42,9 +43,6 @@ public class ElasticsearchServiceTest {
 
   @Mock
   private ElasticApiWrapper elasticApiWrapper;
-
-  @Mock
-  private CreateIndexRequestBuilder createIndexRequestBuilder;
 
   @Before
   public void initMocks() {
@@ -68,11 +66,12 @@ public class ElasticsearchServiceTest {
     runCreateIndexTest(mapping);
   }
 
-  private void runCreateIndexTest(Map<String, Object> expecedMapping) throws IOException {
-    when(elasticApiWrapper.prepareCreateIndexBuilder(anyString()))
-        .thenReturn(createIndexRequestBuilder);
+  private void runCreateIndexTest(Map<String, Object> expecedMapping) {
     when(elasticApiWrapper.getIndexMapping(anyObject(), anyString()))
         .thenReturn(expecedMapping);
+    when(configuration.getElasticSearchIndexPrefix()).thenReturn("es");
+    when(configuration.getIndexSettings()).thenReturn("{}");
+    when(configuration.getDocumentMapping()).thenReturn("{}");
     elasticsearchService.createNewIndex();
   }
 
@@ -129,7 +128,7 @@ public class ElasticsearchServiceTest {
   public void testHandleAliasesCreateAliasWithOneIndex() {
     initHandleAliases(false);
 
-    doReturn(true).when(elasticApiWrapper).checkIndicesExists(any(IndicesExistsRequest.class));
+    doReturn(true).when(elasticApiWrapper).checkIndicesExists(any(GetIndexRequest.class));
     doReturn(null).when(elasticApiWrapper).deleteIndex(any(DeleteIndexRequest.class));
 
     verifyHandleAliases();
