@@ -1,7 +1,4 @@
 {
-  "_all": {
-    "enabled": true
-  },
   "dynamic": "strict",
   "properties": {
     "comment": {
