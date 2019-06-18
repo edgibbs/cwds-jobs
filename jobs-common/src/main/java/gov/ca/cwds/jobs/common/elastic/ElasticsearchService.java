@@ -5,6 +5,7 @@ import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.inject.IndexName;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -67,7 +68,7 @@ public class ElasticsearchService {
       client.indices().getAlias(request, RequestOptions.DEFAULT).getAliases().keySet().forEach(indexes::add);
       return indexes;
     } catch (IOException e) {
-      LOGGER.error("Unable to get indexs for alias [" + request.aliases() + "]", e);
+      LOGGER.error("Unable to get indexs for alias [" + Arrays.toString(request.aliases()) + "]", e);
       throw new RuntimeException(e);
     }
   }

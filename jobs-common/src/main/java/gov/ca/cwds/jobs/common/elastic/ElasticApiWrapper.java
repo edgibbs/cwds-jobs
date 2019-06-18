@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.common.elastic;
 
 import com.google.inject.Inject;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
@@ -40,7 +41,7 @@ public class ElasticApiWrapper {
     try {
       return client.indices().existsAlias(request, RequestOptions.DEFAULT);
     } catch (IOException e) {
-      LOGGER.error("Unable check that alias exists[" + request.indices() + "]", e);
+      LOGGER.error("Unable check that alias exists[" + Arrays.toString(request.indices()) + "]", e);
       throw new RuntimeException(e);
     }
   }
@@ -58,7 +59,7 @@ public class ElasticApiWrapper {
     try {
       return client.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
     } catch (IOException e) {
-      LOGGER.error("Unable to delete the index [" + deleteIndexRequest.indices() + "]", e);
+      LOGGER.error("Unable to delete the index [" + Arrays.toString(deleteIndexRequest.indices()) + "]", e);
       throw new RuntimeException(e);
     }
   }
@@ -67,7 +68,7 @@ public class ElasticApiWrapper {
     try {
       return client.indices().exists(request, RequestOptions.DEFAULT);
     } catch (IOException e) {
-      LOGGER.error("Unable check that index exists[" + request.indices() + "]", e);
+      LOGGER.error("Unable check that index exists[" + Arrays.toString(request.indices()) + "]", e);
       throw new RuntimeException(e);
     }
   }
