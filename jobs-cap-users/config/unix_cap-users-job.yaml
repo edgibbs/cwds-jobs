@@ -11,15 +11,15 @@ performanceTestMode: ${PERF_TEST_MODE_ON:-false}
 
 elasticsearch:
   elasticsearch.additional.nodes:
-    - localhost:9300
-    - localhost:9300
+    - localhost:9200
+    - localhost:9200
 
   elasticsearch.cluster: ${ELASTIC_SEARCH_CLUSTER:-elasticsearch_DimaS}
   elasticsearch.alias: ${ELASTIC_SEARCH_ALIAS:-users}
   elasticsearch.index.prefix: users
   elasticsearch.doctype: ${ELASTIC_SEARCH_DOCTYPE:-user}
   elasticsearch.host: ${ELASTIC_SEARCH_HOST:-localhost}
-  elasticsearch.port: ${ELASTIC_SEARCH_PORT:-9300}
+  elasticsearch.port: ${ELASTIC_SEARCH_PORT:-9200}
   #
   elasticsearch.xpack.user: ${ELASTIC_SEARCH_XPACK_USER:-elastic}
   elasticsearch.xpack.password: ${ELASTIC_SEARCH_XPACK_PASSWORD:-changeme}

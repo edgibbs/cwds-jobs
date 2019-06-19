@@ -8,7 +8,7 @@ elasticsearch:
   elasticsearch.index.prefix: auditevents
   elasticsearch.doctype: ${ELASTIC_SEARCH_AUDIT_EVENT_DOCTYPE:-auditevent}
   elasticsearch.host: ${ELASTIC_SEARCH_HOST:-localhost}
-  elasticsearch.port: ${ELASTIC_SEARCH_PORT:-9300}
+  elasticsearch.port: ${ELASTIC_SEARCH_PORT:-9200}
   #
   elasticsearch.xpack.user: ${ELASTIC_SEARCH_XPACK_USER:-elastic}
   elasticsearch.xpack.password: ${ELASTIC_SEARCH_XPACK_PASSWORD:-changeme}
