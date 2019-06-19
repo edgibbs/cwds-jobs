@@ -1,13 +1,11 @@
 package gov.ca.cwds.jobs.common.elastic;
 
 import com.google.inject.Inject;
-import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.inject.IndexName;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.Validate;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
@@ -19,7 +17,6 @@ import org.elasticsearch.client.RestHighLevelClient;
 
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
-import org.elasticsearch.client.indices.GetMappingsRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.LoggerFactory;
 
@@ -86,22 +83,8 @@ public class ElasticsearchService {
 
     CreateIndexRequest createIndexRequest = new CreateIndexRequest(newIndexName);
     createIndexRequest.settings(configuration.getIndexSettings(), XContentType.JSON);
-    createIndexRequest.mapping(configuration.getDocumentMapping(), XContentType.JSON);
     elasticApiWrapper.createIndex(createIndexRequest);
-    checkIndexCreatedProperly(newIndexName);
     return newIndexName;
-  }
-
-  private void checkIndexCreatedProperly(String newIndexName) {
-    GetMappingsRequest mappingsRequest = new GetMappingsRequest();
-    mappingsRequest.indices(newIndexName);
-
-    Map<String, Object> mapping = elasticApiWrapper.getIndexMapping(mappingsRequest, newIndexName);
-
-    if (!((Map) mapping.get("properties")).containsKey(CUSTOM_CHECK)) {
-      throw new JobsException("Index was not created properly. Please restart the job");
-    }
-    LOGGER.info("Index has been created properly. Custom mapping is found");
   }
 
   public String getExistingIndex() {

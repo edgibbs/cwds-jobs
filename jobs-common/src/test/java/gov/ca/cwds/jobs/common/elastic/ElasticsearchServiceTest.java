@@ -13,16 +13,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import gov.ca.cwds.jobs.common.exception.JobsException;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +47,7 @@ public class ElasticsearchServiceTest {
   }
 
   @Test(expected = JobsException.class)
-  public void testIndexIsNotCreatedProperly() throws IOException {
+  public void testIndexIsNotCreatedProperly() {
     Map<String, Object> mapping = new HashMap<>();
     Map<String, Object> propertiesMap = new HashMap<>();
     mapping.put("properties", propertiesMap);
@@ -58,7 +55,7 @@ public class ElasticsearchServiceTest {
   }
 
   @Test
-  public void testIndexCreatedWithCustomMapping() throws IOException {
+  public void testIndexCreatedWithCustomMapping() {
     Map<String, Object> mapping = new HashMap<>();
     Map<String, Object> propertiesMap = new HashMap<>();
     propertiesMap.put(ElasticsearchService.CUSTOM_CHECK, "");
