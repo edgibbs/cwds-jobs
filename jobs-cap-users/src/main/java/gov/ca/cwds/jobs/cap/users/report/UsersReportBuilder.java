@@ -40,11 +40,20 @@ public class UsersReportBuilder {
   }
 
   public String buildHeader() {
-    return String.join(", ", columns.stream().map(Column::getName).collect(toList())) + "\n";
+    return String.join(", ", columns.stream().map(Column::getName).collect(toList())) + '\n';
   }
 
   public String buildRow(User user) {
     return String.join(", ", columns.stream().map(c -> c.getCellValue(user)).collect(toList()))
-        + "\n";
+        + '\n';
+  }
+
+  public String buildRows(List<User> users) {
+    StringBuilder stringBuilder = new StringBuilder();
+
+    for(User user : users) {
+      stringBuilder.append(buildRow(user));
+    }
+    return stringBuilder.toString();
   }
 }
