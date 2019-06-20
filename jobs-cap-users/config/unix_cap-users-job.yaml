@@ -1,8 +1,8 @@
 elasticSearchBulkSize: 500
 
 perryApiUrl: ${PERRY_URL:-http://localhost:18080/perry/idm}
-perryApiUser: ${PERRY_USER:-user}
-perryApiPassword: ${PERRY_PASS:-pass}
+perryApiUser: ${PERRY_USER:-test}
+perryApiPassword: ${PERRY_PASS:-test}
 jerseyClientConnectTimeout: ${CONNECT_TIMEOUT:-20000}
 jerseyClientReadTimeout: ${READ_TIMEOUT:-60000}
 
