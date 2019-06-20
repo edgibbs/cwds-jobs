@@ -27,7 +27,7 @@ public class CapUsersJobModuleBuilder implements JobModuleBuilder {
     JobMode jobMode = getCurrentJobMode(jobOptions.getLastRunLoc());
     if (elasticSearchModule) {
       jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode,
-          new CapUsersSavePointContainerService(jobOptions.getLastRunLoc())));
+          new CapUsersSavePointContainerService(jobOptions.getLastRunLoc()), false));
     }
     jobModule.addModule(new CapUsersJobModule(jobConfiguration, jobMode));
     return jobModule;

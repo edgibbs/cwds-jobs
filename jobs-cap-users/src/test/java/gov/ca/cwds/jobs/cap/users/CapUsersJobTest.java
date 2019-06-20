@@ -152,10 +152,10 @@ public class CapUsersJobTest {
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
     CapUsersJobModule capUsersJobModule = new TestCapUsersJobModule(jobConfiguration, jobMode);
     capUsersJobModule.setIdmService(MockedIdmService.class);
-    capUsersJobModule.setJobModeFinalizerClass(TestJobModeFinalizer.class);
+//    capUsersJobModule.setJobModeFinalizerClass(TestJobModeFinalizer.class);
     jobModule.addModule(capUsersJobModule);
     TestCapUserWriter.reset();
-    capUsersJobModule.setCapElasticWriterClass(TestCapUserWriter.class);
+//    capUsersJobModule.setCapElasticWriterClass(TestCapUserWriter.class);
     JobRunner.run(jobModule);
   }
 

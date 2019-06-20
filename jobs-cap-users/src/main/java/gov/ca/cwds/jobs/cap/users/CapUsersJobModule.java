@@ -17,6 +17,8 @@ import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersIncrementalJob;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersInitialJob;
+import gov.ca.cwds.jobs.cap.users.report.UsersReportFileWriter;
+import gov.ca.cwds.jobs.cap.users.report.UsersReportFinalizer;
 import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePoint;
 import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointContainerService;
 import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointService;
@@ -49,17 +51,18 @@ public class CapUsersJobModule extends AbstractModule {
 
   private static final Logger LOG = LoggerFactory.getLogger(CapUsersJobModule.class);
 
-  private Class<? extends BulkWriter<ChangedUserDto>> capElasticWriterClass;
+//  private Class<? extends BulkWriter<ChangedUserDto>> capElasticWriterClass;
   private Class<? extends IdmService> idmService;
-  private Class<? extends JobModeFinalizer> jobModeFinalizerClass;
+//  private Class<? extends JobModeFinalizer> jobModeFinalizerClass;
   private CapUsersJobConfiguration configuration;
   private JobMode jobMode;
 
   public CapUsersJobModule(CapUsersJobConfiguration jobConfiguration, JobMode jobMode) {
     this.configuration = jobConfiguration;
     this.jobMode = jobMode;
-    this.capElasticWriterClass = CapUsersWriter.class;
-    this.jobModeFinalizerClass = ElasticsearchAliasFinalizer.class;
+//    this.capElasticWriterClass = CapUsersWriter.class;
+//    this.capElasticWriterClass = UsersReportFileWriter.class;
+//    this.jobModeFinalizerClass = ElasticsearchAliasFinalizer.class;
     this.idmService = IdmServiceImpl.class;
   }
 
@@ -67,15 +70,15 @@ public class CapUsersJobModule extends AbstractModule {
     return configuration;
   }
 
-  public void setCapElasticWriterClass(
-      Class<? extends BulkWriter<ChangedUserDto>> capUsersElasticWriterClass) {
-    this.capElasticWriterClass = capUsersElasticWriterClass;
-  }
+//  public void setCapElasticWriterClass(
+//      Class<? extends BulkWriter<ChangedUserDto>> capUsersElasticWriterClass) {
+//    this.capElasticWriterClass = capUsersElasticWriterClass;
+//  }
 
-  public void setJobModeFinalizerClass(
-      Class<? extends JobModeFinalizer> jobModeFinalizerClass) {
-    this.jobModeFinalizerClass = jobModeFinalizerClass;
-  }
+//  public void setJobModeFinalizerClass(
+//      Class<? extends JobModeFinalizer> jobModeFinalizerClass) {
+//    this.jobModeFinalizerClass = jobModeFinalizerClass;
+//  }
 
   public void setIdmService(Class<? extends IdmService> idmService) {
     this.idmService = idmService;
@@ -84,26 +87,42 @@ public class CapUsersJobModule extends AbstractModule {
   @Override
   protected void configure() {
     configureJobModes();
+
+//    bind(new TypeLiteral<BulkWriter<ChangedUserDto>>() {
+//    }).to(capElasticWriterClass);
+//    bind(new TypeLiteral<BulkWriter<ChangedUserDto>>() {
+//    }).to(CapUsersWriter.class);
     bind(new TypeLiteral<BulkWriter<ChangedUserDto>>() {
-    }).to(capElasticWriterClass);
+    }).to(UsersReportFileWriter.class);
+
     bindConstant().annotatedWith(ElasticsearchBulkSize.class)
         .to(configuration.getElasticSearchBulkSize());
+
     bindConstant().annotatedWith(PerryApiUrl.class)
         .to(getConfiguration().getPerryApiUrl());
+
     bindConstant().annotatedWith(BatchSize.class)
         .to(getConfiguration().getBatchSize());
+
     bindConstant().annotatedWith(PerryApiUser.class)
         .to(getJobsConfiguration().getPerryApiUser());
+
     bindConstant().annotatedWith(PerryApiPassword.class)
         .to(getJobsConfiguration().getPerryApiPassword());
+
     bind(IdmService.class).to(idmService);
+
     bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
     }).annotatedWith(BaseContainerService.class).to(CapUsersSavePointContainerService.class);
+
     bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
     }).annotatedWith(PrimaryContainerService.class).to(SavePointContainerServiceDecorator.class);
+
     bind(new TypeLiteral<SavePointService<CapUsersSavePoint>>() {
     }).toProvider(CapUsersSavePointServiceProvider.class);
+
     bind(CapUsersSavePointService.class).toProvider(CapUsersSavePointServiceProvider.class);
+
     install(new CwsCmsDataAccessModule(getJobsConfiguration().getCmsDataSourceFactory()));
   }
 
@@ -134,7 +153,9 @@ public class CapUsersJobModule extends AbstractModule {
 
   private void configureInitialMode() {
     bind(Job.class).to(CapUsersInitialJob.class);
-    bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).to(jobModeFinalizerClass);
+//    bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).to(jobModeFinalizerClass);
+//    bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).to(ElasticsearchAliasFinalizer.class);
+    bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).to(UsersReportFinalizer.class);
     bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class).toInstance(() -> {});
     bind(CwsChangedUsersService.class).toProvider(CwsChangedUsersServiceProvider.class);
   }
