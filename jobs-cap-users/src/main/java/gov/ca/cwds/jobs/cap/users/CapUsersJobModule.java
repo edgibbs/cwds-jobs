@@ -111,6 +111,7 @@ public class CapUsersJobModule extends AbstractModule {
     switch (jobMode) {
       case INITIAL_LOAD:
       case INITIAL_RESUME:
+      case REPORT:
         configureInitialMode();
         break;
       case INCREMENTAL_LOAD:
