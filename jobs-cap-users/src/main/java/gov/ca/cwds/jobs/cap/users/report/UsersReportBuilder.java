@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 public class UsersReportBuilder {
 
-  private List<Column> columns = new LinkedList<>();
+  private List<ReportColumn> columns = new LinkedList<>();
 
   public UsersReportBuilder() {
     addColumn("Name", user -> {
@@ -32,7 +32,7 @@ public class UsersReportBuilder {
   }
 
   private void addColumn(String name, Function<User, String> cellFunction) {
-    columns.add(new Column(name, cellFunction));
+    columns.add(new ReportColumn(name, cellFunction));
   }
 
   private String getMultiValueProperty(Set<String> values) {
@@ -40,7 +40,7 @@ public class UsersReportBuilder {
   }
 
   public String buildHeader() {
-    return String.join(", ", columns.stream().map(Column::getName).collect(toList())) + '\n';
+    return String.join(", ", columns.stream().map(ReportColumn::getName).collect(toList())) + '\n';
   }
 
   public String buildRow(User user) {
@@ -50,10 +50,7 @@ public class UsersReportBuilder {
 
   public String buildRows(List<User> users) {
     StringBuilder stringBuilder = new StringBuilder();
-
-    for(User user : users) {
-      stringBuilder.append(buildRow(user));
-    }
+    users.forEach(user -> stringBuilder.append(buildRow(user)));
     return stringBuilder.toString();
   }
 }
