@@ -12,7 +12,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import gov.ca.cwds.jobs.common.exception.JobsException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -44,14 +43,6 @@ public class ElasticsearchServiceTest {
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
-  }
-
-  @Test(expected = JobsException.class)
-  public void testIndexIsNotCreatedProperly() {
-    Map<String, Object> mapping = new HashMap<>();
-    Map<String, Object> propertiesMap = new HashMap<>();
-    mapping.put("properties", propertiesMap);
-    runCreateIndexTest(mapping);
   }
 
   @Test
