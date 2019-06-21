@@ -48,8 +48,7 @@ public class CapUsersJobModuleBuilder implements JobModuleBuilder {
   private boolean hasReportFlag(String[] args) {
     for (int i = 0; i < args.length; i++) {
       if (args[i].equalsIgnoreCase(REPORT_MODE_FLAG)) {
-        System.out.println("!!!REPORT MODE!!!");
-        args[i] = "";//to exclude it from Apache CLI paring
+        args[i] = "";//to exclude it from Apache CLI parsing
         return true;
       }
     }

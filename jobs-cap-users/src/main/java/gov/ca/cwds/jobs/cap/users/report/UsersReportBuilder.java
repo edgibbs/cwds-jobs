@@ -4,6 +4,7 @@ import static gov.ca.cwds.jobs.cap.users.report.Utils.emptyIfNull;
 import static java.util.stream.Collectors.toList;
 
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -48,9 +49,9 @@ public class UsersReportBuilder {
         + '\n';
   }
 
-  public String buildRows(List<User> users) {
+  public String buildRows(List<ChangedUserDto> dtos) {
     StringBuilder stringBuilder = new StringBuilder();
-    users.forEach(user -> stringBuilder.append(buildRow(user)));
+    dtos.forEach(dto -> stringBuilder.append(buildRow(dto.getDTO())));
     return stringBuilder.toString();
   }
 }

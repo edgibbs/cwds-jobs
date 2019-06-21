@@ -5,6 +5,8 @@ import static gov.ca.cwds.util.Utils.toSet;
 import static org.junit.Assert.assertEquals;
 
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
@@ -54,13 +56,19 @@ public class UsersReportBuilderTest {
   public void testBuildRows() {
     User user0 = new User();
     user0.setFirstName("First");
+    ChangedUserDto dto0 = dto(user0);
 
     User user1 = new User();
     user1.setFirstName("Second");
+    ChangedUserDto dto1 = dto(user1);
 
-    List<User> users = Arrays.asList(user0, user1);
+    List<ChangedUserDto> dtos = Arrays.asList(dto0, dto1);
     assertEquals("First , , , , , , , \nSecond , , , , , , , \n",
-        usersReportBuilder.buildRows(users));
+        usersReportBuilder.buildRows(dtos));
 
+  }
+
+  private static ChangedUserDto dto(User user) {
+    return new ChangedUserDto(user, RecordChangeOperation.I);
   }
 }

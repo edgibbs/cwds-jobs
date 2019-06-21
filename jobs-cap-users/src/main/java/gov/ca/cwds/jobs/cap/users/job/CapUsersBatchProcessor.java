@@ -33,8 +33,8 @@ public class CapUsersBatchProcessor {
       paginationToken = usersPage.getPaginationToken();
       if (users != null) {
         numberOfProcessedItems += usersPage.getUserList().size();
+        loadEntities(users);
       }
-      loadEntities(users);
 
     } while (StringUtils.isNotEmpty(paginationToken));
 
