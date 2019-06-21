@@ -26,12 +26,17 @@ public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
 
   @Override
   public void destroy() {
+
+  }
+
+  @Override
+  public void flush() {
     String reportStr = stringBuilder.toString();
 
     try {
-      Files.write(Paths.get("./cap_users_report.txt"), reportStr.getBytes(StandardCharsets.UTF_8));
+      Files.write(Paths.get("./cap_users_report.csv"), reportStr.getBytes(StandardCharsets.UTF_8));
     } catch (IOException e) {
-      System.out.println(e);
+      throw new RuntimeException("Error at writing users report to file", e);
     }
   }
 }
