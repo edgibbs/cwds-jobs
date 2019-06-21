@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.client.indices.GetMappingsRequest;
@@ -15,6 +16,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -80,6 +82,18 @@ public class ElasticApiWrapper {
       return mappingMap.getSourceAsMap();
     } catch (IOException e) {
       LOGGER.error("Unable get mapping for index [" + newIndexName + "]", e);
+      throw new RuntimeException(e);
+    }
+  }
+
+  void putMapping(String index, String docType, String mapping) {
+    try {
+      final PutMappingRequest reqMapping = new PutMappingRequest(index);
+      reqMapping.type(docType);
+      reqMapping.source(mapping, XContentType.JSON);
+      client.indices().putMapping(reqMapping, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      LOGGER.error("Unable add mapping for index [" + index + "]", e);
       throw new RuntimeException(e);
     }
   }
