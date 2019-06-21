@@ -8,7 +8,7 @@ public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
 
   @Override
   public void write(List<ChangedUserDto> items) {
-    System.out.println("write report items");
+    System.out.println("write report items: \n" + items);
   }
 
   @Override
