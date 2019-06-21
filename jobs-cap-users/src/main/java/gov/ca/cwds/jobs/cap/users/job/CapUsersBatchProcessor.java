@@ -31,11 +31,11 @@ public class CapUsersBatchProcessor {
       UsersPage usersPage = capUsersJobBatchIterator.getNextPage(paginationToken);
       List<User> users = usersPage.getUserList();
       paginationToken = usersPage.getPaginationToken();
+
       if (users != null) {
         numberOfProcessedItems += usersPage.getUserList().size();
         loadEntities(users);
       }
-
     } while (StringUtils.isNotEmpty(paginationToken));
 
     elasticSearchBulkCollector.flush();

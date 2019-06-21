@@ -42,6 +42,7 @@ public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
   }
 
   @Override
+  @SuppressWarnings("findsecbugs:PATH_TRAVERSAL_IN")//filename is hardcoded
   public void flush() {
     String reportStr = stringBuilder.toString();
     byte[] reportBytes = reportStr.getBytes(StandardCharsets.UTF_8);
