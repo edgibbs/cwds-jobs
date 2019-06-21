@@ -6,9 +6,21 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(UsersReportWriter.class);
+
+  public static final String REPORT_FILE_PATH = "./";
+  public static final String REPORT_FILE_NAME = "CapUsersReport";
+  public static final String REPORT_FILE_EXT = ".csv";
+  public static final DateTimeFormatter TIMESTAMP_FORMATTER =
+      DateTimeFormatter.ofPattern("_yyyy-MM-dd_HH-mm");
 
   private StringBuilder stringBuilder;
   private UsersReportBuilder usersReportBuilder;
@@ -32,11 +44,22 @@ public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
   @Override
   public void flush() {
     String reportStr = stringBuilder.toString();
+    byte[] reportBytes = reportStr.getBytes(StandardCharsets.UTF_8);
+    String filename = createReportFileName();
 
     try {
-      Files.write(Paths.get("./cap_users_report.csv"), reportStr.getBytes(StandardCharsets.UTF_8));
+      Files.write(Paths.get(REPORT_FILE_PATH + filename), reportBytes);
     } catch (IOException e) {
-      throw new RuntimeException("Error at writing users report to file", e);
+      throw new RuntimeException("IO error at writing CAP users report to the file", e);
     }
+    LOGGER.info("CAP users report with filename {} is successfully created ", filename);
+  }
+
+  private String createReportFileName() {
+    return REPORT_FILE_NAME + getTimestampString() + REPORT_FILE_EXT;
+  }
+
+  private String getTimestampString(){
+    return LocalDateTime.now().format(TIMESTAMP_FORMATTER);
   }
 }
