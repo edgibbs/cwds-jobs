@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs.cap.users;
 
-import static gov.ca.cwds.jobs.common.mode.JobMode.REPORT;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -62,15 +60,8 @@ public class CapUsersJobModule extends AbstractModule {
   public CapUsersJobModule(CapUsersJobConfiguration jobConfiguration, JobMode jobMode) {
     this.configuration = jobConfiguration;
     this.jobMode = jobMode;
-
-    if(jobMode == REPORT) {
-      this.capElasticWriterClass = UsersReportWriter.class;
-      this.jobModeFinalizerClass = UsersReportFinalizer.class;
-    } else {
-      this.capElasticWriterClass = CapUsersWriter.class;
-      this.jobModeFinalizerClass = ElasticsearchAliasFinalizer.class;
-    }
-
+    this.capElasticWriterClass = CapUsersWriter.class;
+    this.jobModeFinalizerClass = ElasticsearchAliasFinalizer.class;
     this.idmService = IdmServiceImpl.class;
   }
 
@@ -147,10 +138,7 @@ public class CapUsersJobModule extends AbstractModule {
   }
 
   private void configureInitialMode() {
-    bind(Job.class).to(CapUsersInitialJob.class);
-    bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).to(jobModeFinalizerClass);
-    bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class).toInstance(() -> {});
-    bind(CwsChangedUsersService.class).toProvider(CwsChangedUsersServiceProvider.class);
+    configureCommonInitialConfiguration();
     bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
     }).annotatedWith(BaseContainerService.class).to(CapUsersSavePointContainerService.class);
     bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
@@ -158,12 +146,18 @@ public class CapUsersJobModule extends AbstractModule {
   }
 
   private void configureReportMode() {
+    this.capElasticWriterClass = UsersReportWriter.class;
+    this.jobModeFinalizerClass = UsersReportFinalizer.class;
+    configureCommonInitialConfiguration();
+    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
+    }).annotatedWith(PrimaryContainerService.class).to(CapUsersSavePointContainerService.class);
+  }
+
+  private void configureCommonInitialConfiguration() {
     bind(Job.class).to(CapUsersInitialJob.class);
     bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).to(jobModeFinalizerClass);
     bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class).toInstance(() -> {});
     bind(CwsChangedUsersService.class).toProvider(CwsChangedUsersServiceProvider.class);
-    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
-    }).annotatedWith(PrimaryContainerService.class).to(CapUsersSavePointContainerService.class);
   }
 
   @Provides
