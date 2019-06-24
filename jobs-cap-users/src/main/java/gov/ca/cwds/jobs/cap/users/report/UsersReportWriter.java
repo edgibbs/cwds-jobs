@@ -1,14 +1,19 @@
 package gov.ca.cwds.jobs.cap.users.report;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.common.BulkWriter;
-import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +26,11 @@ public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
   public static final String REPORT_FILE_EXT = ".csv";
   public static final DateTimeFormatter TIMESTAMP_FORMATTER =
       DateTimeFormatter.ofPattern("_yyyy-MM-dd_HH-mm");
+
+  public static final String COGNITO_CLIENT_REGION = "us-east-2";
+  public static final String COGNITO_IAM_ACCESS_ID = "AKIAIYCGEVROHLQFLW3Q";
+  public static final String COGNITO_IAM_SECRET_KEY = "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";
+  public static final String S3_BUCKET_NAME = "cap-users-reports";
 
   private StringBuilder stringBuilder;
   private UsersReportBuilder usersReportBuilder;
@@ -44,15 +54,27 @@ public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
   @Override
   @SuppressWarnings("findsecbugs:PATH_TRAVERSAL_IN")//filename is hardcoded
   public void flush() {
-    String reportStr = stringBuilder.toString();
-    byte[] reportBytes = reportStr.getBytes(StandardCharsets.UTF_8);
-    String filename = createReportFileName();
 
-    try {
-      Files.write(Paths.get(REPORT_FILE_PATH + filename), reportBytes);
-    } catch (IOException e) {
-      throw new RuntimeException("IO error at writing CAP users report to the file", e);
-    }
+    AWSCredentialsProvider credentialsProvider =
+        new AWSStaticCredentialsProvider(
+            new BasicAWSCredentials(COGNITO_IAM_ACCESS_ID, COGNITO_IAM_SECRET_KEY));
+
+    AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+        .withRegion(COGNITO_CLIENT_REGION)
+        .withCredentials(credentialsProvider)
+        .build();
+
+    String filename = createReportFileName();
+    String reportStr = stringBuilder.toString();
+    InputStream inputStream = IOUtils.toInputStream(reportStr, StandardCharsets.UTF_8);
+
+    ObjectMetadata metadata = new ObjectMetadata();
+    metadata.setContentType("plain/text");
+    long contentLength = reportStr.getBytes(StandardCharsets.UTF_8).length;
+    metadata.setContentLength(contentLength);
+
+    s3Client.putObject(S3_BUCKET_NAME, filename, inputStream, metadata);
+
     LOGGER.info("CAP users report with filename {} is successfully created ", filename);
   }
 
