@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
-import gov.ca.cwds.jobs.cap.users.iterator.CapUsersInitialJobPaginator;
+import gov.ca.cwds.jobs.cap.users.paginator.CapUsersInitialJobPaginator;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.elastic.BulkCollector;
 import java.util.List;
@@ -18,7 +18,7 @@ public class CapUsersBatchProcessor {
   private static final Logger LOGGER = LoggerFactory.getLogger(CapUsersBatchProcessor.class);
 
   @Inject
-  private CapUsersInitialJobPaginator capUsersJobBatchIterator;
+  private CapUsersInitialJobPaginator capUsersJobBatchPaginator;
 
   @Inject
   private BulkCollector<ChangedUserDto> elasticSearchBulkCollector;
@@ -28,7 +28,7 @@ public class CapUsersBatchProcessor {
     String paginationToken = null;
 
     do {
-      UsersPage usersPage = capUsersJobBatchIterator.getNextPage(paginationToken);
+      UsersPage usersPage = capUsersJobBatchPaginator.getNextPage(paginationToken);
       List<User> users = usersPage.getUserList();
       paginationToken = usersPage.getPaginationToken();
 
