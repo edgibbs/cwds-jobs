@@ -9,6 +9,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.common.BulkWriter;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,9 +29,10 @@ public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
       DateTimeFormatter.ofPattern("_yyyy-MM-dd_HH-mm");
 
   public static final String COGNITO_CLIENT_REGION = "us-east-2";
-  public static final String COGNITO_IAM_ACCESS_ID = "AKIAIYCGEVROHLQFLW3Q";
-  public static final String COGNITO_IAM_SECRET_KEY = "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";
+  public static final String COGNITO_IAM_ACCESS_ID = "*********";
+  public static final String COGNITO_IAM_SECRET_KEY = "******************";
   public static final String S3_BUCKET_NAME = "cap-users-reports";
+  public static final Charset ENCODING = StandardCharsets.UTF_8;
 
   private StringBuilder stringBuilder;
   private UsersReportBuilder usersReportBuilder;
@@ -66,11 +68,11 @@ public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
 
     String filename = createReportFileName();
     String reportStr = stringBuilder.toString();
-    InputStream inputStream = IOUtils.toInputStream(reportStr, StandardCharsets.UTF_8);
+    InputStream inputStream = IOUtils.toInputStream(reportStr, ENCODING);
 
     ObjectMetadata metadata = new ObjectMetadata();
     metadata.setContentType("plain/text");
-    long contentLength = reportStr.getBytes(StandardCharsets.UTF_8).length;
+    long contentLength = reportStr.getBytes(ENCODING).length;
     metadata.setContentLength(contentLength);
 
     s3Client.putObject(S3_BUCKET_NAME, filename, inputStream, metadata);
