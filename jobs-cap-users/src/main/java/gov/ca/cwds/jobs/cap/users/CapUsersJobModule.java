@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs.cap.users;
 
-import static gov.ca.cwds.jobs.common.mode.JobMode.REPORT;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -62,15 +60,8 @@ public class CapUsersJobModule extends AbstractModule {
   public CapUsersJobModule(CapUsersJobConfiguration jobConfiguration, JobMode jobMode) {
     this.configuration = jobConfiguration;
     this.jobMode = jobMode;
-
-    if(jobMode == REPORT) {
-      this.capElasticWriterClass = UsersReportWriter.class;
-      this.jobModeFinalizerClass = UsersReportFinalizer.class;
-    } else {
-      this.capElasticWriterClass = CapUsersWriter.class;
-      this.jobModeFinalizerClass = ElasticsearchAliasFinalizer.class;
-    }
-
+    this.capElasticWriterClass = CapUsersWriter.class;
+    this.jobModeFinalizerClass = ElasticsearchAliasFinalizer.class;
     this.idmService = IdmServiceImpl.class;
   }
 
@@ -108,17 +99,6 @@ public class CapUsersJobModule extends AbstractModule {
     bindConstant().annotatedWith(PerryApiPassword.class)
         .to(getJobsConfiguration().getPerryApiPassword());
     bind(IdmService.class).to(idmService);
-
-    if(jobMode == REPORT) {
-      bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
-      }).annotatedWith(PrimaryContainerService.class).to(CapUsersSavePointContainerService.class);
-    } else {
-      bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
-      }).annotatedWith(BaseContainerService.class).to(CapUsersSavePointContainerService.class);
-      bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
-      }).annotatedWith(PrimaryContainerService.class).to(SavePointContainerServiceDecorator.class);
-    }
-
     bind(new TypeLiteral<SavePointService<CapUsersSavePoint>>() {
     }).toProvider(CapUsersSavePointServiceProvider.class);
     bind(CapUsersSavePointService.class).toProvider(CapUsersSavePointServiceProvider.class);
@@ -129,8 +109,10 @@ public class CapUsersJobModule extends AbstractModule {
     switch (jobMode) {
       case INITIAL_LOAD:
       case INITIAL_RESUME:
-      case REPORT:
         configureInitialMode();
+        break;
+      case REPORT:
+        configureReportMode();
         break;
       case INCREMENTAL_LOAD:
         configureIncrementalMode();
@@ -149,9 +131,29 @@ public class CapUsersJobModule extends AbstractModule {
     } else {
       bind(CwsChangedUsersService.class).toProvider(CwsChangedUsersServiceProvider.class);
     }
+    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
+    }).annotatedWith(BaseContainerService.class).to(CapUsersSavePointContainerService.class);
+    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
+    }).annotatedWith(PrimaryContainerService.class).to(SavePointContainerServiceDecorator.class);
   }
 
   private void configureInitialMode() {
+    configureCommonInitialConfiguration();
+    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
+    }).annotatedWith(BaseContainerService.class).to(CapUsersSavePointContainerService.class);
+    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
+    }).annotatedWith(PrimaryContainerService.class).to(SavePointContainerServiceDecorator.class);
+  }
+
+  private void configureReportMode() {
+    this.capElasticWriterClass = UsersReportWriter.class;
+    this.jobModeFinalizerClass = UsersReportFinalizer.class;
+    configureCommonInitialConfiguration();
+    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
+    }).annotatedWith(PrimaryContainerService.class).to(CapUsersSavePointContainerService.class);
+  }
+
+  private void configureCommonInitialConfiguration() {
     bind(Job.class).to(CapUsersInitialJob.class);
     bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).to(jobModeFinalizerClass);
     bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class).toInstance(() -> {});
