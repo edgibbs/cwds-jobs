@@ -6,7 +6,14 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.google.inject.Inject;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
+import gov.ca.cwds.jobs.cap.users.inject.AwsBucketName;
+import gov.ca.cwds.jobs.cap.users.inject.AwsRegion;
+import gov.ca.cwds.jobs.cap.users.inject.AwsSecretKey;
+import gov.ca.cwds.jobs.cap.users.inject.AwsUserId;
+import gov.ca.cwds.jobs.cap.users.inject.PerryApiPassword;
+import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
 import gov.ca.cwds.jobs.common.BulkWriter;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -22,16 +29,27 @@ public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UsersReportWriter.class);
 
-  public static final String REPORT_FILE_PATH = "./";
   public static final String REPORT_FILE_NAME = "CapUsersReport";
   public static final String REPORT_FILE_EXT = ".csv";
   public static final DateTimeFormatter TIMESTAMP_FORMATTER =
       DateTimeFormatter.ofPattern("_yyyy-MM-dd_HH-mm");
 
-  public static final String COGNITO_CLIENT_REGION = "us-east-2";
-  public static final String COGNITO_IAM_ACCESS_ID = "*********";
-  public static final String COGNITO_IAM_SECRET_KEY = "******************";
-  public static final String S3_BUCKET_NAME = "cap-users-reports";
+  @Inject
+  @AwsRegion
+  private String cognitoRegion;
+
+  @Inject
+  @AwsUserId
+  private String cognitoAccessId;
+
+  @Inject
+  @AwsSecretKey
+  private String cognitoSecretKey;
+
+  @Inject
+  @AwsBucketName
+  private String s3BucketName;
+
   public static final Charset ENCODING = StandardCharsets.UTF_8;
 
   private StringBuilder stringBuilder;
@@ -59,10 +77,10 @@ public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
 
     AWSCredentialsProvider credentialsProvider =
         new AWSStaticCredentialsProvider(
-            new BasicAWSCredentials(COGNITO_IAM_ACCESS_ID, COGNITO_IAM_SECRET_KEY));
+            new BasicAWSCredentials(cognitoAccessId, cognitoSecretKey));
 
     AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-        .withRegion(COGNITO_CLIENT_REGION)
+        .withRegion(cognitoRegion)
         .withCredentials(credentialsProvider)
         .build();
 
@@ -75,7 +93,7 @@ public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
     long contentLength = reportStr.getBytes(ENCODING).length;
     metadata.setContentLength(contentLength);
 
-    s3Client.putObject(S3_BUCKET_NAME, filename, inputStream, metadata);
+    s3Client.putObject(s3BucketName, filename, inputStream, metadata);
 
     LOGGER.info("CAP users report with filename {} is successfully created ", filename);
   }

@@ -11,6 +11,10 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
+import gov.ca.cwds.jobs.cap.users.inject.AwsBucketName;
+import gov.ca.cwds.jobs.cap.users.inject.AwsRegion;
+import gov.ca.cwds.jobs.cap.users.inject.AwsSecretKey;
+import gov.ca.cwds.jobs.cap.users.inject.AwsUserId;
 import gov.ca.cwds.jobs.cap.users.inject.BatchSize;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiPassword;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
@@ -131,14 +135,15 @@ public class CapUsersJobModule extends AbstractModule {
     } else {
       bind(CwsChangedUsersService.class).toProvider(CwsChangedUsersServiceProvider.class);
     }
-    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
-    }).annotatedWith(BaseContainerService.class).to(CapUsersSavePointContainerService.class);
-    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
-    }).annotatedWith(PrimaryContainerService.class).to(SavePointContainerServiceDecorator.class);
+    configureSavePointContainerServices();
   }
 
   private void configureInitialMode() {
     configureCommonInitialConfiguration();
+    configureSavePointContainerServices();
+  }
+
+  private void configureSavePointContainerServices() {
     bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
     }).annotatedWith(BaseContainerService.class).to(CapUsersSavePointContainerService.class);
     bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
@@ -151,6 +156,14 @@ public class CapUsersJobModule extends AbstractModule {
     configureCommonInitialConfiguration();
     bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
     }).annotatedWith(PrimaryContainerService.class).to(CapUsersSavePointContainerService.class);
+    bindConstant().annotatedWith(AwsRegion.class)
+        .to(getConfiguration().getAwsRegion());
+    bindConstant().annotatedWith(AwsUserId.class)
+        .to(getConfiguration().getAwsAccessId());
+    bindConstant().annotatedWith(AwsSecretKey.class)
+        .to(getConfiguration().getAwsAccessKey());
+    bindConstant().annotatedWith(AwsBucketName.class)
+        .to(getConfiguration().getAwsBucketName());
   }
 
   private void configureCommonInitialConfiguration() {
