@@ -91,7 +91,7 @@ public class CapUsersJobModule extends AbstractModule {
   protected void configure() {
     configureJobModes();
     bind(new TypeLiteral<BulkWriter<ChangedUserDto>>() {
-    }).to(capElasticWriterClass);
+    }).to(capElasticWriterClass).asEagerSingleton();
     bindConstant().annotatedWith(ElasticsearchBulkSize.class)
         .to(configuration.getElasticSearchBulkSize());
     bindConstant().annotatedWith(PerryApiUrl.class)

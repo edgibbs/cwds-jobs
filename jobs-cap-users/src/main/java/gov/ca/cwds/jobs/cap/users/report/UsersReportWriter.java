@@ -12,8 +12,6 @@ import gov.ca.cwds.jobs.cap.users.inject.AwsBucketName;
 import gov.ca.cwds.jobs.cap.users.inject.AwsRegion;
 import gov.ca.cwds.jobs.cap.users.inject.AwsSecretKey;
 import gov.ca.cwds.jobs.cap.users.inject.AwsUserId;
-import gov.ca.cwds.jobs.cap.users.inject.PerryApiPassword;
-import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
 import gov.ca.cwds.jobs.common.BulkWriter;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -67,11 +65,6 @@ public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
   }
 
   @Override
-  public void destroy() {
-
-  }
-
-  @Override
   @SuppressWarnings("findsecbugs:PATH_TRAVERSAL_IN")//filename is hardcoded
   public void flush() {
 
@@ -102,7 +95,7 @@ public class UsersReportWriter implements BulkWriter<ChangedUserDto> {
     return REPORT_FILE_NAME + getTimestampString() + REPORT_FILE_EXT;
   }
 
-  private String getTimestampString(){
+  private String getTimestampString() {
     return LocalDateTime.now().format(TIMESTAMP_FORMATTER);
   }
 }

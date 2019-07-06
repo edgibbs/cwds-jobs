@@ -39,8 +39,4 @@ public class BulkCollector<E> {
   public void destroy() {
     jobWriter.destroy();
   }
-
-  public synchronized BulkWriter<E> getWriter() {
-    return jobWriter;
-  }
 }

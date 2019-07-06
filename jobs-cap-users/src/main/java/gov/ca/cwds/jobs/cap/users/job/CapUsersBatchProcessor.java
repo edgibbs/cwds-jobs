@@ -39,7 +39,6 @@ public class CapUsersBatchProcessor {
     } while (StringUtils.isNotEmpty(paginationToken));
 
     elasticSearchBulkCollector.flush();
-    elasticSearchBulkCollector.getWriter().flush();
     LOGGER.info("total number of items processed: {}", numberOfProcessedItems);
   }
 
