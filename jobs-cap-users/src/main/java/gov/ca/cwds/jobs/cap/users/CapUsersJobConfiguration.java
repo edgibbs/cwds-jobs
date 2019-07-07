@@ -12,6 +12,10 @@ public class CapUsersJobConfiguration implements JobConfiguration {
   private String perryApiPassword;
   private int jerseyClientConnectTimeout;
   private int jerseyClientReadTimeout;
+  private String awsRegion;
+  private String awsAccessId;
+  private String awsAccessKey;
+  private String awsBucketName;
 
   private int batchSize;
 
@@ -105,4 +109,35 @@ public class CapUsersJobConfiguration implements JobConfiguration {
     this.elasticsearch = elasticsearch;
   }
 
+  public String getAwsRegion() {
+    return awsRegion;
+  }
+
+  public void setAwsRegion(String awsRegion) {
+    this.awsRegion = awsRegion;
+  }
+
+  public String getAwsAccessId() {
+    return awsAccessId;
+  }
+
+  public void setAwsAccessId(String awsAccessId) {
+    this.awsAccessId = awsAccessId;
+  }
+
+  public String getAwsAccessKey() {
+    return awsAccessKey;
+  }
+
+  public void setAwsAccessKey(String awsAccessKey) {
+    this.awsAccessKey = awsAccessKey;
+  }
+
+  public String getAwsBucketName() {
+    return awsBucketName;
+  }
+
+  public void setAwsBucketName(String awsBucketName) {
+    this.awsBucketName = awsBucketName;
+  }
 }

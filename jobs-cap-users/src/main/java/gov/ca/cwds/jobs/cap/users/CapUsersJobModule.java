@@ -11,12 +11,18 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
+import gov.ca.cwds.jobs.cap.users.inject.AwsBucketName;
+import gov.ca.cwds.jobs.cap.users.inject.AwsRegion;
+import gov.ca.cwds.jobs.cap.users.inject.AwsSecretKey;
+import gov.ca.cwds.jobs.cap.users.inject.AwsUserId;
 import gov.ca.cwds.jobs.cap.users.inject.BatchSize;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiPassword;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUrl;
 import gov.ca.cwds.jobs.cap.users.inject.PerryApiUser;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersIncrementalJob;
 import gov.ca.cwds.jobs.cap.users.job.CapUsersInitialJob;
+import gov.ca.cwds.jobs.cap.users.report.UsersReportFinalizer;
+import gov.ca.cwds.jobs.cap.users.report.UsersReportWriter;
 import gov.ca.cwds.jobs.cap.users.savepoint.CapUsersSavePoint;
 import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointContainerService;
 import gov.ca.cwds.jobs.cap.users.service.CapUsersSavePointService;
@@ -85,7 +91,7 @@ public class CapUsersJobModule extends AbstractModule {
   protected void configure() {
     configureJobModes();
     bind(new TypeLiteral<BulkWriter<ChangedUserDto>>() {
-    }).to(capElasticWriterClass);
+    }).to(capElasticWriterClass).asEagerSingleton();
     bindConstant().annotatedWith(ElasticsearchBulkSize.class)
         .to(configuration.getElasticSearchBulkSize());
     bindConstant().annotatedWith(PerryApiUrl.class)
@@ -97,10 +103,6 @@ public class CapUsersJobModule extends AbstractModule {
     bindConstant().annotatedWith(PerryApiPassword.class)
         .to(getJobsConfiguration().getPerryApiPassword());
     bind(IdmService.class).to(idmService);
-    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
-    }).annotatedWith(BaseContainerService.class).to(CapUsersSavePointContainerService.class);
-    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
-    }).annotatedWith(PrimaryContainerService.class).to(SavePointContainerServiceDecorator.class);
     bind(new TypeLiteral<SavePointService<CapUsersSavePoint>>() {
     }).toProvider(CapUsersSavePointServiceProvider.class);
     bind(CapUsersSavePointService.class).toProvider(CapUsersSavePointServiceProvider.class);
@@ -112,6 +114,9 @@ public class CapUsersJobModule extends AbstractModule {
       case INITIAL_LOAD:
       case INITIAL_RESUME:
         configureInitialMode();
+        break;
+      case REPORT:
+        configureReportMode();
         break;
       case INCREMENTAL_LOAD:
         configureIncrementalMode();
@@ -130,9 +135,38 @@ public class CapUsersJobModule extends AbstractModule {
     } else {
       bind(CwsChangedUsersService.class).toProvider(CwsChangedUsersServiceProvider.class);
     }
+    configureSavePointContainerServices();
   }
 
   private void configureInitialMode() {
+    configureCommonInitialConfiguration();
+    configureSavePointContainerServices();
+  }
+
+  private void configureSavePointContainerServices() {
+    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
+    }).annotatedWith(BaseContainerService.class).to(CapUsersSavePointContainerService.class);
+    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
+    }).annotatedWith(PrimaryContainerService.class).to(SavePointContainerServiceDecorator.class);
+  }
+
+  private void configureReportMode() {
+    this.capElasticWriterClass = UsersReportWriter.class;
+    this.jobModeFinalizerClass = UsersReportFinalizer.class;
+    configureCommonInitialConfiguration();
+    bind(new TypeLiteral<SavePointContainerService<CapUsersSavePoint>>() {
+    }).annotatedWith(PrimaryContainerService.class).to(CapUsersSavePointContainerService.class);
+    bindConstant().annotatedWith(AwsRegion.class)
+        .to(getConfiguration().getAwsRegion());
+    bindConstant().annotatedWith(AwsUserId.class)
+        .to(getConfiguration().getAwsAccessId());
+    bindConstant().annotatedWith(AwsSecretKey.class)
+        .to(getConfiguration().getAwsAccessKey());
+    bindConstant().annotatedWith(AwsBucketName.class)
+        .to(getConfiguration().getAwsBucketName());
+  }
+
+  private void configureCommonInitialConfiguration() {
     bind(Job.class).to(CapUsersInitialJob.class);
     bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).to(jobModeFinalizerClass);
     bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class).toInstance(() -> {});

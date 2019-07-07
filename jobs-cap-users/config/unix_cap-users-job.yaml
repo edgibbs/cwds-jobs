@@ -9,6 +9,11 @@ jerseyClientReadTimeout: ${READ_TIMEOUT:-60000}
 batchSize: ${PERRY_REQUEST_BATCH_SIZE:-100}
 performanceTestMode: ${PERF_TEST_MODE_ON:-false}
 
+awsRegion: ${AWS_REGION:-region}
+awsAccessId: ${AWS_ACCESS_ID:-id}
+awsAccessKey: ${AWS_ACCESS_KEY:-key}
+awsBucketName: ${AWS_BUCKET_NAME:-cap-users-reports}
+
 elasticsearch:
   elasticsearch.additional.nodes:
     - localhost:9300
