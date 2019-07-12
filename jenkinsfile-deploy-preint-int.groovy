@@ -14,10 +14,8 @@ Input from configuration on Jenkins UI:
 * Java_heap_size
 * Reset_JobLastRun_time
 * remove_index
-* use_hikari_pool - used only for cap-users job deployment to preint
  */
 
-deploy('preint')
 deploy('integration')
 
 def deploy(environment) {
@@ -62,7 +60,7 @@ def prepareProperties(environment, version, cwdsJobName) {
       'PLAYBOOK_ENV': "-e remove_facility_index=${env.remove_index} -e Job_StartScript=${env.Job_StartScript} -e CALS_VERSION_NUMBER=$version",
       'DASHBOARD': [
         'componentName': 'RUNDECK',
-        'packageName': environment == 'preint' ? 'RUNDECK' : 'RUNDECK-FACILITY'
+        'packageName': 'RUNDECK-FACILITY'
       ]
     ],
     'facilities-lis': [
@@ -71,18 +69,13 @@ def prepareProperties(environment, version, cwdsJobName) {
       'PLAYBOOK_ENV': "-e remove_facility_index=${env.remove_index} -e Job_StartScript=${env.Job_StartScript} -e CALS_VERSION_NUMBER=$version",
       'DASHBOARD': [
         'componentName': 'RUNDECK',
-        'packageName': environment == 'preint' ? 'RUNDECK' : 'RUNDECK-FACILITY'
+        'packageName': 'RUNDECK-FACILITY'
       ]
     ]
   ]
-  if (environment == 'preint') {
-    cwdsJobProps['cap-users']['PLAYBOOK_ENV'] += " -e hikari_pool=${env.use_hikari_pool}"
-    cwdsJobProps['facilities-cws']['PLAYBOOK_ENV'] += ' -e drop_keystore=true'
-    cwdsJobProps['facilities-lis']['PLAYBOOK_ENV'] += ' -e drop_keystore=true'
-  }
   def props = cwdsJobProps[cwdsJobName]
   props.PLAYBOOK_ENV += " -e Java_heap_size=${env.Java_heap_size} -e JobLastRun_time=${env.Reset_JobLastRun_time}"
-  props.DASHBOARD['nameOfEnv'] = environment == 'preint' ? 'PREINT' : 'Integration'
+  props.DASHBOARD['nameOfEnv'] = 'Integration'
   props
 }
 
