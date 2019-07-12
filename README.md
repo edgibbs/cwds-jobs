@@ -1,6 +1,6 @@
-## CALS Jobs
+## CWDS Jobs
 
-The CALS Jobs project provides java based stand alone applications which are meant to be scheduled periodically.
+The CWDS Jobs project provides java based stand alone applications which are meant to be scheduled periodically.
 
 ## Installation
 
@@ -23,16 +23,21 @@ Prerequisites are job dependent but typically you can expect the following to be
 
 ### Building
 
-% ./gradlew build
+* % ./gradlew build
+* [Pipeline for building regular versions](http://jenkins.dev.cwds.io:8080/job/cwds-jobs-build/)
+* [Pipeline for building hotfix versions](http://jenkins.dev.cwds.io:8080/job/cwds-jobs-hotfix/)
 
+### [cwds-jobs framework](https://github.com/ca-cwds/cwds-jobs/wiki/cwds-jobs-framework)
 
-### Facility Indexer Job
+### [cwds-jobs deployment strategies](https://github.com/ca-cwds/cwds-jobs/wiki/cwds-jobs-deployment-strategies)
 
-Main Class: gov.ca.cwds.jobs.FacilityIndexerJob
-run job using following command: 
-```bash
-$java -cp jobs.jar gov.ca.cwds.jobs.FacilityIndexerJob path/to/config/file.yaml
-```
+### [CWS Facilities Job](https://github.com/ca-cwds/cwds-jobs/wiki/CWS-Facilities-Job)
+
+### [LIS Facilities Job](https://github.com/ca-cwds/cwds-jobs/wiki/LIS-Facilities-Job)
+
+### [Audit Events Job](https://github.com/ca-cwds/cwds-jobs/wiki/Audit-Events-Job)
+
+### [Cap Users Job](https://github.com/ca-cwds/cwds-jobs/wiki/Cap-Users-Job)
 
 # Questions
 

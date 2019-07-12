@@ -14,5 +14,7 @@ public interface BulkWriter<E> {
   default void destroy() {
   }
 
+  default void flush() {
+  }
 
 }
