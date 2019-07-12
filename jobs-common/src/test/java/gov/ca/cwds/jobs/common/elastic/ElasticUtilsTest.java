@@ -6,7 +6,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import gov.ca.cwds.rest.api.ApiException;
-import org.elasticsearch.client.transport.TransportClient;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.elasticsearch.action.admin.cluster.settings.ClusterGetSettingsRequest;
+import org.elasticsearch.action.admin.cluster.settings.ClusterGetSettingsResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -22,19 +29,21 @@ public class ElasticUtilsTest {
   }
 
   @Test
-  public void testCreateAndConfigureESClient() {
+  public void testCreateAndConfigureESClient() throws IOException {
     doReturn("elasticsearchCluster").when(configuration).getElasticsearchCluster();
     when(configuration.getElasticsearchHost()).thenReturn("localhost");
     when(configuration.getElasticsearchPort()).thenReturn("1010");
+    when(configuration.getUser()).thenReturn("user");
+    when(configuration.getPassword()).thenReturn("password");
+    when(configuration.getUser()).thenReturn("user");
+    when(configuration.getPassword()).thenReturn("password");
+    List<String> nodes = new ArrayList<>();
+    nodes.add("localhost");
+    when(configuration.getNodes()).thenReturn(nodes);
 
-    TransportClient client = ElasticUtils.createAndConfigureESClient(configuration);
+    RestHighLevelClient client = ElasticUtils.createAndConfigureESClient(configuration);
 
-    assertEquals("localhost", client.listedNodes().get(0).getAddress().getHost());
-    assertEquals(1010, client.listedNodes().get(0).getAddress().getPort());
-    assertEquals("transport", client.settings().get("client.type"));
-    assertEquals("elasticsearchCluster", client.settings().get("cluster.name"));
-    assertEquals("security4", client.settings().get("http.type"));
-    assertEquals("security4", client.settings().get("transport.type"));
+    Assert.assertNotNull(client);
   }
 
   @Test(expected = ApiException.class)

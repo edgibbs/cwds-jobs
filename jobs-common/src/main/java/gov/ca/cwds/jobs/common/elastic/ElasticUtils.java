@@ -1,15 +1,17 @@
 package gov.ca.cwds.jobs.common.elastic;
 
 import gov.ca.cwds.rest.api.ApiException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,54 +25,45 @@ public final class ElasticUtils {
 
   private ElasticUtils() {}
 
-  public static TransportClient createAndConfigureESClient(ElasticsearchConfiguration config) {
-    TransportClient client = null;
-
-    LOGGER.info("Create NEW ES client");
+  public static RestHighLevelClient createAndConfigureESClient(ElasticsearchConfiguration config) {
     try {
-      Settings.Builder settings =
-          Settings.builder().put("cluster.name", config.getElasticsearchCluster());
-      client = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
+      final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+      credentialsProvider.setCredentials(AuthScope.ANY,
+          new UsernamePasswordCredentials(config.getUser(), config.getPassword()));
 
-      for (InetSocketTransportAddress address : getValidatedESNodes(config)) {
-        client.addTransportAddress(address);
-      }
+      RestClientBuilder restClientBuilder = RestClient.builder(getHttpHosts(config.getNodes())).setHttpClientConfigCallback(
+          httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+
+      RestHighLevelClient client = new RestHighLevelClient(restClientBuilder);
+      return client;
     } catch (RuntimeException e) {
       LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
-      if (client != null) {
-        client.close();
-      }
       throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
     }
-    return client;
   }
 
-  private static List<InetSocketTransportAddress> getValidatedESNodes(
-      ElasticsearchConfiguration config) {
-    List<InetSocketTransportAddress> nodesList = new LinkedList<>();
-    String[] params;
-    List<String> nodes = config.getNodes();
-    Map<String, String> hostPortMap = new HashMap<>(nodes.size());
-
-    hostPortMap.put(config.getElasticsearchHost(), config.getElasticsearchPort());
+  public static HttpHost[] getHttpHosts(List<String> nodes) {
+    List<HttpHost> nodesList = new ArrayList<>();
     for (String node : nodes) {
-      params = node.split(":");
-      hostPortMap.put(params[0], params[1]);
-    }
-
-    hostPortMap.forEach((k, v) -> {
-      if ((null != k) && (null != v)) {
-        LOGGER.info("Adding new ES Node host:[{}] port:[{}] to elasticsearch client", k, v);
-        try {
-          nodesList
-              .add(new InetSocketTransportAddress(InetAddress.getByName(k), Integer.parseInt(v)));
-        } catch (UnknownHostException e) {
-          LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
-          throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
-        }
+      String[] hostPortPair = node.split(":");
+      String host = getHost(hostPortPair);
+      int port = getPort(hostPortPair);
+      if (org.jadira.usertype.spi.utils.lang.StringUtils.isNotEmpty(host)) {
+        nodesList.add(new HttpHost(host, port));
+      } else {
+        LOGGER.warn("There is an empty host for port {}", port);
       }
-    });
+    }
+    return nodesList.toArray(new HttpHost[0]);
+  }
 
-    return nodesList;
+  @SuppressWarnings("fb-contrib:CLI_CONSTANT_LIST_INDEX")
+  private static int getPort(String[] hostPortPair) {
+    return hostPortPair.length > 1 && hostPortPair[1] != null ? Integer.parseInt(hostPortPair[1])
+        : -1;
+  }
+
+  private static String getHost(String[] hostPortPair) {
+    return hostPortPair.length > 0 ? hostPortPair[0] : "";
   }
 }

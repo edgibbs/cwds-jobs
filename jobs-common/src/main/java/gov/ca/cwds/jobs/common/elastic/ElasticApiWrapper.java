@@ -2,61 +2,103 @@ package gov.ca.cwds.jobs.common.elastic;
 
 import com.google.inject.Inject;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
+
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
+import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
-import org.elasticsearch.client.Client;
+import org.elasticsearch.client.indices.GetMappingsRequest;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 5/10/2019
  */
 public class ElasticApiWrapper {
 
+  private static final org.slf4j.Logger LOGGER = LoggerFactory
+      .getLogger(ElasticApiWrapper.class);
+
   @Inject
-  private Client client;
+  private RestHighLevelClient client;
 
-  void createIndex(CreateIndexRequestBuilder builder) {
-    CreateIndexRequest indexRequest = builder.request();
-    client.admin().indices().create(indexRequest).actionGet();
-  }
-
-  CreateIndexRequestBuilder prepareCreateIndexBuilder(String indexName) {
-    return client.admin().indices().prepareCreate(indexName);
+  void createIndex(CreateIndexRequest request) {
+    try {
+      client.indices().create(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      LOGGER.error("Unable to create index [" + request.index() + "]", e);
+      throw new RuntimeException(e);
+    }
   }
 
   boolean checkAliasExists(GetAliasesRequest request) {
-    return client.admin().indices().aliasesExist(request).actionGet().exists();
+    try {
+      return client.indices().existsAlias(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      LOGGER.error("Unable check that alias exists[" + Arrays.toString(request.indices()) + "]", e);
+      throw new RuntimeException(e);
+    }
   }
 
   void getAliasesAction(IndicesAliasesRequest request) {
-    client.admin().indices().aliases(request).actionGet();
+    try {
+      client.indices().updateAliases(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      LOGGER.error("Unable to execute aliases request", e);
+      throw new RuntimeException(e);
+    }
   }
 
-  DeleteIndexResponse deleteIndex(DeleteIndexRequest deleteIndexRequest) {
-    return client.admin().indices().delete(deleteIndexRequest).actionGet();
+  AcknowledgedResponse deleteIndex(DeleteIndexRequest deleteIndexRequest) {
+    try {
+      return client.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      LOGGER.error("Unable to delete the index [" + Arrays.toString(deleteIndexRequest.indices()) + "]", e);
+      throw new RuntimeException(e);
+    }
   }
 
-  boolean checkIndicesExists(IndicesExistsRequest request) {
-    return client.admin().indices().exists(request).actionGet().isExists();
+  boolean checkIndicesExists(GetIndexRequest request) {
+    try {
+      return client.indices().exists(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      LOGGER.error("Unable check that index exists[" + Arrays.toString(request.indices()) + "]", e);
+      throw new RuntimeException(e);
+    }
   }
 
-  Map<String, Object> getIndexMapping(GetMappingsRequest mappingsRequest, String newIndexName)
-      throws IOException {
-    ImmutableOpenMap<String, MappingMetaData> mappingMap =
-        client.admin().indices().getMappings(mappingsRequest).actionGet().mappings()
-            .get(newIndexName);
-    return mappingMap.values().iterator().next().value.getSourceAsMap();
+  Map<String, Object> getIndexMapping(GetMappingsRequest mappingsRequest, String newIndexName) {
+    try {
+      MappingMetaData mappingMap =
+          client.indices().getMapping(mappingsRequest, RequestOptions.DEFAULT).mappings().get(newIndexName);
+      return mappingMap.getSourceAsMap();
+    } catch (IOException e) {
+      LOGGER.error("Unable get mapping for index [" + newIndexName + "]", e);
+      throw new RuntimeException(e);
+    }
   }
 
-  public void setClient(Client client) {
+  void putMapping(String index, String docType, String mapping) {
+    try {
+      final PutMappingRequest reqMapping = new PutMappingRequest(index);
+      reqMapping.type(docType);
+      reqMapping.source(mapping, XContentType.JSON);
+      client.indices().putMapping(reqMapping, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      LOGGER.error("Unable add mapping for index [" + index + "]", e);
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void setClient(RestHighLevelClient client) {
     this.client = client;
   }
 

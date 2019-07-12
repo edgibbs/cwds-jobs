@@ -39,7 +39,6 @@ Prerequisites are job dependent but typically you can expect the following to be
 
 ### [Cap Users Job](https://github.com/ca-cwds/cwds-jobs/wiki/Cap-Users-Job)
 
-
 # Questions
 
 If you have any questions regarding the contents of this repository, please email the Office of Systems Integration at FOSS@osi.ca.gov.

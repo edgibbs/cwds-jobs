@@ -7,7 +7,7 @@ import gov.ca.cwds.jobs.common.elastic.ElasticsearchBulkOperationsService;
 import gov.ca.cwds.jobs.common.inject.IndexName;
 import gov.ca.cwds.jobs.common.util.ConsumerCounter;
 import java.util.List;
-import org.elasticsearch.client.Client;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +23,7 @@ public class AuditEventElasticWriter extends ElasticWriter<AuditEventChangedDto>
   private String indexName;
 
   @Inject
-  AuditEventElasticWriter(Client client, ObjectMapper objectMapper,
+  AuditEventElasticWriter(RestHighLevelClient client, ObjectMapper objectMapper,
       ElasticsearchBulkOperationsService bulkService, @IndexName String indexName) {
     super(client, objectMapper, bulkService, indexName);
   }

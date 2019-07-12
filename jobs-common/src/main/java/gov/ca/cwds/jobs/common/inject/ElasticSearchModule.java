@@ -6,21 +6,21 @@ import com.google.inject.AbstractModule;
 import gov.ca.cwds.jobs.common.elastic.ElasticApiWrapper;
 import gov.ca.cwds.jobs.common.elastic.ElasticUtils;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchConfiguration;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.slf4j.LoggerFactory;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchService;
 import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
-import org.elasticsearch.client.Client;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 3/18/2018.
  */
 public class ElasticSearchModule extends AbstractModule {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchModule.class);
+  private static final org.slf4j.Logger LOGGER = LoggerFactory
+      .getLogger(ElasticSearchModule.class);
 
-  private final Client client;
+  private final RestHighLevelClient client;
   private ElasticsearchConfiguration configuration;
   private String indexName;
 
@@ -53,7 +53,7 @@ public class ElasticSearchModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(Client.class).toInstance(client);
+    bind(RestHighLevelClient.class).toInstance(client);
     bind(ElasticsearchConfiguration.class).toInstance(configuration);
     bindConstant().annotatedWith(IndexName.class).to(indexName);
   }

@@ -4,6 +4,9 @@ buildscript {
             url "http://sonar.dev.cwds.io:8081/artifactory/repo"
         }
         jcenter()
+        maven {
+            url "https://artifacts.elastic.co/maven"
+        }
     }
 }
 
@@ -25,14 +28,14 @@ project.ext {
     commonsLangVersion = '3.6'
     guiceVersion = "4.1.0"
     slf4jVersion = '1.7.25'
-    log4jVersion = '2.8.2'
+    log4jVersion = '2.11.1'
     hibernateVersion = '5.2.8.Final'
     dropwizardVersion = '1.1.0'
     jUnitVersion = '4.12'
     jsonAssertVersion = '1.5.0'
     apacheCommonsTextVersion = '1.5'
 
-    elasticsearchVersion = "5.5.2"
+    elasticsearchVersion = "6.8.0"
     dropwizardVersion = "1.1.0"
 
     projectMajorVersion = "1.4"
@@ -69,6 +72,9 @@ allprojects {
         mavenLocal()
         maven {
             url artifactoryRepo
+        }
+        maven {
+            url "https://artifacts.elastic.co/maven"
         }
     }
 
@@ -113,8 +119,8 @@ tasks.withType(Test) {
 
 sonarqube {
   properties {
-      property "sonar.projectKey", "cwds.ca.gov:cals-jobs"
-      property "sonar.projectName", "cals-jobs"
+      property "sonar.projectKey", "cwds.ca.gov:cwds-jobs"
+      property "sonar.projectName", "cwds-jobs"
       property "sonar.jacoco.reportPaths",   allTestCoverageFile
   }
 }

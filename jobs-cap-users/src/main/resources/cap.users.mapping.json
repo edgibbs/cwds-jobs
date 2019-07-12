@@ -1,7 +1,4 @@
 {
-  "_all": {
-    "enabled": true
-  },
   "properties": {
     "last_name": {
       "type": "text",
