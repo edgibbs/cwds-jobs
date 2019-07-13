@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs.common.elastic;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.BulkWriter;
@@ -9,12 +8,16 @@ import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.exception.JobsException;
 import gov.ca.cwds.jobs.common.inject.IndexName;
 import gov.ca.cwds.jobs.common.util.ConsumerCounter;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.client.Client;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,36 +34,40 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
 
   protected ObjectMapper objectMapper;
 
-  private Client client;
+  private RestHighLevelClient client;
 
   private ElasticsearchBulkOperationsService bulkService;
 
   private String indexName;
 
   @Inject
-  public ElasticWriter(Client client, ObjectMapper objectMapper,
+  public ElasticWriter(RestHighLevelClient client, ObjectMapper objectMapper,
       ElasticsearchBulkOperationsService bulkService, @IndexName String indexName) {
     this.objectMapper = objectMapper;
     this.bulkService = bulkService;
     this.client = client;
     this.indexName = indexName;
-    bulkProcessor =
-        BulkProcessor.builder(client, new BulkProcessor.Listener() {
-          @Override
-          public void beforeBulk(long executionId, BulkRequest request) {
-            LOGGER.warn("Ready to execute bulk of {} actions", request.numberOfActions());
-          }
+    BulkProcessor.Listener listener = new BulkProcessor.Listener() {
+      @Override
+      public void beforeBulk(long executionId, BulkRequest request) {
+        LOGGER.warn("Ready to execute bulk of {} actions", request.numberOfActions());
+      }
 
-          @Override
-          public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-            LOGGER.warn("Response from bulk: {} ", response.getItems().length);
-          }
+      @Override
+      public void afterBulk(long executionId, BulkRequest request,
+          BulkResponse response) {
+        LOGGER.warn("Response from bulk: {} ", response.getItems().length);
+      }
 
-          @Override
-          public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-            LOGGER.error("ERROR EXECUTING BULK", failure);
-          }
-        }).build();
+      @Override
+      public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
+        LOGGER.error("ERROR EXECUTING BULK", failure);
+      }
+    };
+
+    BiConsumer<BulkRequest, ActionListener<BulkResponse>> bulkConsumer =
+        (request, bulkListener) -> client.bulkAsync(request, RequestOptions.DEFAULT, bulkListener);
+    bulkProcessor = BulkProcessor.builder(bulkConsumer, listener).build();
   }
 
   @Override
@@ -80,7 +87,7 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
         } else {
           LOGGER.warn("No operation found for facility with ID: {}", item.getId());
         }
-      } catch (JsonProcessingException e) {
+      } catch (IOException e) {
         throw new JobsException(e);
       }
     });
@@ -98,7 +105,7 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
           this.client.close();
         }
       }
-    } catch (InterruptedException e) {
+    } catch (InterruptedException | IOException e) {
       LOGGER.warn("Interrupted!!!");
       Thread.currentThread().interrupt();
     }

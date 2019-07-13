@@ -1,7 +1,4 @@
 {
-  "_all": {
-    "enabled": true
-  },
   "properties": {
     "name": {
       "type": "text",
@@ -34,7 +31,8 @@
           "type": "byte"
         },
         "value": {
-          "type": "text"
+          "type": "text",
+          "copy_to": "_all"
         }
       }
     },

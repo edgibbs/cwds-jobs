@@ -8,12 +8,12 @@ import gov.ca.cwds.jobs.cap.users.dto.ChangedUserDto;
 import gov.ca.cwds.jobs.common.elastic.ElasticWriter;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchBulkOperationsService;
 import gov.ca.cwds.jobs.common.inject.IndexName;
-import org.elasticsearch.client.Client;
+import org.elasticsearch.client.RestHighLevelClient;
 
 public class CapUsersWriter extends ElasticWriter<ChangedUserDto> {
 
   @Inject
-  public CapUsersWriter(Client client, ObjectMapper objectMapper,
+  public CapUsersWriter(RestHighLevelClient client, ObjectMapper objectMapper,
       ElasticsearchBulkOperationsService bulkService, @IndexName String indexName) {
     super(client, objectMapper, bulkService, indexName);
     objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

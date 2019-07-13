@@ -4,18 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.inject.IndexName;
+import java.io.IOException;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentType;
 
 /**
  * Created by Alexander Serbin on 4/1/2019
  */
 public class ElasticsearchBulkOperationsService {
-
-  @Inject
-  private Client client;
 
   @Inject
   @IndexName
@@ -34,16 +31,14 @@ public class ElasticsearchBulkOperationsService {
    * @throws JsonProcessingException if unable to serialize JSON
    */
   public IndexRequest bulkAdd(final ObjectMapper mapper, final String id, final Object obj)
-      throws JsonProcessingException {
-    return client.prepareIndex(indexName,
-        config.getElasticsearchDocType(), id)
-        .setSource(mapper.writeValueAsBytes(obj), XContentType.JSON).request();
+      throws IOException {
+    return new IndexRequest(indexName,
+        config.getElasticsearchDocType(), id).source(mapper.writeValueAsBytes(obj), XContentType.JSON);
   }
 
   public IndexRequest bulkAdd(final String id, final String json) {
-    return client.prepareIndex(indexName,
-        config.getElasticsearchDocType(), id)
-        .setSource(json, XContentType.JSON).request();
+    return new IndexRequest(indexName,
+        config.getElasticsearchDocType(), id).source(json, XContentType.JSON);
   }
 
   /**
@@ -53,8 +48,8 @@ public class ElasticsearchBulkOperationsService {
    * @return prepared DeleteRequest
    */
   public DeleteRequest bulkDelete(final String id) {
-    return client.prepareDelete(indexName,
-        config.getElasticsearchDocType(), id).request();
+    return new DeleteRequest(indexName,
+        config.getElasticsearchDocType(), id);
   }
 
 }

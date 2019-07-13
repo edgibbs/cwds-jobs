@@ -1,4 +1,4 @@
-rootProject.name = 'cals-jobs'
+rootProject.name = 'cwds-jobs'
 include 'jobs-common'
 include 'jobs-facilities-common'
 include 'jobs-facilities-lis'
