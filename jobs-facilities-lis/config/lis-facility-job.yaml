@@ -21,12 +21,12 @@ elasticsearch:
 
 lisDataSourceFactory:
   properties:
-      hibernate.dialect: gov.ca.cwds.cals.persistence.hibernate.dialect.CONNXDialect
+      hibernate.dialect: org.hibernate.dialect.PostgreSQL82Dialect
       hibernate.temp.use_jdbc_metadata_defaults: false
-      hibernate.connection.driver_class: com.Connx.jdbc.TCJdbc.TCJdbcDriver
-      hibernate.connection.username: ${DB_LIS_USER:-x}
-      hibernate.connection.password: ${DB_LIS_PASSWORD:-x}
-      hibernate.connection.url: ${DB_LIS_JDBC_URL:-x}
+      hibernate.connection.driver_class: org.postgresql.Driver
+      hibernate.connection.username: ${DB_LIS_USER:-postgres_data}
+      hibernate.connection.password: ${DB_LIS_PASSWORD:-postgres_data}
+      hibernate.connection.url: ${DB_LIS_JDBC_URL:-jdbc:postgresql://localhost:5432/?currentSchema=lis}
       hibernate.show_sql: false
       hibernate.format_sql: true
       hibernate.use_sql_comments: false
@@ -46,7 +46,7 @@ fasDataSourceFactory:
       hibernate.connection.driver_class: org.postgresql.Driver
       hibernate.connection.username: ${DB_FAS_USER:-postgres_data}
       hibernate.connection.password: ${DB_FAS_PASSWORD:-postgres_data}
-      hibernate.connection.url: ${DB_FAS_JDBC_URL:-jdbc:postgresql://192.168.99.100:5432/?currentSchema=fas}
+      hibernate.connection.url: ${DB_FAS_JDBC_URL:-jdbc:postgresql://localhost:5432/?currentSchema=fas}
       hibernate.show_sql: false
       hibernate.connection.ssl: ${FAS_SSL_ENABLED:-false}
       hibernate.connection.sslmode: ${FAS_SSL_MODE:-disable}
@@ -71,7 +71,7 @@ calsnsDataSourceFactory:
       hibernate.use_sql_comments: false
       hibernate.connection.username: ${DB_NS_USER:-postgres_data}
       hibernate.connection.password: ${DB_NS_PASSWORD:-postgres_data}
-      hibernate.connection.url: ${DB_NS_JDBC_URL:-jdbc:postgresql://192.168.99.100:5432/postgres_data}
+      hibernate.connection.url: ${DB_NS_JDBC_URL:-jdbc:postgresql://localhost:5432/postgres_data}
       hibernate.default_schema: ${DB_NS_DEFAULT_SCHEMA:-calsns}
       hibernate.connection.connectionTimeout: 1000000
       hibernate.connection.loginTimeout: 1000000
