@@ -10,6 +10,7 @@ import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 public interface JobBatchIterator<S extends SavePoint> {
 
   default void init() {
+    //Default method
   }
 
   /**
