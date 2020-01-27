@@ -10,7 +10,7 @@ import org.hibernate.SessionFactory;
  *
  * @author Alex Serbin
  */
-public abstract class CustomDao {
+public class CustomDao {
 
   private final SessionFactory sessionFactory;
 

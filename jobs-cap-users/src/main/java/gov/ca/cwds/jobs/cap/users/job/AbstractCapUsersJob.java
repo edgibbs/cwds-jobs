@@ -29,11 +29,12 @@ public abstract class AbstractCapUsersJob implements Job {
 
   private void processJobResult(CapJobResult jobResult,
       CapUsersSavePoint newSavePoint) {
+    CapUsersSavePoint savePoint = newSavePoint;
     if (!jobResult.isCwsPartSuccess() || !jobResult.isCapPartSuccess()) {
-      newSavePoint = editSavePoint(jobResult, newSavePoint);
+      savePoint = editSavePoint(jobResult, savePoint);
     }
-    LOGGER.info("Creating save point savePoint {}", newSavePoint);
-    savePointService.saveSavePoint(newSavePoint);
+    LOGGER.info("Creating save point savePoint {}", savePoint);
+    savePointService.saveSavePoint(savePoint);
   }
 
   private CapUsersSavePoint editSavePoint(CapJobResult jobResult, CapUsersSavePoint savePoint) {

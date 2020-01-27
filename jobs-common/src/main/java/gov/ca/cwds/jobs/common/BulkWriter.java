@@ -12,9 +12,11 @@ public interface BulkWriter<E> {
   void write(List<E> items);
 
   default void destroy() {
+    //default method
   }
 
   default void flush() {
+    //default method
   }
 
 }
