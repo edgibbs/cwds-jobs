@@ -34,11 +34,11 @@ node ('dora-slave'){
             def labels = getPRLabels()
             def foundTagPrefixes = labels.findAll { label -> tagPrefixes.contains(label) }
             def versionIncrement = versionIncrement(labels)
-            def jobBackLink = "http://jenkins.dev.cwds.io:8080/job/cwds-jobs-pr/${env.BUILD_ID}/"
+            def jobBackLink = "https://jenkins.dev.cwds.io/job/cwds-jobs-pr/${env.BUILD_ID}/"
             for(String tagPrefix in foundTagPrefixes) {
                 withCredentials([usernamePassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', usernameVariable: 'JENKINS_USER', passwordVariable: 'JENKINS_API_TOKEN')]) {
                     def jobParams = "token=${JENKINS_TRIGGER_TOKEN}&versionIncrement=${versionIncrement}&tagPrefix=${tagPrefix}&triggered_by=${jobBackLink}"
-                    def jobLink = "http://jenkins.dev.cwds.io:8080/job/cwds-jobs-build/buildWithParameters?${jobParams}"
+                    def jobLink = "https://jenkins.dev.cwds.io/job/cwds-jobs-build/buildWithParameters?${jobParams}"
                     sh "curl -v -u '${JENKINS_USER}:${JENKINS_API_TOKEN}' '${jobLink}'"
                 }
                 sleep 10
