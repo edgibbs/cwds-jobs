@@ -1,17 +1,18 @@
 package gov.ca.cwds.jobs.common.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
+
 import gov.ca.cwds.jobs.common.batch.BatchProcessor;
 import gov.ca.cwds.jobs.common.exception.JobExceptionHandler;
 import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import gov.ca.cwds.jobs.common.util.ConsumerCounter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
-
 public class JobImpl<E, S extends SavePoint> implements Job {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobImpl.class);

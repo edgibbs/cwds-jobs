@@ -12,7 +12,7 @@ public interface Job {
   void run();
 
   default void close() {
-    //Default method
+    // Default method
   }
 
 }

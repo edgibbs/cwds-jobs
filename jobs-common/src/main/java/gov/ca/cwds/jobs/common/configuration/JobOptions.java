@@ -1,12 +1,11 @@
 package gov.ca.cwds.jobs.common.configuration;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import gov.ca.cwds.jobs.common.exception.JobsException;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Paths;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -19,6 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import gov.ca.cwds.jobs.common.exception.JobsException;
+
 /**
  * Represents batch job options from the command line.
  *
@@ -28,7 +30,6 @@ public class JobOptions {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobOptions.class);
 
-
   public static final String CMD_LINE_ES_CONFIG = "config";
   public static final String CMD_LINE_LAST_RUN_FILE = "last-run-file";
 
@@ -36,7 +37,6 @@ public class JobOptions {
    * Location of Elasticsearch configuration file.
    */
   final String esConfigLoc;
-
 
   /**
    * Location of last run file.
@@ -66,7 +66,6 @@ public class JobOptions {
     return lastRunLoc;
   }
 
-
   /**
    * Define a command line option.
    *
@@ -91,12 +90,11 @@ public class JobOptions {
    * @return command line option definitions
    */
   protected static Options buildCmdLineOptions() {
-    Options ret = new Options();
-
+    final Options ret = new Options();
     ret.addOption(JobCmdLineOption.ES_CONFIG.getOpt());
 
     // RUN MODE: mutually exclusive choice.
-    OptionGroup group = new OptionGroup();
+    final OptionGroup group = new OptionGroup();
     group.setRequired(true);
     group.addOption(JobCmdLineOption.LAST_RUN_FILE.getOpt());
     ret.addOptionGroup(group);
@@ -111,8 +109,8 @@ public class JobOptions {
     try (final StringWriter sw = new StringWriter()) {
       String equals = StringUtils.leftPad("", 90, '=');
       new HelpFormatter().printHelp(new PrintWriter(sw), 100, "Batch loader",
-          equals + "\nUSAGE: java <job class> ...\n" + equals,
-          buildCmdLineOptions(), 4, 8, equals, true);
+          equals + "\nUSAGE: java <job class> ...\n" + equals, buildCmdLineOptions(), 4, 8, equals,
+          true);
       String usage = sw.toString();
       LOGGER.error(usage);
     } catch (IOException e) {
@@ -164,22 +162,22 @@ public class JobOptions {
     return jobOptions;
   }
 
-  @SuppressFBWarnings("PATH_TRAVERSAL_IN") //Path cannot be controlled by the user
+  @SuppressFBWarnings("PATH_TRAVERSAL_IN") // Path cannot be controlled by the user
   private static String getPathToOutputDirectory(JobOptions jobOptions) {
     return Paths.get(jobOptions.getLastRunLoc()).normalize().toAbsolutePath().toString();
   }
 
-  @SuppressFBWarnings("PATH_TRAVERSAL_IN") //Path cannot be controlled by the user
+  @SuppressFBWarnings("PATH_TRAVERSAL_IN") // Path cannot be controlled by the user
   private static JobOptions validateJobOptions(JobOptions jobOptions) {
     // check option: -c
-    File configFile = new File(jobOptions.getConfigFileLocation());
+    final File configFile = new File(jobOptions.getConfigFileLocation());
     if (!configFile.exists()) {
-      throw new JobsException(
-          "job arguments error: specified configuration file " + configFile.getPath() + " not found");
+      throw new JobsException("job arguments error: specified configuration file "
+          + configFile.getPath() + " not found");
     }
 
     // check option: -l
-    File timeFilesDir = new File(jobOptions.getLastRunLoc());
+    final File timeFilesDir = new File(jobOptions.getLastRunLoc());
     if (createTimeFilesDirIfMissing(timeFilesDir) && LOGGER.isInfoEnabled()) {
       LOGGER.info("{} was created in file system", getPathToOutputDirectory(jobOptions));
     }
@@ -193,4 +191,5 @@ public class JobOptions {
   private static boolean createTimeFilesDirIfMissing(File timeFilesDir) {
     return !timeFilesDir.exists() && timeFilesDir.mkdir();
   }
+
 }

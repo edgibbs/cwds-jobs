@@ -20,13 +20,14 @@ public class CwsJobModuleBuilder implements JobModuleBuilder {
   @Override
   public JobModule buildJobModule(String[] args, boolean elasticSearchModule) {
     JobOptions jobOptions = JobOptions.parseCommandLine(args);
-    CwsFacilityJobConfiguration jobConfiguration = JobConfiguration
-        .getJobsConfiguration(CwsFacilityJobConfiguration.class,
-            jobOptions.getConfigFileLocation());
+    CwsFacilityJobConfiguration jobConfiguration = JobConfiguration.getJobsConfiguration(
+        CwsFacilityJobConfiguration.class, jobOptions.getConfigFileLocation());
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
+
     ElasticsearchConfiguration elasticsearchConfiguration = jobConfiguration.getElasticsearch();
     elasticsearchConfiguration.setDocumentMapping("facility.mapping.json");
     elasticsearchConfiguration.setIndexSettings("facility.settings.json");
+
     JobMode jobMode = getCurrentJobMode(jobOptions.getLastRunLoc());
     if (elasticSearchModule) {
       jobModule.addModule(new ElasticSearchModule(elasticsearchConfiguration, jobMode,
@@ -38,11 +39,9 @@ public class CwsJobModuleBuilder implements JobModuleBuilder {
   }
 
   private JobMode getCurrentJobMode(String runDir) {
-    LocalDateTimeJobModeService timestampJobModeService =
-        new LocalDateTimeJobModeService();
-    LocalDateTimeSavePointContainerService savePointContainerService =
-        new LocalDateTimeSavePointContainerService(runDir);
-    timestampJobModeService.setSavePointContainerService(savePointContainerService);
+    LocalDateTimeJobModeService timestampJobModeService = new LocalDateTimeJobModeService();
+    timestampJobModeService
+        .setSavePointContainerService(new LocalDateTimeSavePointContainerService(runDir));
     return timestampJobModeService.getCurrentJobMode();
   }
 
