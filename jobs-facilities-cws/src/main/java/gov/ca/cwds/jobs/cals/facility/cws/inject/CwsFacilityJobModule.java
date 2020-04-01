@@ -1,9 +1,17 @@
 package gov.ca.cwds.jobs.cals.facility.cws.inject;
 
+import java.time.LocalDateTime;
+
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
+
 import gov.ca.cwds.cals.Constants;
 import gov.ca.cwds.cals.Constants.UnitOfWork;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
@@ -52,11 +60,6 @@ import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
-import java.time.LocalDateTime;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.hibernate.SessionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 3/4/2018.
@@ -73,30 +76,24 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
   protected void configure() {
     super.configure();
     bind(Job.class).to(CwsFacilityJob.class);
-    bind(new TypeLiteral<JobModeService>() {
-    }).to(LocalDateTimeJobModeService.class);
+    bind(new TypeLiteral<JobModeService>() {}).to(LocalDateTimeJobModeService.class);
     bindJobModeImplementor();
-    bind(
-        new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>>>() {
-        }).annotatedWith(BaseContainerService.class)
-        .to(LocalDateTimeSavePointContainerService.class);
-    bind(
-        new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>>>() {
-        }).annotatedWith(PrimaryContainerService.class)
-        .to(SavePointContainerServiceDecorator.class);
-    bind(new TypeLiteral<SavePointService<TimestampSavePoint<LocalDateTime>>>() {
-    }).toProvider(CwsTimestampSavePointServiceProvider.class);
+    bind(new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>>>() {})
+        .annotatedWith(BaseContainerService.class).to(LocalDateTimeSavePointContainerService.class);
+    bind(new TypeLiteral<SavePointContainerService<TimestampSavePoint<LocalDateTime>>>() {})
+        .annotatedWith(PrimaryContainerService.class).to(SavePointContainerServiceDecorator.class);
+    bind(new TypeLiteral<SavePointService<TimestampSavePoint<LocalDateTime>>>() {})
+        .toProvider(CwsTimestampSavePointServiceProvider.class);
     bind(CwsTimestampSavePointService.class).toProvider(CwsTimestampSavePointServiceProvider.class);
-    bind(
-        new TypeLiteral<ChangedEntitiesIdentifiersService<LocalDateTime>>() {
-        }).toProvider(CwsChangedIdentifiersServiceProvider.class);
+    bind(new TypeLiteral<ChangedEntitiesIdentifiersService<LocalDateTime>>() {})
+        .toProvider(CwsChangedIdentifiersServiceProvider.class);
     bind(CwsFacilityService.class).toProvider(CwsFacilityServiceProvider.class);
-    bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {
-    }).to(CwsChangedFacilityService.class);
+    bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {})
+        .to(CwsChangedFacilityService.class);
     bind(CountyOwnershipMapper.class).to(CountyOwnershipMapperImpl.class);
     bind(ExternalInterfaceMapper.class).to(ExternalInterfaceMapperImpl.class);
-    bind(new TypeLiteral<JobBatchIterator<TimestampSavePoint<LocalDateTime>>>() {
-    }).to(LocalDateTimeJobBatchIterator.class);
+    bind(new TypeLiteral<JobBatchIterator<TimestampSavePoint<LocalDateTime>>>() {})
+        .to(LocalDateTimeJobBatchIterator.class);
 
     install(new CwsCmsRsDataAccessModule(getJobConfiguration().getCmsDataSourceFactory()));
   }
@@ -107,14 +104,21 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
       case INITIAL_LOAD:
         bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class)
             .toProvider(CwsInitialModeFinalizerProvider.class);
-        bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).toProvider(
-            getPrimaryJobFinalizerProviderClass());
+        bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class)
+            .toProvider(getPrimaryJobFinalizerProviderClass());
         bindConstant().annotatedWith(CwsGetIdentifiersAfterTimestampQuery.class)
             .to(QueryConstants.InitialMode.GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY);
         bindConstant().annotatedWith(CwsGetIdentifiersBetweenTimestampsQuery.class)
             .to(QueryConstants.InitialMode.GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY);
         bindConstant().annotatedWith(CwsGetNextSavePointQuery.class)
             .to(InitialMode.GET_NEXT_SAVEPOINT_QUERY);
+
+        LOG.info("GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY: {}",
+            InitialMode.GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY);
+        LOG.info("GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY: {}",
+            InitialMode.GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY);
+        LOG.info("GET_NEXT_SAVEPOINT_QUERY: {}", InitialMode.GET_NEXT_SAVEPOINT_QUERY);
+
         break;
       case INCREMENTAL_LOAD:
         bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).toInstance(() -> {
@@ -125,6 +129,13 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
             .to(IncrementalMode.GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY);
         bindConstant().annotatedWith(CwsGetNextSavePointQuery.class)
             .to(IncrementalMode.GET_NEXT_SAVEPOINT_QUERY);
+
+        LOG.info("GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY: {}",
+            IncrementalMode.GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY);
+        LOG.info("GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY: {}",
+            IncrementalMode.GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY);
+        LOG.info("GET_NEXT_SAVEPOINT_QUERY: {}", IncrementalMode.GET_NEXT_SAVEPOINT_QUERY);
+
         break;
       default:
         throw new IllegalStateException(String.format("Unknown job mode %s", getJobMode()));
@@ -148,13 +159,12 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
       @CmsSessionFactory SessionFactory cwsSessionFactory,
       @CalsnsSessionFactory SessionFactory calsnsDataSourceFactory) {
     try {
-      ImmutableMap<String, SessionFactory> sessionFactories = ImmutableMap.<String, SessionFactory>builder()
-          .put(Constants.UnitOfWork.CMS, cwsSessionFactory)
-          .put(UnitOfWork.CALSNS, calsnsDataSourceFactory)
-          .build();
+      ImmutableMap<String, SessionFactory> sessionFactories = ImmutableMap
+          .<String, SessionFactory>builder().put(Constants.UnitOfWork.CMS, cwsSessionFactory)
+          .put(UnitOfWork.CALSNS, calsnsDataSourceFactory).build();
       UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory = new UnitOfWorkAwareProxyFactory();
-      FieldUtils
-          .writeField(unitOfWorkAwareProxyFactory, "sessionFactories", sessionFactories, true);
+      FieldUtils.writeField(unitOfWorkAwareProxyFactory, "sessionFactories", sessionFactories,
+          true);
       return unitOfWorkAwareProxyFactory;
     } catch (IllegalAccessException e) {
       LOG.error("Can't build UnitOfWorkAwareProxyFactory", e);
@@ -163,21 +173,15 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
   }
 
   @Provides
-  public LegacyDictionariesCache provideLegacyDictionariesCache(
-      CountiesDao countiesDao,
-      StateDao stateDao,
-      LicenseStatusDao licenseStatusDao
-  ) {
+  public LegacyDictionariesCache provideLegacyDictionariesCache(CountiesDao countiesDao,
+      StateDao stateDao, LicenseStatusDao licenseStatusDao) {
     LegacyDictionariesCacheBuilder builder = new LegacyDictionariesCacheBuilder();
-    return builder
-        .add(County.class, countiesDao)
-        .add(State.class, stateDao)
-        .add(LicenseStatus.class, licenseStatusDao)
-        .build();
+    return builder.add(County.class, countiesDao).add(State.class, stateDao)
+        .add(LicenseStatus.class, licenseStatusDao).build();
   }
 
-  static class SavePointContainerServiceDecorator extends
-      IndexAwareSavePointContainerService<TimestampSavePoint<LocalDateTime>> {
+  static class SavePointContainerServiceDecorator
+      extends IndexAwareSavePointContainerService<TimestampSavePoint<LocalDateTime>> {
 
   }
 

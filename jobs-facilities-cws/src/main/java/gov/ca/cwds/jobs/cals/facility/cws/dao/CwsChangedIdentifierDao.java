@@ -1,6 +1,15 @@
 package gov.ca.cwds.jobs.cals.facility.cws.dao;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
+
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.cws.QueryConstants;
@@ -11,15 +20,13 @@ import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsGetNextSavePointQuery;
 import gov.ca.cwds.jobs.common.batch.JobBatchSize;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import org.hibernate.SessionFactory;
 
 /**
  * @author CWDS TPT-2
  */
 public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CwsChangedIdentifierDao.class);
 
   @Inject
   @JobBatchSize
@@ -44,34 +51,30 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
 
   public Optional<LocalDateTime> getNextSavePoint(LocalDateTime timestamp) {
     return currentSession().createQuery(getNextSavePointQuery, LocalDateTime.class)
-        .setParameter(QueryConstants.DATE_AFTER, timestamp)
-        .setMaxResults(1)
-        .setFirstResult(batchSize - 1)
-        .setReadOnly(true).uniqueResultOptional();
+        .setParameter(QueryConstants.DATE_AFTER, timestamp).setMaxResults(1)
+        .setFirstResult(batchSize - 1).setReadOnly(true).uniqueResultOptional();
   }
 
-  public Optional<LocalDateTime> getFirstChangedTimestampAfterSavepoint(
-      LocalDateTime timestamp) {
+  public Optional<LocalDateTime> getFirstChangedTimestampAfterSavepoint(LocalDateTime timestamp) {
+    LOG.info("getNextSavePointQuery: {}", getNextSavePointQuery);
     return currentSession().createQuery(getNextSavePointQuery, LocalDateTime.class)
-        .setParameter(QueryConstants.DATE_AFTER, timestamp)
-        .setMaxResults(1)
-        .setFirstResult(0)
+        .setParameter(QueryConstants.DATE_AFTER, timestamp).setMaxResults(1).setFirstResult(0)
         .setReadOnly(true).uniqueResultOptional();
   }
 
   public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiers(
       LocalDateTime afterTimestamp, LocalDateTime beforeTimestamp) {
+    LOG.info("cwsGetIdentifiersBetweenTimestampsQuery: {}",
+        cwsGetIdentifiersBetweenTimestampsQuery);
     return currentSession().createQuery(cwsGetIdentifiersBetweenTimestampsQuery)
         .setParameter(QueryConstants.DATE_AFTER, afterTimestamp)
-        .setParameter(QueryConstants.DATE_BEFORE, beforeTimestamp)
-        .setReadOnly(true).list();
+        .setParameter(QueryConstants.DATE_BEFORE, beforeTimestamp).setReadOnly(true).list();
   }
 
   public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiers(
       LocalDateTime afterTimestamp) {
     return currentSession().createQuery(cwsGetIdentifierAfterTimestampQuery)
-        .setParameter(QueryConstants.DATE_AFTER, afterTimestamp)
-        .setReadOnly(true).list();
+        .setParameter(QueryConstants.DATE_AFTER, afterTimestamp).setReadOnly(true).list();
   }
 
 }
