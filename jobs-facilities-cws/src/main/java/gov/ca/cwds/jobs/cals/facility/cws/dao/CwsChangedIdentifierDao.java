@@ -73,6 +73,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
 
   public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiers(
       LocalDateTime afterTimestamp) {
+    LOG.info("get identifiers ...");
     return currentSession().createQuery(cwsGetIdentifierAfterTimestampQuery)
         .setParameter(QueryConstants.DATE_AFTER, afterTimestamp).setReadOnly(true).list();
   }

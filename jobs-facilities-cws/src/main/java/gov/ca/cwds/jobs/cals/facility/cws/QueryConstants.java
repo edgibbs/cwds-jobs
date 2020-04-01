@@ -1,11 +1,16 @@
 package gov.ca.cwds.jobs.cals.facility.cws;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 
 /**
  * Created by Alexander Serbin on 12/3/2018
  */
 public final class QueryConstants {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(QueryConstants.class);
 
   public static final String DATE_AFTER = "dateAfter";
   public static final String DATE_BEFORE = "dateBefore";
@@ -50,6 +55,11 @@ public final class QueryConstants {
             + InitialMode.TIMESTAMP_FIELD_NAME + " > :" + DATE_AFTER + ORDER_BY
             + InitialMode.TIMESTAMP_FIELD_NAME + ", " + HOME_IDENTIFIER_FIELD_NAME;
 
+    static {
+      LOGGER.info("INITIAL MODE: GET_NEXT_SAVEPOINT_QUERY: {}",
+          InitialMode.GET_NEXT_SAVEPOINT_QUERY);
+    }
+
     private InitialMode() {
       // utility class
     }
@@ -78,6 +88,11 @@ public final class QueryConstants {
         "select " + IncrementalMode.TIMESTAMP_FIELD_NAME + SHARED_PART + AND
             + IncrementalMode.TIMESTAMP_FIELD_NAME + " > :" + DATE_AFTER + ORDER_BY
             + IncrementalMode.TIMESTAMP_FIELD_NAME + ", " + HOME_IDENTIFIER_FIELD_NAME;
+
+    static {
+      LOGGER.info("INCREMENTAL MODE: GET_NEXT_SAVEPOINT_QUERY: {}",
+          IncrementalMode.GET_NEXT_SAVEPOINT_QUERY);
+    }
 
     private IncrementalMode() {
       // utility class

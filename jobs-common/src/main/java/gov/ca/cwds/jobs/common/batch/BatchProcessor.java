@@ -1,6 +1,10 @@
 package gov.ca.cwds.jobs.common.batch;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
+
 import gov.ca.cwds.jobs.common.elastic.BulkCollector;
 import gov.ca.cwds.jobs.common.exception.JobExceptionHandler;
 import gov.ca.cwds.jobs.common.exception.JobsException;
@@ -10,8 +14,6 @@ import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 import gov.ca.cwds.jobs.common.timereport.JobTimeReport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 4/2/2018.
@@ -41,7 +43,8 @@ public class BatchProcessor<E, S extends SavePoint> {
   }
 
   public void processBatches() {
-    JobTimeReport jobTimeReport = new JobTimeReport();
+    LOGGER.info("process batches");
+    final JobTimeReport jobTimeReport = new JobTimeReport();
     JobBatch<S> batch = jobBatchIterator.getNextPortion();
     while (!batch.isEmpty()) {
       LOGGER.info("Batch processing, batch size = {}", batch.getSize());
@@ -60,8 +63,8 @@ public class BatchProcessor<E, S extends SavePoint> {
       LOGGER.info("Save point has been reached. Batch save point is {}. Trying to save", savePoint);
       savePointService.saveSavePoint(savePoint);
     } else {
-      LOGGER.error("Exception occured during batch processing. Job has been terminated." +
-          " Batch timestamp {} has not been recorded", savePoint);
+      LOGGER.error("Exception occured during batch processing. Job has been terminated."
+          + " Batch timestamp {} has not been recorded", savePoint);
       throw new JobsException("Exception occured during batch processing");
     }
   }
@@ -70,4 +73,5 @@ public class BatchProcessor<E, S extends SavePoint> {
     batchReadersPool.destroy();
     elasticSearchBulkCollector.destroy();
   }
+
 }
