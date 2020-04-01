@@ -59,7 +59,8 @@ public class BatchProcessor<E, S extends SavePoint> {
 
   private void handleBatchSavepoint(JobBatch<S> batch) {
     LOGGER.info("handle batch savepoint ...");
-    S savePoint = savePointService.defineSavepoint(batch);
+    final S savePoint = savePointService.defineSavepoint(batch);
+
     LOGGER.debug("Last batch in portion save point {}", savePoint);
     if (!JobExceptionHandler.isExceptionHappened()) {
       LOGGER.info("Save point has been reached. Batch save point is {}. Trying to save", savePoint);

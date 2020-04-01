@@ -22,7 +22,7 @@ public final class QueryConstants {
   // CMO-475: discrepancy between CWS/CMS and CARES Facility Search.
   // This query ignores other affected tables other than PLC_HM_T.
   private static final String SHARED_PART = " from ReplicationPlacementHome as home"
-      + " where home.licensrCd <> 'CL' and home.facilityType <> 1420 "; // medical facility
+      + " where home.licensrCd <> 'CL' and home.facilityType <> 1420"; // medical facility
 
   public static final String CWS_CMS_GET_MAX_TIMESTAMP_QUERY =
       "select max(home.replicationLastUpdated)" + SHARED_PART;
