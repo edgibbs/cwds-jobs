@@ -1,10 +1,12 @@
 package gov.ca.cwds.jobs.common.inject;
 
-import com.google.inject.AbstractModule;
-import gov.ca.cwds.jobs.common.core.JobPreparator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.google.inject.AbstractModule;
+
+import gov.ca.cwds.jobs.common.core.JobPreparator;
 
 /**
  * Created by Alexander Serbin on 3/4/2018.
@@ -13,7 +15,8 @@ public class JobModule extends AbstractModule {
 
   private String lastRunDir;
 
-  private JobPreparator jobPreparator = ()->{};
+  private JobPreparator jobPreparator = () -> {
+  };
 
   private List<AbstractModule> modules = new ArrayList<>();
 
@@ -32,7 +35,7 @@ public class JobModule extends AbstractModule {
     modules.forEach(this::install);
   }
 
-  public void addModules(AbstractModule ... modules) {
+  public void addModules(AbstractModule... modules) {
     this.modules.addAll(Arrays.asList(modules));
   }
 
@@ -48,7 +51,8 @@ public class JobModule extends AbstractModule {
 
     @Override
     public void run() {
-      //empty by default
+      // empty by default
     }
   }
+
 }

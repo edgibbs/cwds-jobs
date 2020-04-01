@@ -26,10 +26,10 @@ public class LocalDateTimeSavePointContainerService
     if (savePointContainerExists()) {
       return super.readSavePointContainer(savePointContainerClass);
     } else {
-      LocalDateTimeSavePointContainer container = new LocalDateTimeSavePointContainer();
+      final LocalDateTimeSavePointContainer container = new LocalDateTimeSavePointContainer();
       container.setJobMode(JobMode.INITIAL_LOAD);
 
-      LocalDateTimeSavePoint savePoint = new LocalDateTimeSavePoint();
+      final LocalDateTimeSavePoint savePoint = new LocalDateTimeSavePoint();
       savePoint.setTimestamp(VERY_FIRST_TIMESTAMP);
       container.setSavePoint(savePoint);
       return container;

@@ -50,6 +50,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
   }
 
   public Optional<LocalDateTime> getNextSavePoint(LocalDateTime timestamp) {
+    LOG.info("getNextSavePointQuery: {}", getNextSavePointQuery);
     return currentSession().createQuery(getNextSavePointQuery, LocalDateTime.class)
         .setParameter(QueryConstants.DATE_AFTER, timestamp).setMaxResults(1)
         .setFirstResult(batchSize - 1).setReadOnly(true).uniqueResultOptional();

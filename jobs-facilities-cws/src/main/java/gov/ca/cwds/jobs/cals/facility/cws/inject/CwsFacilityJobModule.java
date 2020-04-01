@@ -113,6 +113,7 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
         bindConstant().annotatedWith(CwsGetNextSavePointQuery.class)
             .to(InitialMode.GET_NEXT_SAVEPOINT_QUERY);
 
+        LOG.info("\n\n******* INITIAL MODE *******\n");
         LOG.info("GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY: {}",
             InitialMode.GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY);
         LOG.info("GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY: {}",
@@ -130,6 +131,7 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
         bindConstant().annotatedWith(CwsGetNextSavePointQuery.class)
             .to(IncrementalMode.GET_NEXT_SAVEPOINT_QUERY);
 
+        LOG.info("\n\n******* INCREMENTAL MODE *******\n");
         LOG.info("GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY: {}",
             IncrementalMode.GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY);
         LOG.info("GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY: {}",
@@ -175,15 +177,13 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
   @Provides
   public LegacyDictionariesCache provideLegacyDictionariesCache(CountiesDao countiesDao,
       StateDao stateDao, LicenseStatusDao licenseStatusDao) {
-    LegacyDictionariesCacheBuilder builder = new LegacyDictionariesCacheBuilder();
-    return builder.add(County.class, countiesDao).add(State.class, stateDao)
-        .add(LicenseStatus.class, licenseStatusDao).build();
+    return new LegacyDictionariesCacheBuilder().add(County.class, countiesDao)
+        .add(State.class, stateDao).add(LicenseStatus.class, licenseStatusDao).build();
   }
 
   static class SavePointContainerServiceDecorator
       extends IndexAwareSavePointContainerService<TimestampSavePoint<LocalDateTime>> {
 
   }
-
 
 }

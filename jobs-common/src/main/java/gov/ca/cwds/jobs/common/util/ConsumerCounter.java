@@ -6,8 +6,7 @@ public final class ConsumerCounter {
 
   private static AtomicInteger counter = new AtomicInteger(0);
 
-  private ConsumerCounter() {
-  }
+  private ConsumerCounter() {}
 
   public static void incrementCounter() {
     counter.incrementAndGet();
@@ -24,4 +23,5 @@ public final class ConsumerCounter {
   public static void reset() {
     counter.set(0);
   }
+
 }
