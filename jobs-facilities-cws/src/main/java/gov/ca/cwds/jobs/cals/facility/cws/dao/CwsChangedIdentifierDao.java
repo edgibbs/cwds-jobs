@@ -72,6 +72,10 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     LOG.debug("getFirstChangedTimestampAfterSavepoint: \n{}", getNextSavePointQuery);
     LOG.debug("batchSize: {}", batchSize);
     return getNextSavePoint(timestamp);
+
+    // DRS: code works okay-ish, but the approach is dicey.
+    // It only scans for changes in the placement home table proper, not supporting tables.
+
     // return currentSession().createNativeQuery(getNextSavePointQuery, Timestamp.class)
     // .setParameter(QueryConstants.DATE_AFTER, timestamp).setMaxResults(1)
     // .setFirstResult(batchSize - 1).setReadOnly(true).uniqueResultOptional()
