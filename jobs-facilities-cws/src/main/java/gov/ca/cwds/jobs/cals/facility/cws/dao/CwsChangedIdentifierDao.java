@@ -56,11 +56,8 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     LOG.debug("getNextSavePointQuery: \n{}", getNextSavePointQuery);
 
     try {
-      final Timestamp ts = Timestamp.valueOf(timestamp);
-      LOG.debug("getNextSavePointQuery: ts: {}", ts);
       final Object obj = currentSession().createNativeQuery(getNextSavePointQuery)
-          .setParameter("ts", ts).uniqueResult();
-      LOG.info("obj: {}", obj);
+          .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
       ret = Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime());
     } catch (Exception e) {
       LOG.error("FAILED TO FIND NEXT SAVE POINT!", e);
@@ -72,16 +69,17 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
   }
 
   public Optional<LocalDateTime> getFirstChangedTimestampAfterSavepoint(LocalDateTime timestamp) {
-    LOG.debug("getFirstChangedTimestampAfterSavepoint: {}", getNextSavePointQuery);
-    return currentSession().createNativeQuery(getNextSavePointQuery, Timestamp.class)
-        .setParameter(QueryConstants.DATE_AFTER, timestamp).setMaxResults(1)
-        .setFirstResult(batchSize - 1).setReadOnly(true).uniqueResultOptional()
-        .map(Timestamp::toLocalDateTime);
+    LOG.debug("getFirstChangedTimestampAfterSavepoint: \n{}", getNextSavePointQuery);
+    return getNextSavePoint(timestamp);
+    // return currentSession().createNativeQuery(getNextSavePointQuery, Timestamp.class)
+    // .setParameter(QueryConstants.DATE_AFTER, timestamp).setMaxResults(1)
+    // .setFirstResult(batchSize - 1).setReadOnly(true).uniqueResultOptional()
+    // .map(Timestamp::toLocalDateTime);
   }
 
   public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiers(
       LocalDateTime afterTimestamp, LocalDateTime beforeTimestamp) {
-    LOG.info("cwsGetIdentifiersBetweenTimestampsQuery: {}",
+    LOG.info("cwsGetIdentifiersBetweenTimestampsQuery: \n{}",
         cwsGetIdentifiersBetweenTimestampsQuery);
     return currentSession().createQuery(cwsGetIdentifiersBetweenTimestampsQuery)
         .setParameter(QueryConstants.DATE_AFTER, afterTimestamp)
