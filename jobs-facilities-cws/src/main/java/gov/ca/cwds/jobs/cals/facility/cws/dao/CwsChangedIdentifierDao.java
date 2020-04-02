@@ -51,19 +51,32 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
   }
 
   public Optional<LocalDateTime> getNextSavePoint(LocalDateTime timestamp) {
-    LOG.debug("getNextSavePointQuery: {}", getNextSavePointQuery);
-    final Timestamp ts = Timestamp.valueOf(timestamp);
-    return currentSession().createNativeQuery(getNextSavePointQuery, LocalDateTime.class)
-        .setParameter(QueryConstants.DATE_AFTER, ts).setMaxResults(1).setFirstResult(batchSize - 1)
-        .setReadOnly(true).uniqueResultOptional();
+    Optional<LocalDateTime> ret = Optional.<LocalDateTime>empty();
+    LOG.debug("getNextSavePointQuery: timestamp: {}", timestamp);
+    LOG.debug("getNextSavePointQuery: \n{}", getNextSavePointQuery);
+
+    try {
+      final Timestamp ts = Timestamp.valueOf(timestamp);
+      LOG.debug("getNextSavePointQuery: ts: {}", ts);
+      final Object obj = currentSession().createNativeQuery(getNextSavePointQuery)
+          .setParameter("ts", ts).uniqueResult();
+      LOG.info("obj: {}", obj);
+      ret = Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime());
+    } catch (Exception e) {
+      LOG.error("FAILED TO FIND NEXT SAVE POINT!", e);
+      throw e;
+    }
+
+    LOG.info("getNextSavePoint: {}", ret);
+    return ret;
   }
 
   public Optional<LocalDateTime> getFirstChangedTimestampAfterSavepoint(LocalDateTime timestamp) {
     LOG.debug("getFirstChangedTimestampAfterSavepoint: {}", getNextSavePointQuery);
-    final Timestamp ts = Timestamp.valueOf(timestamp);
-    return currentSession().createNativeQuery(getNextSavePointQuery, LocalDateTime.class)
-        .setParameter(QueryConstants.DATE_AFTER, ts).setMaxResults(1).setFirstResult(batchSize - 1)
-        .setReadOnly(true).uniqueResultOptional();
+    return currentSession().createNativeQuery(getNextSavePointQuery, Timestamp.class)
+        .setParameter(QueryConstants.DATE_AFTER, timestamp).setMaxResults(1)
+        .setFirstResult(batchSize - 1).setReadOnly(true).uniqueResultOptional()
+        .map(Timestamp::toLocalDateTime);
   }
 
   public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiers(
