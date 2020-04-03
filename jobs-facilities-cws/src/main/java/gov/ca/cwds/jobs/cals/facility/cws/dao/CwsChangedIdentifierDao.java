@@ -75,12 +75,17 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
 
   public Optional<LocalDateTime> getFirstChangedTimestampAfterSavepoint(LocalDateTime timestamp) {
     Optional<LocalDateTime> ret = Optional.<LocalDateTime>empty();
-    LOG.debug("getFirstChangedTimestampAfterSavepoint: \n{}", getFirstTimestampAfterSavePointQuery);
+    final String sql =
+        getFirstTimestampAfterSavePointQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
+    LOG.debug("getFirstChangedTimestampAfterSavepoint: \n{}", sql);
     LOG.debug("batchSize: {}", batchSize);
+    LOG.debug("timestamp: {}", timestamp);
+
     try {
-      final Object obj = currentSession().createNativeQuery(getFirstTimestampAfterSavePointQuery)
+      final Object obj = currentSession().createNativeQuery(sql)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
-      ret = Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime());
+      ret = obj != null ? Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime())
+          : Optional.<LocalDateTime>empty();
     } catch (Exception e) {
       LOG.error("FAILED TO FIND FIRST TIMESTAMP AFTER SAVE POINT!", e);
       throw e;
