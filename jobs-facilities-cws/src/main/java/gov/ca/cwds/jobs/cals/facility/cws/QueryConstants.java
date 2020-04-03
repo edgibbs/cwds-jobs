@@ -66,11 +66,22 @@ public final class QueryConstants {
                                      // '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'
     private static final String TIMESTAMP_FIELD_NAME = "home.replicationLastUpdated";
 
+    //@formatter:off
     public static final String GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY =
-        "select new CwsChangedIdentifier(home.identifier, home.recordChangeOperation,"
-            + IncrementalMode.TIMESTAMP_FIELD_NAME + ")" + SHARED_PART + AND
-            + IncrementalMode.TIMESTAMP_FIELD_NAME + " > :" + DATE_AFTER + ORDER_BY
-            + IncrementalMode.TIMESTAMP_FIELD_NAME + ", " + HOME_IDENTIFIER_FIELD_NAME;
+          "SELECT plh.IBMSNAP_LOGMARKER, plh.IDENTIFIER, plh.IBMSNAP_OPERATION\n"
+        + "FROM      {h-schema}.PLC_HM_T plh\n"
+        + "LEFT JOIN {h-schema}.CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST\n"
+        + "LEFT JOIN {h-schema}.STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"
+        + "WHERE plh.LICENSR_CD <> 'CL' AND plh.PLC_FCLC <> 1420\n"
+        + "  AND (\n"
+        + "   plh.IBMSNAP_LOGMARKER    > :dateAfter\n"
+        + "   OR cst.IBMSNAP_LOGMARKER > :dateAfter\n"
+        + "   OR stf.IBMSNAP_LOGMARKER > :dateAfter\n"
+        + ")\n"
+        + "ORDER BY plh.IBMSNAP_LOGMARKER, cst.IBMSNAP_LOGMARKER, stf.IBMSNAP_LOGMARKER, plh.IDENTIFIER\n"
+        + "FETCH FIRST BATCH_SIZE ROWS ONLY\n"
+        + "FOR READ ONLY WITH UR";
+    //@formatter:on
 
     public static final String GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY =
         "select new CwsChangedIdentifier(home.identifier, home.recordChangeOperation,"
@@ -81,7 +92,7 @@ public final class QueryConstants {
 
     //@formatter:off
     public static final String GET_FIRST_TS_AFTER_SAVEPOINT_QUERY =
-      "WITH STEP1 AS (\n"
+          "WITH STEP1 AS (\n"
         + " SELECT\n"
         + "   plh.IBMSNAP_LOGMARKER AS PLH_TS,\n"
         + "   cst.IBMSNAP_LOGMARKER AS CST_TS,\n"
@@ -111,7 +122,7 @@ public final class QueryConstants {
 
     //@formatter:off
     public static final String GET_NEXT_SAVEPOINT_QUERY =
-      "WITH STEP1 AS (\n"
+          "WITH STEP1 AS (\n"
         + " SELECT x.IBMSNAP_LOGMARKER, 'X' AS IBMSNAP_OPERATION\n"
         + " FROM (\n"
         + "     SELECT MAX(plh.IBMSNAP_LOGMARKER) AS IBMSNAP_LOGMARKER\n"
