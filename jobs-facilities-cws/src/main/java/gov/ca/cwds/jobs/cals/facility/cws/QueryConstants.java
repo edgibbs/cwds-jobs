@@ -96,7 +96,7 @@ public final class QueryConstants {
         + "       OR cst.IBMSNAP_LOGMARKER > :dateAfter\n"
         + "       OR stf.IBMSNAP_LOGMARKER > :dateAfter\n"
         + "    )\n"
-        + "    ORDER BY plh.IBMSNAP_LOGMARKER, cst.IBMSNAP_LOGMARKER, stf.IBMSNAP_LOGMARKER, plh.IDENTIFIER\n"
+        + " ORDER BY plh.IBMSNAP_LOGMARKER, cst.IBMSNAP_LOGMARKER, stf.IBMSNAP_LOGMARKER, plh.IDENTIFIER\n"
         + " FETCH FIRST BATCH_SIZE ROWS ONLY\n"
         + ")\n"
         + "SELECT MAX(x.LAST_TS) FROM (\n"
