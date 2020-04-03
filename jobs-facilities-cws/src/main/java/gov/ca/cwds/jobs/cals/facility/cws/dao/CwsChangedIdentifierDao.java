@@ -15,6 +15,7 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.cws.QueryConstants;
 import gov.ca.cwds.jobs.cals.facility.cws.identifier.CwsChangedIdentifier;
+import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsGetFirstTimestampAfterSavePointQuery;
 import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsGetIdentifiersAfterTimestampQuery;
 import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsGetIdentifiersBetweenTimestampsQuery;
 import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsGetNextSavePointQuery;
@@ -36,6 +37,10 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
   @Inject
   @CwsGetNextSavePointQuery
   private String getNextSavePointQuery;
+
+  @Inject
+  @CwsGetFirstTimestampAfterSavePointQuery
+  private String getFirstTimestampAfterSavePointQuery;
 
   @Inject
   @CwsGetIdentifiersBetweenTimestampsQuery
@@ -64,16 +69,27 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
       throw e;
     }
 
-    LOG.info("getNextSavePoint: {}", ret);
+    LOG.debug("getNextSavePoint: {}", ret);
     return ret;
   }
 
   public Optional<LocalDateTime> getFirstChangedTimestampAfterSavepoint(LocalDateTime timestamp) {
-    LOG.debug("getFirstChangedTimestampAfterSavepoint: \n{}", getNextSavePointQuery);
+    Optional<LocalDateTime> ret = Optional.<LocalDateTime>empty();
+    LOG.debug("getFirstChangedTimestampAfterSavepoint: \n{}", getFirstTimestampAfterSavePointQuery);
     LOG.debug("batchSize: {}", batchSize);
-    return getNextSavePoint(timestamp);
+    try {
+      final Object obj = currentSession().createNativeQuery(getFirstTimestampAfterSavePointQuery)
+          .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
+      ret = Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime());
+    } catch (Exception e) {
+      LOG.error("FAILED TO FIND FIRST TIMESTAMP AFTER SAVE POINT!", e);
+      throw e;
+    }
 
-    // DRS: code works okay-ish, but the approach is dicey.
+    LOG.debug("getFirstChangedTimestampAfterSavepoint: {}", ret);
+    return ret;
+
+    // DRS: code works okay-ish, but the original approach is incomplete.
     // It only scans for changes in the placement home table proper, not supporting tables.
 
     // return currentSession().createNativeQuery(getNextSavePointQuery, Timestamp.class)

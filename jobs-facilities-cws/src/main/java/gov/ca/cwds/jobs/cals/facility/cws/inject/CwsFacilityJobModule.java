@@ -112,14 +112,6 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
             .to(QueryConstants.InitialMode.GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY);
         bindConstant().annotatedWith(CwsGetNextSavePointQuery.class)
             .to(InitialMode.GET_NEXT_SAVEPOINT_QUERY);
-
-        LOG.info("\n\n******* INITIAL MODE *******\n");
-        LOG.info("GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY: {}",
-            InitialMode.GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY);
-        LOG.info("GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY: {}",
-            InitialMode.GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY);
-        LOG.info("GET_NEXT_SAVEPOINT_QUERY: {}", InitialMode.GET_NEXT_SAVEPOINT_QUERY);
-
         break;
       case INCREMENTAL_LOAD:
         bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).toInstance(() -> {
@@ -130,14 +122,8 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
             .to(IncrementalMode.GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY);
         bindConstant().annotatedWith(CwsGetNextSavePointQuery.class)
             .to(IncrementalMode.GET_NEXT_SAVEPOINT_QUERY);
-
-        LOG.info("\n\n******* INCREMENTAL MODE *******\n");
-        LOG.info("GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY: {}",
-            IncrementalMode.GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY);
-        LOG.info("GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY: {}",
-            IncrementalMode.GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY);
-        LOG.info("GET_NEXT_SAVEPOINT_QUERY: {}", IncrementalMode.GET_NEXT_SAVEPOINT_QUERY);
-
+        bindConstant().annotatedWith(CwsGetFirstTimestampAfterSavePointQuery.class)
+            .to(IncrementalMode.GET_FIRST_TS_AFTER_SAVEPOINT_QUERY);
         break;
       default:
         throw new IllegalStateException(String.format("Unknown job mode %s", getJobMode()));

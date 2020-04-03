@@ -55,11 +55,6 @@ public final class QueryConstants {
             + InitialMode.TIMESTAMP_FIELD_NAME + " > :" + DATE_AFTER + ORDER_BY
             + InitialMode.TIMESTAMP_FIELD_NAME + ", " + HOME_IDENTIFIER_FIELD_NAME;
 
-    static {
-      LOGGER.info("INITIAL MODE: GET_NEXT_SAVEPOINT_QUERY: {}",
-          InitialMode.GET_NEXT_SAVEPOINT_QUERY);
-    }
-
     private InitialMode() {
       // utility class
     }
@@ -88,6 +83,31 @@ public final class QueryConstants {
     // "select " + IncrementalMode.TIMESTAMP_FIELD_NAME + SHARED_PART + AND
     // + IncrementalMode.TIMESTAMP_FIELD_NAME + " > :" + DATE_AFTER + ORDER_BY
     // + IncrementalMode.TIMESTAMP_FIELD_NAME + ", " + HOME_IDENTIFIER_FIELD_NAME;
+
+    public static final String GET_FIRST_TS_AFTER_SAVEPOINT_QUERY =
+    //@formatter:off
+          "WITH STEP1 AS ("
+            + " SELECT plh.IBMSNAP_LOGMARKER AS PLH_TS, cst.IBMSNAP_LOGMARKER AS CST_TS, stf.IBMSNAP_LOGMARKER AS STF_TS"
+            + " FROM      {h-schema}PLC_HM_T plh"
+            + " LEFT JOIN {h-schema}CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST"
+            + " LEFT JOIN {h-schema}STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST"
+            + " WHERE plh.LICENSR_CD <> 'CL' AND plh.PLC_FCLC <> 1420"
+            + "      AND ("
+            + "          plh.IBMSNAP_LOGMARKER > :dateAfter"
+            + "       OR cst.IBMSNAP_LOGMARKER > :dateAfter"
+            + "       OR stf.IBMSNAP_LOGMARKER > :dateAfter"
+            + "    )"
+            + " FETCH FIRST 1000 ROWS ONLY"
+            + ")"
+            + "SELECT MAX(x.LAST_TS) FROM ("
+            + " SELECT MAX(s1.PLH_TS) AS LAST_TS FROM STEP1 s1"
+            + " UNION ALL"
+            + " SELECT MAX(s1.CST_TS) AS LAST_TS FROM STEP1 s1 WHERE s1.CST_TS IS NOT NULL"
+            + " UNION ALL"
+            + " SELECT MAX(s1.STF_TS) AS LAST_TS FROM STEP1 s1 WHERE s1.STF_TS IS NOT NULL"
+            + ") x"
+            + "FOR READ ONLY WITH UR";
+    //@formatter:on
 
     //@formatter:off
     public static final String GET_NEXT_SAVEPOINT_QUERY =
@@ -118,11 +138,6 @@ public final class QueryConstants {
             + "FROM STEP2 s2\n"
             + "FOR READ ONLY WITH UR";
     //@formatter:on
-
-    static {
-      LOGGER.info("INCREMENTAL MODE: GET_NEXT_SAVEPOINT_QUERY: {}",
-          IncrementalMode.GET_NEXT_SAVEPOINT_QUERY);
-    }
 
     private IncrementalMode() {
       // utility class
