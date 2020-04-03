@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs.cals.facility.cws.dao;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -106,9 +107,28 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
 
   public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiers(
       LocalDateTime afterTimestamp) {
-    LOG.info("get identifiers ...");
-    return currentSession().createQuery(cwsGetIdentifierAfterTimestampQuery)
-        .setParameter(QueryConstants.DATE_AFTER, afterTimestamp).setReadOnly(true).list();
+    // LOG.info("get identifiers ...");
+    // return currentSession().createQuery(cwsGetIdentifierAfterTimestampQuery)
+    // .setParameter(QueryConstants.DATE_AFTER, afterTimestamp).setReadOnly(true).list();
+
+    List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> ret = new ArrayList<>(0);
+    final String sql =
+        cwsGetIdentifierAfterTimestampQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
+    LOG.debug("getFirstChangedTimestampAfterSavepoint: SQL: \n{}", sql);
+    LOG.debug("getFirstChangedTimestampAfterSavepoint: batchSize: {}", batchSize);
+    LOG.debug("getFirstChangedTimestampAfterSavepoint: timestamp: {}", afterTimestamp);
+
+    try {
+      final Object obj = currentSession().createNativeQuery(sql)
+          .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(afterTimestamp)).list();
+      LOG.debug("obj: {}", obj);
+    } catch (Exception e) {
+      LOG.error("FAILED TO PULL IDENTIFIERS!", e);
+      throw e;
+    }
+
+    LOG.debug("getIdentifiers(ts): {}", ret);
+    return ret;
   }
 
 }

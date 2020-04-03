@@ -74,7 +74,7 @@ public final class QueryConstants {
         + "LEFT JOIN {h-schema}.STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"
         + "WHERE plh.LICENSR_CD <> 'CL' AND plh.PLC_FCLC <> 1420\n"
         + "  AND (\n"
-        + "   plh.IBMSNAP_LOGMARKER    > :dateAfter\n"
+        + "      plh.IBMSNAP_LOGMARKER > :dateAfter\n"
         + "   OR cst.IBMSNAP_LOGMARKER > :dateAfter\n"
         + "   OR stf.IBMSNAP_LOGMARKER > :dateAfter\n"
         + ")\n"
