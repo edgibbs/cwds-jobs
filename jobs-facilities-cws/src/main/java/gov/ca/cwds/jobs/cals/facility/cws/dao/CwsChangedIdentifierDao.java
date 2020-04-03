@@ -77,9 +77,9 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     Optional<LocalDateTime> ret = Optional.<LocalDateTime>empty();
     final String sql =
         getFirstTimestampAfterSavePointQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
-    LOG.debug("getFirstChangedTimestampAfterSavepoint: \n{}", sql);
-    LOG.debug("batchSize: {}", batchSize);
-    LOG.debug("timestamp: {}", timestamp);
+    LOG.debug("getFirstChangedTimestampAfterSavepoint: SQL: \n{}", sql);
+    LOG.debug("getFirstChangedTimestampAfterSavepoint: batchSize: {}", batchSize);
+    LOG.debug("getFirstChangedTimestampAfterSavepoint: timestamp: {}", timestamp);
 
     try {
       final Object obj = currentSession().createNativeQuery(sql)
@@ -93,14 +93,6 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
 
     LOG.debug("getFirstChangedTimestampAfterSavepoint: {}", ret);
     return ret;
-
-    // DRS: code works okay-ish, but the original approach is incomplete.
-    // It only scans for changes in the placement home table proper, not supporting tables.
-
-    // return currentSession().createNativeQuery(getNextSavePointQuery, Timestamp.class)
-    // .setParameter(QueryConstants.DATE_AFTER, timestamp).setMaxResults(1)
-    // .setFirstResult(batchSize - 1).setReadOnly(true).uniqueResultOptional()
-    // .map(Timestamp::toLocalDateTime);
   }
 
   public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiers(

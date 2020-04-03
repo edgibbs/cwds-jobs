@@ -79,15 +79,14 @@ public final class QueryConstants {
             + IncrementalMode.TIMESTAMP_FIELD_NAME + " < :" + DATE_BEFORE + ORDER_BY
             + IncrementalMode.TIMESTAMP_FIELD_NAME + ", " + HOME_IDENTIFIER_FIELD_NAME;
 
-    // public static final String GET_NEXT_SAVEPOINT_QUERY =
-    // "select " + IncrementalMode.TIMESTAMP_FIELD_NAME + SHARED_PART + AND
-    // + IncrementalMode.TIMESTAMP_FIELD_NAME + " > :" + DATE_AFTER + ORDER_BY
-    // + IncrementalMode.TIMESTAMP_FIELD_NAME + ", " + HOME_IDENTIFIER_FIELD_NAME;
-
     //@formatter:off
     public static final String GET_FIRST_TS_AFTER_SAVEPOINT_QUERY =
-          "WITH STEP1 AS (\n"
-        + " SELECT plh.IBMSNAP_LOGMARKER AS PLH_TS, cst.IBMSNAP_LOGMARKER AS CST_TS, stf.IBMSNAP_LOGMARKER AS STF_TS\n"
+      "WITH STEP1 AS (\n"
+        + " SELECT\n"
+        + "   plh.IBMSNAP_LOGMARKER AS PLH_TS,\n"
+        + "   cst.IBMSNAP_LOGMARKER AS CST_TS,\n"
+        + "   stf.IBMSNAP_LOGMARKER AS STF_TS,\n"
+        + "   plh.IDENTIFIER\n"
         + " FROM      {h-schema}PLC_HM_T plh\n"
         + " LEFT JOIN {h-schema}CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST\n"
         + " LEFT JOIN {h-schema}STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"
@@ -97,14 +96,15 @@ public final class QueryConstants {
         + "       OR cst.IBMSNAP_LOGMARKER > :dateAfter\n"
         + "       OR stf.IBMSNAP_LOGMARKER > :dateAfter\n"
         + "    )\n"
+        + "    ORDER BY plh.IBMSNAP_LOGMARKER, cst.IBMSNAP_LOGMARKER, stf.IBMSNAP_LOGMARKER, plh.IDENTIFIER\n"
         + " FETCH FIRST BATCH_SIZE ROWS ONLY\n"
         + ")\n"
         + "SELECT MAX(x.LAST_TS) FROM (\n"
-        + " SELECT MAX(s1.PLH_TS) AS LAST_TS FROM STEP1 s1\n"
-        + " UNION ALL\n"
-        + " SELECT MAX(s1.CST_TS) AS LAST_TS FROM STEP1 s1 WHERE s1.CST_TS IS NOT NULL\n"
-        + " UNION ALL\n"
-        + " SELECT MAX(s1.STF_TS) AS LAST_TS FROM STEP1 s1 WHERE s1.STF_TS IS NOT NULL\n"
+        + "  SELECT MAX(s1.PLH_TS) AS LAST_TS FROM STEP1 s1\n"
+        + "  UNION ALL\n"
+        + "  SELECT MAX(s1.CST_TS) AS LAST_TS FROM STEP1 s1 WHERE s1.CST_TS IS NOT NULL\n"
+        + "  UNION ALL\n"
+        + "  SELECT MAX(s1.STF_TS) AS LAST_TS FROM STEP1 s1 WHERE s1.STF_TS IS NOT NULL\n"
         + ") x\n"
         + "FOR READ ONLY WITH UR";
     //@formatter:on
