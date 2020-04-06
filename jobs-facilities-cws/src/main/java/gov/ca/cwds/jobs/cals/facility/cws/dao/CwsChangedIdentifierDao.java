@@ -155,7 +155,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
       throw e;
     }
 
-    LOG.debug("getIdentifiers(ts): ret: {}", ret);
+    LOG.debug("getIdentifiers(ts): DONE");
     return ret;
   }
 
