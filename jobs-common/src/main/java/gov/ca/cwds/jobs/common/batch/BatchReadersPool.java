@@ -49,7 +49,6 @@ public class BatchReadersPool<E, S extends SavePoint> {
 
   public void loadEntities(List<ChangedEntityIdentifier<S>> changedEntityIdentifiers) {
     LOGGER.info("loadEntities: START");
-    LOGGER.debug("loadEntities: changedEntityIdentifiers: {}", changedEntityIdentifiers);
     final List<Future> futures = changedEntityIdentifiers.parallelStream()
         .map(identifier -> (Runnable) () -> elasticSearchBulkCollector
             .addEntity(changedEntityService.loadEntity(identifier)))
