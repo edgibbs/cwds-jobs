@@ -100,13 +100,11 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
   @SuppressWarnings("unchecked")
   public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiers(
       LocalDateTime afterTimestamp, LocalDateTime beforeTimestamp) {
-    LOG.info("cwsGetIdentifiersBetweenTimestampsQuery: \n{}",
-        cwsGetIdentifiersBetweenTimestampsQuery);
     List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> ret = new ArrayList<>(0);
     final String sql =
         cwsGetIdentifiersBetweenTimestampsQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
-    LOG.debug("getIdentifiers(ts): SQL: \n{}", sql);
-    LOG.debug("getIdentifiers(ts): timestamp: {}", afterTimestamp);
+    LOG.debug("getIdentifiers(ts,ts): SQL: \n{}", sql);
+    LOG.debug("getIdentifiers(ts,ts): timestamp: {}", afterTimestamp);
 
     try {
       final List<Object[]> arr = currentSession().createNativeQuery(sql)
@@ -122,11 +120,11 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
         }
       }
     } catch (Exception e) {
-      LOG.error("getIdentifiers(ts): FAILED TO PULL IDENTIFIERS!", e);
+      LOG.error("getIdentifiers(ts,ts): FAILED TO PULL IDENTIFIERS!", e);
       throw e;
     }
 
-    LOG.debug("getIdentifiers(ts): ret: {}", ret);
+    LOG.debug("getIdentifiers(ts,ts): ret: {}", ret);
     return ret;
   }
 
