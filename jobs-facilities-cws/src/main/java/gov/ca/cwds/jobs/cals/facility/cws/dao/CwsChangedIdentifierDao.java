@@ -116,7 +116,10 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
 
         for (Object o : arr) {
           final Object[] row = (Object[]) o;
-          final RecordChangeOperation op = RecordChangeOperation.valueOf(String.valueOf(row[1]));
+          final String strOp = (String) row[1];
+          final RecordChangeOperation op =
+              strOp != null ? RecordChangeOperation.valueOf(String.valueOf(strOp))
+                  : RecordChangeOperation.I;
           final LocalDateTime ts = ((Timestamp) row[2]).toLocalDateTime();
           ret.add(new CwsChangedIdentifier((String) row[0], op, ts));
         }
