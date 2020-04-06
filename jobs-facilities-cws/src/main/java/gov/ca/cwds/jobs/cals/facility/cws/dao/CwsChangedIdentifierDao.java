@@ -65,7 +65,6 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     try {
       final Object obj = currentSession().createNativeQuery(getNextSavePointQuery)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
-      LOG.debug("getNextSavePoint: obj: {}", obj);
       ret = Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime());
     } catch (Exception e) {
       LOG.error("getNextSavePoint: FAILED TO FIND NEXT SAVE POINT!", e);
@@ -87,7 +86,6 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     try {
       final Object obj = currentSession().createNativeQuery(sql)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
-      LOG.debug("getFirstChangedTimestampAfterSavepoint: obj: {}", obj);
       ret = obj != null ? Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime())
           : Optional.<LocalDateTime>empty();
     } catch (Exception e) {
@@ -104,9 +102,32 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
       LocalDateTime afterTimestamp, LocalDateTime beforeTimestamp) {
     LOG.info("cwsGetIdentifiersBetweenTimestampsQuery: \n{}",
         cwsGetIdentifiersBetweenTimestampsQuery);
-    return currentSession().createQuery(cwsGetIdentifiersBetweenTimestampsQuery)
-        .setParameter(QueryConstants.DATE_AFTER, afterTimestamp)
-        .setParameter(QueryConstants.DATE_BEFORE, beforeTimestamp).setReadOnly(true).list();
+    List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> ret = new ArrayList<>(0);
+    final String sql =
+        cwsGetIdentifiersBetweenTimestampsQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
+    LOG.debug("getIdentifiers(ts): SQL: \n{}", sql);
+    LOG.debug("getIdentifiers(ts): timestamp: {}", afterTimestamp);
+
+    try {
+      final List<Object[]> arr = currentSession().createNativeQuery(sql)
+          .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(afterTimestamp)).list();
+      if (arr != null && !arr.isEmpty()) {
+        ret = new ArrayList<>(arr.size());
+
+        for (Object o : arr) {
+          final Object[] row = (Object[]) o;
+          final RecordChangeOperation op = RecordChangeOperation.valueOf(String.valueOf(row[1]));
+          final LocalDateTime ts = ((Timestamp) row[2]).toLocalDateTime();
+          ret.add(new CwsChangedIdentifier((String) row[0], op, ts));
+        }
+      }
+    } catch (Exception e) {
+      LOG.error("getIdentifiers(ts): FAILED TO PULL IDENTIFIERS!", e);
+      throw e;
+    }
+
+    LOG.debug("getIdentifiers(ts): ret: {}", ret);
+    return ret;
   }
 
   @SuppressWarnings("unchecked")
