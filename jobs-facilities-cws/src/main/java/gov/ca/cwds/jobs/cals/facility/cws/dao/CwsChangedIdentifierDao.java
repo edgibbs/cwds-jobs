@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,10 +108,11 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     LOG.debug("getIdentifiers(ts,ts): timestamp: {}", afterTimestamp);
 
     try {
-      final Timestamp param = Timestamp.valueOf(afterTimestamp);
-      final List<Object[]> arr =
-          currentSession().createNativeQuery(sql).setParameter(QueryConstants.DATE_AFTER, param)
-              .setParameter(QueryConstants.DATE_BEFORE, param).list();
+      final Timestamp paramBefore = Timestamp.valueOf(beforeTimestamp);
+      final Timestamp paramAfter = Timestamp.valueOf(afterTimestamp);
+      final List<Object[]> arr = currentSession().createNativeQuery(sql)
+          .setParameter(QueryConstants.DATE_AFTER, paramAfter)
+          .setParameter(QueryConstants.DATE_BEFORE, paramBefore).list();
       if (arr != null && !arr.isEmpty()) {
         ret = new ArrayList<>(arr.size());
 
@@ -118,7 +120,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
           final Object[] row = (Object[]) o;
           final String strOp = (String) row[1];
           final RecordChangeOperation op =
-              strOp != null ? RecordChangeOperation.valueOf(String.valueOf(strOp))
+              StringUtils.isNotBlank(strOp) ? RecordChangeOperation.valueOf(String.valueOf(strOp))
                   : RecordChangeOperation.I;
           final LocalDateTime ts = ((Timestamp) row[2]).toLocalDateTime();
           ret.add(new CwsChangedIdentifier((String) row[0], op, ts));
