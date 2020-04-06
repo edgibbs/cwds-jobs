@@ -82,6 +82,38 @@ public final class QueryConstants {
     //@formatter:on
 
     //@formatter:off
+    public static final String GET_FIRST_TS_AFTER_SAVEPOINT_QUERY =
+          "WITH STEP1 AS (\n"
+        + " SELECT\n"
+        + "   plh.IBMSNAP_LOGMARKER AS PLH_TS,\n"
+        + "   cst.IBMSNAP_LOGMARKER AS CST_TS,\n"
+        + "   stf.IBMSNAP_LOGMARKER AS STF_TS,\n"
+        + "   plh.IDENTIFIER\n"
+        + " FROM      {h-schema}PLC_HM_T plh\n"
+        + " LEFT JOIN {h-schema}CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST\n"
+        + " LEFT JOIN {h-schema}STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"
+        + " WHERE plh.LICENSR_CD <> 'CL' "
+        + "   AND plh.PLC_FCLC <> 1420\n"
+        + "   AND plh.IBMSNAP_OPERATION IN ('I','U')\n"
+        + "      AND (\n"
+        + "          plh.IBMSNAP_LOGMARKER > :dateAfter\n"
+        + "       OR cst.IBMSNAP_LOGMARKER > :dateAfter\n"
+        + "       OR stf.IBMSNAP_LOGMARKER > :dateAfter\n"
+        + "    )\n"
+        + " ORDER BY plh.IBMSNAP_LOGMARKER, cst.IBMSNAP_LOGMARKER, stf.IBMSNAP_LOGMARKER, plh.IDENTIFIER\n"
+        + " FETCH FIRST BATCH_SIZE ROWS ONLY\n"
+        + ")\n"
+        + "SELECT MAX(x.LAST_TS) FROM (\n"
+        + "  SELECT MAX(s1.PLH_TS) AS LAST_TS FROM STEP1 s1\n"
+        + "  UNION ALL\n"
+        + "  SELECT MAX(s1.CST_TS) AS LAST_TS FROM STEP1 s1 WHERE s1.CST_TS IS NOT NULL\n"
+        + "  UNION ALL\n"
+        + "  SELECT MAX(s1.STF_TS) AS LAST_TS FROM STEP1 s1 WHERE s1.STF_TS IS NOT NULL\n"
+        + ") x\n"
+        + "FOR READ ONLY WITH UR";
+    //@formatter:on
+
+    //@formatter:off
     public static final String GET_NEXT_SAVEPOINT_QUERY =
           "WITH STEP1 AS (\n"
         + " SELECT x.IBMSNAP_LOGMARKER, 'X' AS IBMSNAP_OPERATION\n"

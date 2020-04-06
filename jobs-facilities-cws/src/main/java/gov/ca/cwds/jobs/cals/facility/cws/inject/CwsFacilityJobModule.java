@@ -112,6 +112,8 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
             .to(QueryConstants.InitialMode.GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY);
         bindConstant().annotatedWith(CwsGetNextSavePointQuery.class)
             .to(InitialMode.GET_NEXT_SAVEPOINT_QUERY);
+        bindConstant().annotatedWith(CwsGetFirstTimestampAfterSavePointQuery.class)
+            .to(InitialMode.GET_FIRST_TS_AFTER_SAVEPOINT_QUERY);
         break;
       case INCREMENTAL_LOAD:
         bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).toInstance(() -> {
