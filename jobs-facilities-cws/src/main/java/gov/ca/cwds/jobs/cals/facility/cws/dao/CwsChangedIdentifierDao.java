@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,7 +119,23 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     try {
       final Object obj = currentSession().createNativeQuery(sql)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(afterTimestamp)).list();
-      LOG.debug("getIdentifiers(ts): obj: {}", obj);
+      if (obj != null) {
+        LOG.debug("getIdentifiers(ts): object type: {}", obj.getClass().getName());
+        LOG.debug("getIdentifiers(ts): obj: {}",
+            ToStringBuilder.reflectionToString(obj, ToStringStyle.MULTI_LINE_STYLE, true));
+        final List<Object[]> arr = (List<Object[]>) obj;
+        if (arr.size() > 0) {
+          ret = new ArrayList<>(arr.size());
+          LOG.debug("getIdentifiers(ts): arr[0]: {}",
+              ToStringBuilder.reflectionToString(arr.get(0), ToStringStyle.MULTI_LINE_STYLE, true));
+
+          for (Object o : arr) {
+            final Object[] row = (Object[]) o;
+            final LocalDateTime ts = ((Timestamp) row[1]).toLocalDateTime();
+            ret.add(new CwsChangedIdentifier((String) row[0], ts));
+          }
+        }
+      }
     } catch (Exception e) {
       LOG.error("getIdentifiers(ts): FAILED TO PULL IDENTIFIERS!", e);
       throw e;
