@@ -1,16 +1,11 @@
 package gov.ca.cwds.jobs.cals.facility.cws;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 
 /**
  * Created by Alexander Serbin on 12/3/2018
  */
 public final class QueryConstants {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(QueryConstants.class);
 
   public static final String DATE_AFTER = "dateAfter";
   public static final String DATE_BEFORE = "dateBefore";
@@ -69,9 +64,9 @@ public final class QueryConstants {
     //@formatter:off
     public static final String GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY =
           "SELECT plh.IDENTIFIER, plh.IBMSNAP_LOGMARKER\n"
-        + "FROM      {h-schema}.PLC_HM_T plh\n"
-        + "LEFT JOIN {h-schema}.CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST\n"
-        + "LEFT JOIN {h-schema}.STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"
+        + "FROM      {h-schema}PLC_HM_T plh\n"
+        + "LEFT JOIN {h-schema}CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST\n"
+        + "LEFT JOIN {h-schema}STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"
         + "WHERE plh.LICENSR_CD <> 'CL' AND plh.PLC_FCLC <> 1420\n"
         + "  AND (\n"
         + "      plh.IBMSNAP_LOGMARKER > :dateAfter\n"

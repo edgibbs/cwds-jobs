@@ -58,19 +58,20 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
 
   public Optional<LocalDateTime> getNextSavePoint(LocalDateTime timestamp) {
     Optional<LocalDateTime> ret = Optional.<LocalDateTime>empty();
-    LOG.debug("getNextSavePointQuery: timestamp: {}", timestamp);
-    LOG.debug("getNextSavePointQuery: \n{}", getNextSavePointQuery);
+    LOG.debug("getNextSavePoint: timestamp: {}", timestamp);
+    LOG.debug("getNextSavePoint: \n{}", getNextSavePointQuery);
 
     try {
       final Object obj = currentSession().createNativeQuery(getNextSavePointQuery)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
+      LOG.debug("getNextSavePoint: obj: {}", obj);
       ret = Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime());
     } catch (Exception e) {
-      LOG.error("FAILED TO FIND NEXT SAVE POINT!", e);
+      LOG.error("getNextSavePoint: FAILED TO FIND NEXT SAVE POINT!", e);
       throw e;
     }
 
-    LOG.debug("getNextSavePoint: {}", ret);
+    LOG.debug("getNextSavePoint: ret: {}", ret);
     return ret;
   }
 
@@ -79,12 +80,12 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     final String sql =
         getFirstTimestampAfterSavePointQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
     LOG.debug("getFirstChangedTimestampAfterSavepoint: SQL: \n{}", sql);
-    LOG.debug("getFirstChangedTimestampAfterSavepoint: batchSize: {}", batchSize);
-    LOG.debug("getFirstChangedTimestampAfterSavepoint: timestamp: {}", timestamp);
+    LOG.debug("timestamp: {}", timestamp);
 
     try {
       final Object obj = currentSession().createNativeQuery(sql)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
+      LOG.debug("getFirstChangedTimestampAfterSavepoint: obj: {}", obj);
       ret = obj != null ? Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime())
           : Optional.<LocalDateTime>empty();
     } catch (Exception e) {
@@ -92,7 +93,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
       throw e;
     }
 
-    LOG.debug("getFirstChangedTimestampAfterSavepoint: {}", ret);
+    LOG.debug("getFirstChangedTimestampAfterSavepoint: ret: {}", ret);
     return ret;
   }
 
@@ -111,19 +112,18 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     final String sql =
         cwsGetIdentifierAfterTimestampQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
     LOG.debug("getIdentifiers(ts): SQL: \n{}", sql);
-    LOG.debug("getIdentifiers(ts): batchSize: {}", batchSize);
     LOG.debug("getIdentifiers(ts): timestamp: {}", afterTimestamp);
 
     try {
       final Object obj = currentSession().createNativeQuery(sql)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(afterTimestamp)).list();
-      LOG.debug("obj: {}", obj);
+      LOG.debug("getIdentifiers(ts): obj: {}", obj);
     } catch (Exception e) {
-      LOG.error("FAILED TO PULL IDENTIFIERS!", e);
+      LOG.error("getIdentifiers(ts): FAILED TO PULL IDENTIFIERS!", e);
       throw e;
     }
 
-    LOG.debug("getIdentifiers(ts): {}", ret);
+    LOG.debug("getIdentifiers(ts): ret: {}", ret);
     return ret;
   }
 
