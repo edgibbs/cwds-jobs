@@ -32,11 +32,24 @@ public final class QueryConstants {
                                      // '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'
     private static final String TIMESTAMP_FIELD_NAME = "home.lastUpdatedTime";
 
+    //@formatter:off
     public static final String GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY =
-        "select new CwsChangedIdentifier(home.identifier, " + InitialMode.TIMESTAMP_FIELD_NAME
-            + ") " + SHARED_PART + AND + InitialMode.TIMESTAMP_FIELD_NAME + " > :" + DATE_AFTER
-            + " and home.recordChangeOperation != '" + RecordChangeOperation.D.name() + "'"
-            + ORDER_BY + InitialMode.TIMESTAMP_FIELD_NAME + ", " + HOME_IDENTIFIER_FIELD_NAME;
+          "SELECT plh.IDENTIFIER, plh.IBMSNAP_OPERATION, plh.IBMSNAP_LOGMARKER\n"
+        + "FROM      {h-schema}PLC_HM_T plh\n"
+        + "LEFT JOIN {h-schema}CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST\n"
+        + "LEFT JOIN {h-schema}STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"
+        + "WHERE plh.LICENSR_CD <> 'CL' "
+        + "  AND plh.PLC_FCLC <> 1420 "
+        + "  AND plh.IBMSNAP_OPERATION IN ('I','U')\n"
+        + "  AND (\n"
+        + "      plh.IBMSNAP_LOGMARKER > :dateAfter\n"
+        + "   OR cst.IBMSNAP_LOGMARKER > :dateAfter\n"
+        + "   OR stf.IBMSNAP_LOGMARKER > :dateAfter\n"
+        + ")\n"
+        + "ORDER BY plh.IBMSNAP_LOGMARKER, cst.IBMSNAP_LOGMARKER, stf.IBMSNAP_LOGMARKER, plh.IDENTIFIER\n"
+        + "FETCH FIRST BATCH_SIZE ROWS ONLY\n"
+        + "FOR READ ONLY WITH UR";
+    //@formatter:on
 
     public static final String GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY =
         "select new CwsChangedIdentifier(home.identifier, " + InitialMode.TIMESTAMP_FIELD_NAME
@@ -96,7 +109,8 @@ public final class QueryConstants {
         + " FROM      {h-schema}PLC_HM_T plh\n"
         + " LEFT JOIN {h-schema}CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST\n"
         + " LEFT JOIN {h-schema}STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"
-        + " WHERE plh.LICENSR_CD <> 'CL' AND plh.PLC_FCLC <> 1420\n"
+        + " WHERE plh.LICENSR_CD <> 'CL' "
+        + "   AND plh.PLC_FCLC <> 1420\n"
         + "      AND (\n"
         + "          plh.IBMSNAP_LOGMARKER > :dateAfter\n"
         + "       OR cst.IBMSNAP_LOGMARKER > :dateAfter\n"

@@ -76,6 +76,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     return ret;
   }
 
+  @SuppressWarnings("unchecked")
   public Optional<LocalDateTime> getFirstChangedTimestampAfterSavepoint(LocalDateTime timestamp) {
     Optional<LocalDateTime> ret = Optional.<LocalDateTime>empty();
     final String sql =
@@ -98,6 +99,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     return ret;
   }
 
+  @SuppressWarnings("unchecked")
   public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiers(
       LocalDateTime afterTimestamp, LocalDateTime beforeTimestamp) {
     LOG.info("cwsGetIdentifiersBetweenTimestampsQuery: \n{}",
@@ -107,6 +109,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
         .setParameter(QueryConstants.DATE_BEFORE, beforeTimestamp).setReadOnly(true).list();
   }
 
+  @SuppressWarnings("unchecked")
   public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiers(
       LocalDateTime afterTimestamp) {
     List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> ret = new ArrayList<>(0);
