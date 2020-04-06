@@ -40,7 +40,7 @@ public final class QueryConstants {
         + "   OR cst.LST_UPD_TS > :dateAfter\n"
         + "   OR stf.LST_UPD_TS > :dateAfter\n"
         + ")\n"
-        + "ORDER BY plh.LST_UPD_TS, cst.IBMSNAP_LOGMARKER, stf.IBMSNAP_LOGMARKER, plh.IDENTIFIER\n"
+        + "ORDER BY plh.LST_UPD_TS, cst.LST_UPD_TS, stf.LST_UPD_TS, plh.IDENTIFIER\n"
         + "FETCH FIRST BATCH_SIZE ROWS ONLY\n"
         + "FOR READ ONLY WITH UR";
     //@formatter:on
@@ -59,7 +59,7 @@ public final class QueryConstants {
       + "   OR cst.LST_UPD_TS BETWEEN :dateBefore AND :dateAfter\n"
       + "   OR stf.LST_UPD_TS BETWEEN :dateBefore AND :dateAfter\n"
       + ")\n"
-      + "ORDER BY plh.LST_UPD_TS, cst.IBMSNAP_LOGMARKER, stf.IBMSNAP_LOGMARKER, plh.IDENTIFIER\n"
+      + "ORDER BY plh.LST_UPD_TS, cst.LST_UPD_TS, stf.LST_UPD_TS, plh.IDENTIFIER\n"
       + "FETCH FIRST BATCH_SIZE ROWS ONLY\n"
       + "FOR READ ONLY WITH UR";
     //@formatter:on
@@ -83,7 +83,7 @@ public final class QueryConstants {
         + "    OR cst.LST_UPD_TS > :dateAfter\n"
         + "    OR stf.LST_UPD_TS > :dateAfter\n"
         + " )\n"
-        + " ORDER BY plh.LST_UPD_TS, cst.IBMSNAP_LOGMARKER, stf.IBMSNAP_LOGMARKER, plh.IDENTIFIER\n"
+        + " ORDER BY plh.LST_UPD_TS, cst.LST_UPD_TS, stf.LST_UPD_TS, plh.IDENTIFIER\n"
         + " FETCH FIRST BATCH_SIZE ROWS ONLY\n"
         + ")\n"
         + "SELECT MAX(x.LAST_TS) FROM (\n"
