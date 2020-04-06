@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +20,7 @@ import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsGetFirstTimestampAfterSavePo
 import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsGetIdentifiersAfterTimestampQuery;
 import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsGetIdentifiersBetweenTimestampsQuery;
 import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsGetNextSavePointQuery;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.batch.JobBatchSize;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
@@ -117,23 +116,16 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     LOG.debug("getIdentifiers(ts): timestamp: {}", afterTimestamp);
 
     try {
-      final Object obj = currentSession().createNativeQuery(sql)
+      final List<Object[]> arr = currentSession().createNativeQuery(sql)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(afterTimestamp)).list();
-      if (obj != null) {
-        LOG.debug("getIdentifiers(ts): object type: {}", obj.getClass().getName());
-        LOG.debug("getIdentifiers(ts): obj: {}",
-            ToStringBuilder.reflectionToString(obj, ToStringStyle.MULTI_LINE_STYLE, true));
-        final List<Object[]> arr = (List<Object[]>) obj;
-        if (arr.size() > 0) {
-          ret = new ArrayList<>(arr.size());
-          LOG.debug("getIdentifiers(ts): arr[0]: {}",
-              ToStringBuilder.reflectionToString(arr.get(0), ToStringStyle.MULTI_LINE_STYLE, true));
+      if (arr != null && !arr.isEmpty()) {
+        ret = new ArrayList<>(arr.size());
 
-          for (Object o : arr) {
-            final Object[] row = (Object[]) o;
-            final LocalDateTime ts = ((Timestamp) row[1]).toLocalDateTime();
-            ret.add(new CwsChangedIdentifier((String) row[0], ts));
-          }
+        for (Object o : arr) {
+          final Object[] row = (Object[]) o;
+          final RecordChangeOperation op = RecordChangeOperation.valueOf(String.valueOf(row[1]));
+          final LocalDateTime ts = ((Timestamp) row[2]).toLocalDateTime();
+          ret.add(new CwsChangedIdentifier((String) row[0], op, ts));
         }
       }
     } catch (Exception e) {

@@ -63,7 +63,7 @@ public final class QueryConstants {
 
     //@formatter:off
     public static final String GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY =
-          "SELECT plh.IDENTIFIER, plh.IBMSNAP_LOGMARKER\n"
+          "SELECT plh.IDENTIFIER, plh.IBMSNAP_OPERATION, plh.IBMSNAP_LOGMARKER\n"
         + "FROM      {h-schema}PLC_HM_T plh\n"
         + "LEFT JOIN {h-schema}CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST\n"
         + "LEFT JOIN {h-schema}STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"
