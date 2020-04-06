@@ -107,8 +107,10 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     LOG.debug("getIdentifiers(ts,ts): timestamp: {}", afterTimestamp);
 
     try {
-      final List<Object[]> arr = currentSession().createNativeQuery(sql)
-          .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(afterTimestamp)).list();
+      final Timestamp param = Timestamp.valueOf(afterTimestamp);
+      final List<Object[]> arr =
+          currentSession().createNativeQuery(sql).setParameter(QueryConstants.DATE_AFTER, param)
+              .setParameter(QueryConstants.DATE_BEFORE, param).list();
       if (arr != null && !arr.isEmpty()) {
         ret = new ArrayList<>(arr.size());
 
