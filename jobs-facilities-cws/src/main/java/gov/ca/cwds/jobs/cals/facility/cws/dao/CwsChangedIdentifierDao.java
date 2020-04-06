@@ -105,19 +105,19 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     final String sql =
         cwsGetIdentifiersBetweenTimestampsQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
     LOG.debug("getIdentifiers(ts,ts): SQL: \n{}", sql);
-    LOG.debug("getIdentifiers(ts,ts): timestamp: {}", afterTimestamp);
+    LOG.debug("getIdentifiers(ts,ts): beforeTimestamp: {}, afterTimestamp: {}", beforeTimestamp,
+        afterTimestamp);
 
     try {
-      final Timestamp paramBefore = Timestamp.valueOf(beforeTimestamp);
       final Timestamp paramAfter = Timestamp.valueOf(afterTimestamp);
+      final Timestamp paramBefore = Timestamp.valueOf(beforeTimestamp);
       final List<Object[]> arr = currentSession().createNativeQuery(sql)
           .setParameter(QueryConstants.DATE_AFTER, paramAfter)
           .setParameter(QueryConstants.DATE_BEFORE, paramBefore).list();
       if (arr != null && !arr.isEmpty()) {
         ret = new ArrayList<>(arr.size());
 
-        for (Object o : arr) {
-          final Object[] row = (Object[]) o;
+        for (Object[] row : arr) {
           final String strOp = (String) row[1];
           final RecordChangeOperation op =
               StringUtils.isNotBlank(strOp) ? RecordChangeOperation.valueOf(String.valueOf(strOp))
