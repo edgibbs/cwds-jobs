@@ -50,6 +50,7 @@ import gov.ca.cwds.jobs.common.inject.PrimaryFinalizer;
 import gov.ca.cwds.jobs.common.inject.SecondaryFinalizer;
 import gov.ca.cwds.jobs.common.iterator.JobBatchIterator;
 import gov.ca.cwds.jobs.common.iterator.LocalDateTimeJobBatchIterator;
+import gov.ca.cwds.jobs.common.mode.JobBatchMode;
 import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.mode.JobModeFinalizer;
 import gov.ca.cwds.jobs.common.mode.JobModeService;
@@ -99,6 +100,10 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
   }
 
   private void bindJobModeImplementor() {
+    bindConstant().annotatedWith(JobBatchMode.class).to(getJobMode());
+    bindConstant().annotatedWith(CwsGetFirstTimestampAfterSavePointQuery.class)
+        .to(IncrementalMode.GET_FIRST_TS_AFTER_SAVEPOINT_QUERY);
+
     switch (getJobMode()) {
       case INITIAL_RESUME:
       case INITIAL_LOAD:
@@ -112,8 +117,6 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
             .to(QueryConstants.InitialMode.GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY);
         bindConstant().annotatedWith(CwsGetNextSavePointQuery.class)
             .to(InitialMode.GET_NEXT_SAVEPOINT_QUERY);
-        bindConstant().annotatedWith(CwsGetFirstTimestampAfterSavePointQuery.class)
-            .to(InitialMode.GET_FIRST_TS_AFTER_SAVEPOINT_QUERY);
         break;
       case INCREMENTAL_LOAD:
         bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).toInstance(() -> {
@@ -124,8 +127,6 @@ public class CwsFacilityJobModule extends BaseFacilityJobModule<CwsFacilityJobCo
             .to(IncrementalMode.GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY);
         bindConstant().annotatedWith(CwsGetNextSavePointQuery.class)
             .to(IncrementalMode.GET_NEXT_SAVEPOINT_QUERY);
-        bindConstant().annotatedWith(CwsGetFirstTimestampAfterSavePointQuery.class)
-            .to(IncrementalMode.GET_FIRST_TS_AFTER_SAVEPOINT_QUERY);
         break;
       default:
         throw new IllegalStateException(String.format("Unknown job mode %s", getJobMode()));

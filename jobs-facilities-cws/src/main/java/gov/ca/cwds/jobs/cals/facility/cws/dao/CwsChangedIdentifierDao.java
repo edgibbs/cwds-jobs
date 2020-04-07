@@ -24,6 +24,8 @@ import gov.ca.cwds.jobs.cals.facility.cws.inject.CwsGetNextSavePointQuery;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.batch.JobBatchSize;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
+import gov.ca.cwds.jobs.common.mode.JobBatchMode;
+import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 
 /**
@@ -36,6 +38,10 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
   @Inject
   @JobBatchSize
   private int batchSize;
+
+  @Inject
+  @JobBatchMode
+  private JobMode jobMode;
 
   @Inject
   @CwsGetNextSavePointQuery
@@ -58,7 +64,45 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     super(sessionFactory);
   }
 
+  protected Optional<LocalDateTime> getNextSavePointInitial(LocalDateTime timestamp) {
+    return currentSession().createQuery(getNextSavePointQuery, LocalDateTime.class)
+        .setParameter(QueryConstants.DATE_AFTER, timestamp).setMaxResults(1)
+        .setFirstResult(batchSize - 1).setReadOnly(true).uniqueResultOptional();
+  }
+
+  protected Optional<LocalDateTime> getFirstChangedTimestampAfterSavepointInitial(
+      LocalDateTime timestamp) {
+    return currentSession().createQuery(getNextSavePointQuery, LocalDateTime.class)
+        .setParameter(QueryConstants.DATE_AFTER, timestamp).setMaxResults(1).setFirstResult(0)
+        .setReadOnly(true).uniqueResultOptional();
+  }
+
+  protected List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiersInitial(
+      LocalDateTime afterTimestamp, LocalDateTime beforeTimestamp) {
+    return currentSession().createQuery(cwsGetIdentifiersBetweenTimestampsQuery)
+        .setParameter(QueryConstants.DATE_AFTER, afterTimestamp)
+        .setParameter(QueryConstants.DATE_BEFORE, beforeTimestamp).setReadOnly(true).list();
+  }
+
+  protected List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiersInitial(
+      LocalDateTime afterTimestamp) {
+    return currentSession().createQuery(cwsGetIdentifierAfterTimestampQuery)
+        .setParameter(QueryConstants.DATE_AFTER, afterTimestamp).setReadOnly(true).list();
+  }
+
+  protected boolean isInitialLoad() {
+    return jobMode.ordinal() == JobMode.INITIAL_LOAD.ordinal()
+        || jobMode.ordinal() == JobMode.INITIAL_RESUME.ordinal();
+  }
+
   public Optional<LocalDateTime> getNextSavePoint(LocalDateTime timestamp) {
+    LOG.debug("getNextSavePoint(ts): jobMode: {}", jobMode);
+    if (isInitialLoad()) {
+      return getNextSavePointInitial(timestamp);
+    }
+
+    LOG.debug("\n\nPAST INITIAL LOAD POINT\n\n");
+
     Optional<LocalDateTime> ret = Optional.<LocalDateTime>empty();
     LOG.debug("getNextSavePoint: timestamp: {}", timestamp);
     LOG.debug("getNextSavePoint: \n{}", getNextSavePointQuery);
@@ -66,7 +110,8 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     try {
       final Object obj = currentSession().createNativeQuery(getNextSavePointQuery)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
-      ret = Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime());
+      ret = obj != null ? Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime())
+          : Optional.<LocalDateTime>empty();
     } catch (Exception e) {
       LOG.error("getNextSavePoint: FAILED TO FIND NEXT SAVE POINT!", e);
       throw e;
@@ -78,6 +123,10 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
 
   @SuppressWarnings("unchecked")
   public Optional<LocalDateTime> getFirstChangedTimestampAfterSavepoint(LocalDateTime timestamp) {
+    if (isInitialLoad()) {
+      return getFirstChangedTimestampAfterSavepointInitial(timestamp);
+    }
+
     Optional<LocalDateTime> ret = Optional.<LocalDateTime>empty();
     final String sql =
         getFirstTimestampAfterSavePointQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
@@ -101,6 +150,10 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
   @SuppressWarnings("unchecked")
   public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiers(
       LocalDateTime afterTimestamp, LocalDateTime beforeTimestamp) {
+    if (isInitialLoad()) {
+      return getIdentifiersInitial(afterTimestamp, beforeTimestamp);
+    }
+
     List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> ret = new ArrayList<>(0);
     final String sql =
         cwsGetIdentifiersBetweenTimestampsQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
@@ -138,6 +191,10 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
   @SuppressWarnings("unchecked")
   public List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> getIdentifiers(
       LocalDateTime afterTimestamp) {
+    if (isInitialLoad()) {
+      return getIdentifiersInitial(afterTimestamp);
+    }
+
     List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> ret = new ArrayList<>(0);
     final String sql =
         cwsGetIdentifierAfterTimestampQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
