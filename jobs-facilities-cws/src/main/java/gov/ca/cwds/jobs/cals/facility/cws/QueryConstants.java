@@ -60,7 +60,10 @@ public final class QueryConstants {
 
     //@formatter:off
     public static final String GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY =
-          "SELECT plh.IDENTIFIER, plh.IBMSNAP_OPERATION, plh.IBMSNAP_LOGMARKER\n"
+          "SELECT plh.IDENTIFIER, plh.IBMSNAP_OPERATION\n"
+        + "  , MAX(NVL(cst.IBMSNAP_LOGMARKER, plh.IBMSNAP_LOGMARKER)"
+        + "      , NVL(stf.IBMSNAP_LOGMARKER, plh.IBMSNAP_LOGMARKER)"
+        + "      ,     plh.IBMSNAP_LOGMARKER) AS IBMSNAP_LOGMARKER\n"
         + "FROM      {h-schema}PLC_HM_T plh\n"
         + "LEFT JOIN {h-schema}CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST\n"
         + "LEFT JOIN {h-schema}STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"
@@ -71,27 +74,30 @@ public final class QueryConstants {
         + "   OR cst.IBMSNAP_LOGMARKER > :dateAfter\n"
         + "   OR stf.IBMSNAP_LOGMARKER > :dateAfter\n"
         + ")\n"
-        + "ORDER BY plh.IBMSNAP_LOGMARKER, cst.IBMSNAP_LOGMARKER, stf.IBMSNAP_LOGMARKER, plh.IDENTIFIER\n"
+        + "ORDER BY 3, 1\n"
         + "FETCH FIRST BATCH_SIZE ROWS ONLY\n"
         + "FOR READ ONLY WITH UR";
     //@formatter:on
 
     //@formatter:off
     public static final String GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY =
-        "SELECT plh.IDENTIFIER, plh.IBMSNAP_OPERATION, plh.IBMSNAP_LOGMARKER\n"
-      + "FROM      {h-schema}PLC_HM_T plh\n"
-      + "LEFT JOIN {h-schema}CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST\n"
-      + "LEFT JOIN {h-schema}STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"
-      + "WHERE plh.LICENSR_CD <> 'CL'\n"
-      + "  AND plh.PLC_FCLC   <> 1420\n"
-      + "  AND (\n"
-      + "      (plh.IBMSNAP_LOGMARKER > :dateAfter AND plh.IBMSNAP_LOGMARKER < :dateBefore)\n"
-      + "   OR (cst.IBMSNAP_LOGMARKER > :dateAfter AND cst.IBMSNAP_LOGMARKER < :dateBefore)\n"
-      + "   OR (stf.IBMSNAP_LOGMARKER > :dateAfter AND stf.IBMSNAP_LOGMARKER < :dateBefore)\n"
-      + ")\n"
-      + "ORDER BY plh.IBMSNAP_LOGMARKER, cst.IBMSNAP_LOGMARKER, stf.IBMSNAP_LOGMARKER, plh.IDENTIFIER\n"
-      + "FETCH FIRST BATCH_SIZE ROWS ONLY\n"
-      + "FOR READ ONLY WITH UR";
+          "SELECT plh.IDENTIFIER, plh.IBMSNAP_OPERATION\n"
+        + "  , MAX(NVL(cst.IBMSNAP_LOGMARKER, plh.IBMSNAP_LOGMARKER)"
+        + "      , NVL(stf.IBMSNAP_LOGMARKER, plh.IBMSNAP_LOGMARKER)"
+        + "      ,     plh.IBMSNAP_LOGMARKER) AS IBMSNAP_LOGMARKER\n"
+        + "FROM      {h-schema}PLC_HM_T plh\n"
+        + "LEFT JOIN {h-schema}CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST\n"
+        + "LEFT JOIN {h-schema}STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"
+        + "WHERE plh.LICENSR_CD <> 'CL'\n"
+        + "  AND plh.PLC_FCLC   <> 1420\n"
+        + "  AND (\n"
+        + "      (plh.IBMSNAP_LOGMARKER > :dateAfter AND plh.IBMSNAP_LOGMARKER < :dateBefore)\n"
+        + "   OR (cst.IBMSNAP_LOGMARKER > :dateAfter AND cst.IBMSNAP_LOGMARKER < :dateBefore)\n"
+        + "   OR (stf.IBMSNAP_LOGMARKER > :dateAfter AND stf.IBMSNAP_LOGMARKER < :dateBefore)\n"
+        + ")\n"
+        + "ORDER BY 3, 1\n"
+        + "FETCH FIRST BATCH_SIZE ROWS ONLY\n"
+        + "FOR READ ONLY WITH UR";
     //@formatter:on
 
     //@formatter:off

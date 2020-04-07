@@ -160,7 +160,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     final String sql =
         cwsGetIdentifiersBetweenTimestampsQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
     LOG.debug("getIdentifiers(ts,ts): SQL: \n{}", sql);
-    LOG.debug("getIdentifiers(ts,ts): \nbefore: {}, \nafter: {}", beforeTimestamp, afterTimestamp);
+    LOG.debug("getIdentifiers(ts,ts): \nbefore: {}, \n after: {}", beforeTimestamp, afterTimestamp);
 
     try {
       Timestamp paramAfter = Timestamp.valueOf(afterTimestamp);
