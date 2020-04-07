@@ -2,6 +2,8 @@ package gov.ca.cwds.jobs.cals.facility.cws.dao;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -101,8 +103,6 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
       return getNextSavePointInitial(timestamp);
     }
 
-    LOG.debug("\n\nPAST INITIAL LOAD POINT\n\n");
-
     Optional<LocalDateTime> ret = Optional.<LocalDateTime>empty();
     LOG.debug("getNextSavePoint: timestamp: {}", timestamp);
     LOG.debug("getNextSavePoint: \n{}", getNextSavePointQuery);
@@ -111,7 +111,8 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
       final Object obj = currentSession().createNativeQuery(getNextSavePointQuery)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
       ret = obj != null ? Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime())
-          : Optional.<LocalDateTime>of(LocalDateTime.now());
+          : Optional.<LocalDateTime>of(
+              LocalDateTime.now(ZoneId.of("America/Los_Angeles")).minus(2, ChronoUnit.MINUTES));
     } catch (Exception e) {
       LOG.error("getNextSavePoint: FAILED TO FIND NEXT SAVE POINT!", e);
       throw e;
@@ -137,7 +138,8 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
       final Object obj = currentSession().createNativeQuery(sql)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
       ret = obj != null ? Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime())
-          : Optional.<LocalDateTime>of(LocalDateTime.now());
+          : Optional.<LocalDateTime>of(
+              LocalDateTime.now(ZoneId.of("America/Los_Angeles")).minus(2, ChronoUnit.MINUTES));
     } catch (Exception e) {
       LOG.error("FAILED TO FIND FIRST TIMESTAMP AFTER SAVE POINT!", e);
       throw e;
