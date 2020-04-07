@@ -1,11 +1,5 @@
 package gov.ca.cwds.jobs.common.savepoint;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.inject.Inject;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import gov.ca.cwds.jobs.common.inject.LastRunDir;
-import gov.ca.cwds.rest.api.ApiException;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -13,16 +7,25 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.inject.Inject;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import gov.ca.cwds.jobs.common.inject.LastRunDir;
+import gov.ca.cwds.rest.api.ApiException;
+
 /**
  * Created by Alexander Serbin on 2/5/2018.
  */
-public abstract class SavePointContainerServiceImpl<S extends SavePoint> implements
-    SavePointContainerService<S> {
+public abstract class SavePointContainerServiceImpl<S extends SavePoint>
+    implements SavePointContainerService<S> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SavePointContainerServiceImpl.class);
 
@@ -56,7 +59,7 @@ public abstract class SavePointContainerServiceImpl<S extends SavePoint> impleme
     }
   }
 
-  @SuppressFBWarnings("PATH_TRAVERSAL_IN") //Path cannot be controlled by the user
+  @SuppressFBWarnings("PATH_TRAVERSAL_IN") // Path cannot be controlled by the user
   @Override
   public Path getSavePointFile() {
     return Paths.get(outputDir, TIMESTAMP_FILENAME).normalize().toAbsolutePath();

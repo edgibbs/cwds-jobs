@@ -166,13 +166,6 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
       Timestamp paramAfter = Timestamp.valueOf(afterTimestamp);
       Timestamp paramBefore = Timestamp.valueOf(beforeTimestamp);
 
-      if (paramBefore.after(paramAfter)) {
-        LOG.debug("\n\nTIMESTAMPS REVERSED??\nbefore: {}\n after: {}\n", paramBefore, paramAfter);
-        // final Timestamp hold = paramAfter;
-        // paramAfter = paramBefore;
-        // paramBefore = hold;
-      }
-
       final List<Object[]> arr = currentSession().createNativeQuery(sql)
           .setParameter(QueryConstants.DATE_AFTER, paramAfter)
           .setParameter(QueryConstants.DATE_BEFORE, paramBefore).list();
@@ -193,7 +186,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
       throw e;
     }
 
-    LOG.debug("getIdentifiers(ts,ts): ret: {}", ret);
+    LOG.debug("getIdentifiers(ts,ts): \nret: {}", ret);
     return ret;
   }
 
