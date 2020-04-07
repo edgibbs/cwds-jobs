@@ -111,7 +111,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
       final Object obj = currentSession().createNativeQuery(getNextSavePointQuery)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
       ret = obj != null ? Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime())
-          : Optional.<LocalDateTime>empty();
+          : Optional.<LocalDateTime>of(LocalDateTime.now());
     } catch (Exception e) {
       LOG.error("getNextSavePoint: FAILED TO FIND NEXT SAVE POINT!", e);
       throw e;
@@ -137,7 +137,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
       final Object obj = currentSession().createNativeQuery(sql)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
       ret = obj != null ? Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime())
-          : Optional.<LocalDateTime>empty();
+          : Optional.<LocalDateTime>of(LocalDateTime.now());
     } catch (Exception e) {
       LOG.error("FAILED TO FIND FIRST TIMESTAMP AFTER SAVE POINT!", e);
       throw e;
