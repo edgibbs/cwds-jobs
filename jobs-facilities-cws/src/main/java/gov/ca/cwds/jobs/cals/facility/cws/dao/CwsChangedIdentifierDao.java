@@ -98,17 +98,17 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
   }
 
   public Optional<LocalDateTime> getNextSavePoint(LocalDateTime timestamp) {
-    LOG.debug("getNextSavePoint(ts): jobMode: {}", jobMode);
     if (isInitialLoad()) {
       return getNextSavePointInitial(timestamp);
     }
 
     Optional<LocalDateTime> ret = Optional.<LocalDateTime>empty();
     LOG.debug("getNextSavePoint: timestamp: {}", timestamp);
-    LOG.debug("getNextSavePoint: \n{}", getNextSavePointQuery);
+    final String sql = getNextSavePointQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
+    LOG.debug("getNextSavePoint: SQL: \n{}", sql);
 
     try {
-      final Object obj = currentSession().createNativeQuery(getNextSavePointQuery)
+      final Object obj = currentSession().createNativeQuery(sql)
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
       ret = obj != null ? Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime())
           : Optional.<LocalDateTime>of(
@@ -132,7 +132,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     final String sql =
         getFirstTimestampAfterSavePointQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
     LOG.debug("getFirstChangedTimestampAfterSavepoint: SQL: \n{}", sql);
-    LOG.debug("timestamp: {}", timestamp);
+    LOG.debug("getFirstChangedTimestampAfterSavepoint: timestamp: {}", timestamp);
 
     try {
       final Object obj = currentSession().createNativeQuery(sql)
@@ -160,12 +160,19 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     final String sql =
         cwsGetIdentifiersBetweenTimestampsQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
     LOG.debug("getIdentifiers(ts,ts): SQL: \n{}", sql);
-    LOG.debug("getIdentifiers(ts,ts): beforeTimestamp: {}, afterTimestamp: {}", beforeTimestamp,
-        afterTimestamp);
+    LOG.debug("getIdentifiers(ts,ts): \nbefore: {}, \nafter: {}", beforeTimestamp, afterTimestamp);
 
     try {
-      final Timestamp paramAfter = Timestamp.valueOf(afterTimestamp);
-      final Timestamp paramBefore = Timestamp.valueOf(beforeTimestamp);
+      Timestamp paramAfter = Timestamp.valueOf(afterTimestamp);
+      Timestamp paramBefore = Timestamp.valueOf(beforeTimestamp);
+
+      if (paramBefore.after(paramAfter)) {
+        LOG.debug("\n\nTIMESTAMPS REVERSED??\nbefore: {}\n after: {}\n", paramBefore, paramAfter);
+        // final Timestamp hold = paramAfter;
+        // paramAfter = paramBefore;
+        // paramBefore = hold;
+      }
+
       final List<Object[]> arr = currentSession().createNativeQuery(sql)
           .setParameter(QueryConstants.DATE_AFTER, paramAfter)
           .setParameter(QueryConstants.DATE_BEFORE, paramBefore).list();
@@ -173,7 +180,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
         ret = new ArrayList<>(arr.size());
 
         for (Object[] row : arr) {
-          final String strOp = (String) row[1];
+          final String strOp = "" + row[1];
           final RecordChangeOperation op =
               StringUtils.isNotBlank(strOp) ? RecordChangeOperation.valueOf(String.valueOf(strOp))
                   : RecordChangeOperation.I;
