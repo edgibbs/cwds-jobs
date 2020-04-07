@@ -173,12 +173,13 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
         ret = new ArrayList<>(arr.size());
 
         for (Object[] row : arr) {
+          final String id = (String) row[0];
           final String strOp = "" + row[1];
           final RecordChangeOperation op =
               StringUtils.isNotBlank(strOp) ? RecordChangeOperation.valueOf(String.valueOf(strOp))
                   : RecordChangeOperation.I;
           final LocalDateTime ts = ((Timestamp) row[2]).toLocalDateTime();
-          ret.add(new CwsChangedIdentifier((String) row[0], op, ts));
+          ret.add(new CwsChangedIdentifier(id, op, ts));
         }
       }
     } catch (Exception e) {
