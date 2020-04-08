@@ -61,9 +61,9 @@ public final class QueryConstants {
     //@formatter:off
     public static final String GET_IDENTIFIERS_AFTER_TIMESTAMP_QUERY =
           "SELECT plh.IDENTIFIER, plh.IBMSNAP_OPERATION\n"
-        + "  , MAX(NVL(cst.IBMSNAP_LOGMARKER, plh.IBMSNAP_LOGMARKER)"
-        + "      , NVL(stf.IBMSNAP_LOGMARKER, plh.IBMSNAP_LOGMARKER)"
-        + "      ,     plh.IBMSNAP_LOGMARKER) AS IBMSNAP_LOGMARKER\n"
+        + "  , MAX(NVL(cst.IBMSNAP_LOGMARKER, plh.IBMSNAP_LOGMARKER)\n"
+        + "      , NVL(stf.IBMSNAP_LOGMARKER, plh.IBMSNAP_LOGMARKER)\n"
+        + "      ,     plh.IBMSNAP_LOGMARKER)  AS IBMSNAP_LOGMARKER\n"
         + "FROM      {h-schema}PLC_HM_T plh\n"
         + "LEFT JOIN {h-schema}CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST\n"
         + "LEFT JOIN {h-schema}STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"
@@ -82,9 +82,9 @@ public final class QueryConstants {
     //@formatter:off
     public static final String GET_IDENTIFIERS_BETWEEN_TIMESTAMPS_QUERY =
           "SELECT plh.IDENTIFIER, plh.IBMSNAP_OPERATION\n"
-        + "  , MAX(NVL(cst.IBMSNAP_LOGMARKER, plh.IBMSNAP_LOGMARKER)"
-        + "      , NVL(stf.IBMSNAP_LOGMARKER, plh.IBMSNAP_LOGMARKER)"
-        + "      ,     plh.IBMSNAP_LOGMARKER) AS IBMSNAP_LOGMARKER\n"
+        + "  , MAX(NVL(cst.IBMSNAP_LOGMARKER, plh.IBMSNAP_LOGMARKER)\n"
+        + "      , NVL(stf.IBMSNAP_LOGMARKER, plh.IBMSNAP_LOGMARKER)\n"
+        + "      ,     plh.IBMSNAP_LOGMARKER)  AS IBMSNAP_LOGMARKER\n"
         + "FROM      {h-schema}PLC_HM_T plh\n"
         + "LEFT JOIN {h-schema}CNTY_CST cst ON cst.IDENTIFIER = plh.FKCNTY_CST\n"
         + "LEFT JOIN {h-schema}STFPERST stf ON stf.IDENTIFIER = cst.FKSTFPERST\n"

@@ -112,7 +112,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
       ret = obj != null ? Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime())
           : Optional.<LocalDateTime>of(
-              LocalDateTime.now(ZoneId.of("America/Los_Angeles")).minus(2, ChronoUnit.MINUTES));
+              LocalDateTime.now(ZoneId.of("America/Los_Angeles")).minus(1, ChronoUnit.MINUTES));
     } catch (Exception e) {
       LOG.error("getNextSavePoint: FAILED TO FIND NEXT SAVE POINT!", e);
       throw e;
@@ -139,7 +139,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
           .setParameter(QueryConstants.DATE_AFTER, Timestamp.valueOf(timestamp)).uniqueResult();
       ret = obj != null ? Optional.<LocalDateTime>of(((Timestamp) obj).toLocalDateTime())
           : Optional.<LocalDateTime>of(
-              LocalDateTime.now(ZoneId.of("America/Los_Angeles")).minus(2, ChronoUnit.MINUTES));
+              LocalDateTime.now(ZoneId.of("America/Los_Angeles")).minus(1, ChronoUnit.MINUTES));
     } catch (Exception e) {
       LOG.error("FAILED TO FIND FIRST TIMESTAMP AFTER SAVE POINT!", e);
       throw e;
@@ -163,8 +163,8 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     LOG.debug("getIdentifiers(ts,ts): \nbefore: {}, \n after: {}", beforeTimestamp, afterTimestamp);
 
     try {
-      Timestamp paramAfter = Timestamp.valueOf(afterTimestamp);
-      Timestamp paramBefore = Timestamp.valueOf(beforeTimestamp);
+      Timestamp paramAfter = Timestamp.valueOf(afterTimestamp.minus(1, ChronoUnit.MINUTES));
+      Timestamp paramBefore = Timestamp.valueOf(beforeTimestamp.plus(1, ChronoUnit.MINUTES));
 
       final List<Object[]> arr = currentSession().createNativeQuery(sql)
           .setParameter(QueryConstants.DATE_AFTER, paramAfter)
