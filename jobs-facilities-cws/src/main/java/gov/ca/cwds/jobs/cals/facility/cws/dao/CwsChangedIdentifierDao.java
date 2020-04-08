@@ -33,6 +33,7 @@ import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 /**
  * @author CWDS TPT-2
  */
+@SuppressWarnings({"fb-contrib:CLI_CONSTANT_LIST_INDEX"})
 public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
 
   private static final Logger LOG = LoggerFactory.getLogger(CwsChangedIdentifierDao.class);
