@@ -1,17 +1,10 @@
 package gov.ca.cwds.jobs.common.elastic;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Inject;
-import gov.ca.cwds.jobs.common.BulkWriter;
-import gov.ca.cwds.jobs.common.ChangedDTO;
-import gov.ca.cwds.jobs.common.RecordChangeOperation;
-import gov.ca.cwds.jobs.common.exception.JobsException;
-import gov.ca.cwds.jobs.common.inject.IndexName;
-import gov.ca.cwds.jobs.common.util.ConsumerCounter;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -21,6 +14,15 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
+
+import gov.ca.cwds.jobs.common.BulkWriter;
+import gov.ca.cwds.jobs.common.ChangedDTO;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
+import gov.ca.cwds.jobs.common.exception.JobsException;
+import gov.ca.cwds.jobs.common.inject.IndexName;
+import gov.ca.cwds.jobs.common.util.ConsumerCounter;
 
 /**
  * @param <T> persistence class type
@@ -54,8 +56,7 @@ public class ElasticWriter<T extends ChangedDTO<?>> implements BulkWriter<T> {
       }
 
       @Override
-      public void afterBulk(long executionId, BulkRequest request,
-          BulkResponse response) {
+      public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
         LOGGER.warn("Response from bulk: {} ", response.getItems().length);
       }
 

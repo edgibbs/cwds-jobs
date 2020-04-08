@@ -1,36 +1,35 @@
 package gov.ca.cwds.jobs.cals.facility.cws.identifier;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+import javax.persistence.Entity;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+
 import gov.ca.cwds.jobs.cals.facility.cws.QueryConstants;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.savepoint.LocalDateTimeSavePoint;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import javax.persistence.Entity;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 
 /**
  * Created by Alexander Serbin on 7/6/2018.
  */
-
-@NamedQueries({@NamedQuery(
-    name = CwsChangedIdentifier.CWSCMS_GET_MAX_TIMESTAMP_QUERY_NAME,
-    query = QueryConstants.CWS_CMS_GET_MAX_TIMESTAMP_QUERY
-)
-})
+@NamedQueries({@NamedQuery(name = CwsChangedIdentifier.CWSCMS_GET_MAX_TIMESTAMP_QUERY_NAME,
+    query = QueryConstants.CWS_CMS_GET_MAX_TIMESTAMP_QUERY)})
 @Entity
-public class CwsChangedIdentifier extends
-    ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> {
+public class CwsChangedIdentifier
+    extends ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>> {
 
-  public static final String CWSCMS_GET_MAX_TIMESTAMP_QUERY_NAME = "RecordChange.cwscmsMaxTimestampQuery";
+  private static final long serialVersionUID = -2320143335869667227L;
 
-  protected CwsChangedIdentifier() {
-  }
+  public static final String CWSCMS_GET_MAX_TIMESTAMP_QUERY_NAME =
+      "RecordChange.cwscmsMaxTimestampQuery";
 
-  public CwsChangedIdentifier(String id,
-      LocalDateTime timestamp) {
+  protected CwsChangedIdentifier() {}
+
+  public CwsChangedIdentifier(String id, LocalDateTime timestamp) {
     super(id, RecordChangeOperation.I, new LocalDateTimeSavePoint(timestamp));
   }
 

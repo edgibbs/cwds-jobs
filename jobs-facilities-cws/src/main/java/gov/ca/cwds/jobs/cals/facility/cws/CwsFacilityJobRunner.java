@@ -8,8 +8,7 @@ import gov.ca.cwds.jobs.common.core.JobRunner;
 public final class CwsFacilityJobRunner {
 
   public static void main(String[] args) {
-    CwsJobModuleBuilder jobModuleBuilder = new CwsJobModuleBuilder();
-    JobRunner.run(jobModuleBuilder.buildJobModule(args, true));
+    JobRunner.run(new CwsJobModuleBuilder().buildJobModule(args, true));
   }
 
 }

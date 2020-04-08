@@ -1,17 +1,13 @@
 package gov.ca.cwds.jobs.common.elastic;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import gov.ca.cwds.rest.api.ApiException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.elasticsearch.action.admin.cluster.settings.ClusterGetSettingsRequest;
-import org.elasticsearch.action.admin.cluster.settings.ClusterGetSettingsResponse;
-import org.elasticsearch.client.RequestOptions;
+
 import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,9 +15,12 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import gov.ca.cwds.rest.api.ApiException;
+
 public class ElasticUtilsTest {
 
-  @Mock private ElasticsearchConfiguration configuration;
+  @Mock
+  private ElasticsearchConfiguration configuration;
 
   @Before
   public void initMocks() {
@@ -52,4 +51,5 @@ public class ElasticUtilsTest {
 
     ElasticUtils.createAndConfigureESClient(configuration);
   }
+
 }

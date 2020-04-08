@@ -1,15 +1,17 @@
 package gov.ca.cwds.jobs.common.savepoint;
 
+import java.time.LocalDateTime;
+
 import com.google.inject.Inject;
+
 import gov.ca.cwds.jobs.common.inject.LastRunDir;
 import gov.ca.cwds.jobs.common.mode.JobMode;
-import java.time.LocalDateTime;
 
 /**
  * Created by Alexander Serbin on 6/21/2018.
  */
-public class LocalDateTimeSavePointContainerService extends
-    SavePointContainerServiceImpl<TimestampSavePoint<LocalDateTime>> {
+public class LocalDateTimeSavePointContainerService
+    extends SavePointContainerServiceImpl<TimestampSavePoint<LocalDateTime>> {
 
   public static final LocalDateTime VERY_FIRST_TIMESTAMP = LocalDateTime.of(1970, 1, 1, 1, 1);
 
@@ -24,13 +26,14 @@ public class LocalDateTimeSavePointContainerService extends
     if (savePointContainerExists()) {
       return super.readSavePointContainer(savePointContainerClass);
     } else {
-      LocalDateTimeSavePointContainer container = new LocalDateTimeSavePointContainer();
+      final LocalDateTimeSavePointContainer container = new LocalDateTimeSavePointContainer();
       container.setJobMode(JobMode.INITIAL_LOAD);
-      LocalDateTimeSavePoint savePoint = new LocalDateTimeSavePoint();
+
+      final LocalDateTimeSavePoint savePoint = new LocalDateTimeSavePoint();
       savePoint.setTimestamp(VERY_FIRST_TIMESTAMP);
       container.setSavePoint(savePoint);
       return container;
     }
   }
-}
 
+}

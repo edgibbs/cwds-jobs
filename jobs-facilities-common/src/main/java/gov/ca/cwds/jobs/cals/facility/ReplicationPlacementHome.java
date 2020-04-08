@@ -1,30 +1,30 @@
 package gov.ca.cwds.jobs.cals.facility;
 
-import gov.ca.cwds.data.legacy.cms.entity.BasePlacementHome;
-import gov.ca.cwds.data.legacy.cms.entity.CountyLicenseCase;
-import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import gov.ca.cwds.data.legacy.cms.entity.BasePlacementHome;
+import gov.ca.cwds.data.legacy.cms.entity.CountyLicenseCase;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
 
 /**
  * Created by Alexander Serbin on 4/4/2018.
  */
 @Entity
-@Table(
-    name = "PLC_HM_T"
-)
+@Table(name = "PLC_HM_T")
 public class ReplicationPlacementHome extends BasePlacementHome {
 
-  @Column(
-      name = "IBMSNAP_LOGMARKER",
-      nullable = false
-  )
+  private static final long serialVersionUID = -3401375575724776869L;
+
+  @Column(name = "IBMSNAP_LOGMARKER", nullable = false)
   private LocalDateTime replicationLastUpdated;
 
   @Enumerated(EnumType.STRING)

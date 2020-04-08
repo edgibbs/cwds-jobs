@@ -1,20 +1,24 @@
 package gov.ca.cwds.jobs.common.identifier;
 
-import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.jobs.common.RecordChangeOperation;
-import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.jobs.common.RecordChangeOperation;
+import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
 @MappedSuperclass
-public abstract class ChangedEntityIdentifier<S extends SavePoint> implements
-    Comparable<ChangedEntityIdentifier<S>>, PersistentObject {
+public abstract class ChangedEntityIdentifier<S extends SavePoint>
+    implements Comparable<ChangedEntityIdentifier<S>>, PersistentObject {
+
+  private static final long serialVersionUID = 1L;
 
   @Id
   private String id;
@@ -25,8 +29,7 @@ public abstract class ChangedEntityIdentifier<S extends SavePoint> implements
   @Transient
   private S savePoint;
 
-  protected ChangedEntityIdentifier() {
-  }
+  protected ChangedEntityIdentifier() {}
 
   public ChangedEntityIdentifier(String id, S savePoint) {
     this.id = id;
@@ -79,8 +82,8 @@ public abstract class ChangedEntityIdentifier<S extends SavePoint> implements
 
   @Override
   public String toString() {
-    return "id=" + id + ", recordChangeOperation=" + recordChangeOperation +
-        ", savePoint=" + savePoint + "\n";
+    return "id=" + id + ", recordChangeOperation=" + recordChangeOperation + ", savePoint="
+        + savePoint + "\n";
   }
 
 }

@@ -13,6 +13,6 @@ import com.google.inject.BindingAnnotation;
 @BindingAnnotation
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CwsGetIdentifiersBetweenTimestampsQuery {
+public @interface CwsGetFirstTimestampAfterSavePointQuery {
 
 }
