@@ -69,7 +69,6 @@ public class CwsFacilityJobTest {
   private static final String INDEX_NAME = "index_name";
 
   @Test
-  // @Ignore
   public void cwsFacilityJobTest()
       throws IOException, JSONException, InterruptedException, LiquibaseException {
     try {
