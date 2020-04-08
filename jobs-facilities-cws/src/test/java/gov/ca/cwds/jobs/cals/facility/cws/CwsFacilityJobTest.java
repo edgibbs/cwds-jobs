@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +69,7 @@ public class CwsFacilityJobTest {
   private static final String INDEX_NAME = "index_name";
 
   @Test
-  @Ignore
+  // @Ignore
   public void cwsFacilityJobTest()
       throws IOException, JSONException, InterruptedException, LiquibaseException {
     try {
