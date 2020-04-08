@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.common.inject;
 
 import com.google.inject.AbstractModule;
+
 import gov.ca.cwds.jobs.common.batch.JobBatchSize;
 import gov.ca.cwds.jobs.common.configuration.MultiThreadConfiguration;
 
@@ -17,8 +18,7 @@ public class MultiThreadModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bindConstant().annotatedWith(JobBatchSize.class)
-        .to(configuration.getBatchSize());
+    bindConstant().annotatedWith(JobBatchSize.class).to(configuration.getBatchSize());
     bindConstant().annotatedWith(ElasticsearchBulkSize.class)
         .to(configuration.getElasticSearchBulkSize());
     bindConstant().annotatedWith(ReaderThreadsCount.class)

@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,9 @@ import io.dropwizard.db.DataSourceFactory;
 import liquibase.exception.LiquibaseException;
 
 /**
- * DB2 native SQL doesn't work in H2. This is test is invalid.
+ * DB2 native SQL doesn't work in H2, because H2 does not support the standard WITH clause.
+ * 
+ * Unfortunately this test is invalid.
  * 
  * Created by Alexander Serbin on 3/18/2018.
  */
@@ -68,7 +69,7 @@ public class CwsFacilityJobTest {
   private static final String INDEX_NAME = "index_name";
 
   @Test
-  @Ignore
+  // @Ignore
   public void cwsFacilityJobTest()
       throws IOException, JSONException, InterruptedException, LiquibaseException {
     try {
@@ -160,6 +161,7 @@ public class CwsFacilityJobTest {
         getFacilityJobConfiguration().getCmsDataSourceFactory();
     DatabaseHelper cwsDatabaseHelper = new DatabaseHelper(cwsDataSourceFactory.getUrl(),
         cwsDataSourceFactory.getUser(), cwsDataSourceFactory.getPassword());
+
     Map<String, Object> parameters = new HashMap<>();
     parameters.put("now", datetimeFormatter.format(LocalDateTime.now()));
     cwsDatabaseHelper.runScript("liquibase/cwsrs_facility_incremental_load.xml", parameters,
