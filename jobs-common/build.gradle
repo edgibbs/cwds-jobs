@@ -1,36 +1,47 @@
-apply plugin: 'jacoco'
+plugins {
+    id 'jacoco'
+}
+
+
 
 dependencies {
 
-    compile group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: commonsLangVersion
+    implementation group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: commonsLangVersion
 
-    compile group: 'com.google.inject', name: 'guice', version: guiceVersion
-    compile group: 'org.hibernate', name: 'hibernate-core', version: hibernateVersion
-    compile group: 'org.hibernate', name: 'hibernate-hikaricp', version: hibernateVersion
-    compile (group: 'io.dropwizard', name: 'dropwizard-db', version: dropwizardVersion){
+    implementation group: 'com.google.inject', name: 'guice', version: guiceVersion
+    implementation group: 'org.hibernate', name: 'hibernate-core', version: hibernateVersion
+    implementation group: 'org.hibernate', name: 'hibernate-hikaricp', version: hibernateVersion
+    implementation (group: 'io.dropwizard', name: 'dropwizard-db', version: dropwizardVersion){
         exclude group: 'org.slf4j'
     }
-    compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
-    compile group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: elasticsearchVersion
+    implementation group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
+    implementation group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: elasticsearchVersion
 
-    compile (group: 'gov.ca.cwds.api', name: 'api-core-cms', version: coreApiVersion) {
+    implementation (group: 'gov.ca.cwds.api', name: 'api-core-cms', version: coreApiVersion) {
         exclude group: 'org.elasticsearch'
         exclude group: 'org.elasticsearch.client'
     }
-    compile group: 'gov.ca.cwds.api', name: 'api-core-common', version: coreApiVersion
-    compile (group: 'gov.ca.cwds.api', name: 'api-core', version: coreApiVersion) {
+    implementation group: 'gov.ca.cwds.api', name: 'api-core-common', version: coreApiVersion
+    implementation (group: 'gov.ca.cwds.api', name: 'api-core', version: coreApiVersion) {
         exclude group: 'org.glassfish.jersey.core'
         exclude group: 'org.elasticsearch'
         exclude group: 'org.elasticsearch.client'
     }
 
-    testCompile group: 'com.h2database', name: 'h2', version: '1.4.194'
-    testCompile(group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion) {
+    implementation group: 'gov.ca.cwds.api', name: 'legacy-data-access', version: coreApiVersion
+    implementation 'com.google.code.findbugs:annotations:3.0.1'
+    implementation 'com.google.code.findbugs:jsr305:3.0.1'
+    implementation 'commons-io:commons-io:2.6'
+    implementation 'org.json:json:20090211'
+    implementation 'io.dropwizard:dropwizard-hibernate:1.1.0'
+
+    testImplementation group: 'com.h2database', name: 'h2', version: '1.4.194'
+    testImplementation(group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion) {
         exclude group: 'gov.ca.cwds.api'
     }
 
-    testCompile group: 'org.skyscreamer', name: 'jsonassert', version: jsonAssertVersion
-
-
+    testImplementation group: 'org.skyscreamer', name: 'jsonassert', version: jsonAssertVersion
+    testImplementation 'org.liquibase:liquibase-core:3.5.3' 
+    testImplementation 'io.dropwizard:dropwizard-testing:1.1.0' 
 }
