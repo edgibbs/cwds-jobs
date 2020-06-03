@@ -201,8 +201,7 @@ public class CwsChangedIdentifierDao extends BaseDaoImpl<CwsChangedIdentifier> {
     List<ChangedEntityIdentifier<TimestampSavePoint<LocalDateTime>>> ret = new ArrayList<>(0);
     final String sql =
         cwsGetIdentifierAfterTimestampQuery.replace("BATCH_SIZE", Integer.toString(batchSize));
-    LOG.debug("getIdentifiers(ts): SQL: \n{}", sql);
-    LOG.debug("getIdentifiers(ts): timestamp: {}", afterTimestamp);
+    LOG.debug("getIdentifiers(ts): timestamp: {}, SQL: \n{}", afterTimestamp, sql);
 
     try {
       final List<Object[]> arr = currentSession().createNativeQuery(sql)
