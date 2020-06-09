@@ -42,8 +42,10 @@ public class LisInitialModeIterator implements JobBatchIterator<LicenseNumberSav
     if (identifiers.isEmpty()) {
       return new JobBatch<>(Collections.emptyList());
     }
+
     lastId = getLastId(identifiers);
     LOGGER.info("Next page prepared. List size: {}. Last Id: {}", identifiers.size(), lastId);
+
     if (identifiers.size() > batchSize) {
       identifiers = identifiers.subList(0, batchSize);
       lastId = getLastId(identifiers);
