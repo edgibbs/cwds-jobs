@@ -15,4 +15,5 @@ public class LisInitialJobModeFinalizerProvider implements Provider<LisInitialJo
   public LisInitialJobModeFinalizer get() {
     return lisInitialJobModeFinalizer;
   }
+
 }

@@ -1,8 +1,9 @@
 package gov.ca.cwds.jobs.common;
 
-import gov.ca.cwds.jobs.common.util.ConsumerCounter;
 import java.util.ArrayList;
 import java.util.List;
+
+import gov.ca.cwds.jobs.common.util.ConsumerCounter;
 
 /**
  * Created by Alexander Serbin on 3/28/2018.
@@ -27,5 +28,3 @@ public class TestWriter<E> implements BulkWriter<E> {
   }
 
 }
-
-

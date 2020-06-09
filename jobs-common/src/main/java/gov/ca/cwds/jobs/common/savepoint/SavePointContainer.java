@@ -1,13 +1,13 @@
 package gov.ca.cwds.jobs.common.savepoint;
 
-import gov.ca.cwds.jobs.common.mode.JobMode;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
+import gov.ca.cwds.jobs.common.mode.JobMode;
+
 /**
- * Container to load and store job save point.
- * Created by Alexander Serbin on 6/18/2018.
+ * Container to load and store job save point. Created by Alexander Serbin on 6/18/2018.
  */
 public class SavePointContainer<S extends SavePoint> {
 
@@ -41,10 +41,12 @@ public class SavePointContainer<S extends SavePoint> {
     this.savePoint = savePoint;
   }
 
+  @Override
   public boolean equals(Object o) {
     return EqualsBuilder.reflectionEquals(this, o);
   }
 
+  @Override
   public int hashCode() {
     return HashCodeBuilder.reflectionHashCode(this);
   }
@@ -53,4 +55,5 @@ public class SavePointContainer<S extends SavePoint> {
   public String toString() {
     return ReflectionToStringBuilder.toString(this);
   }
+
 }

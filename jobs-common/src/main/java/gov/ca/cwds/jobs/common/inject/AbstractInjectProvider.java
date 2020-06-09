@@ -3,12 +3,12 @@ package gov.ca.cwds.jobs.common.inject;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
+
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 
 /**
  * @author CWDS CALS API Team
  */
-
 public abstract class AbstractInjectProvider<T> implements Provider<T> {
 
   private Injector injector;
@@ -30,5 +30,5 @@ public abstract class AbstractInjectProvider<T> implements Provider<T> {
     injector.injectMembers(service);
     return service;
   }
-}
 
+}

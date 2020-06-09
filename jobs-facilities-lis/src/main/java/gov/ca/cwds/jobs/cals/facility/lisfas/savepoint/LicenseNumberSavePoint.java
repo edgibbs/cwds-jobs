@@ -1,8 +1,9 @@
 package gov.ca.cwds.jobs.cals.facility.lisfas.savepoint;
 
-import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import gov.ca.cwds.jobs.common.savepoint.SavePoint;
 
 /**
  * Created by Alexander Serbin on 6/27/2018.
@@ -37,4 +38,5 @@ public class LicenseNumberSavePoint implements SavePoint, Comparable<LicenseNumb
   public int compareTo(LicenseNumberSavePoint o) {
     return Integer.compare(licenseNumber, o.licenseNumber);
   }
+
 }

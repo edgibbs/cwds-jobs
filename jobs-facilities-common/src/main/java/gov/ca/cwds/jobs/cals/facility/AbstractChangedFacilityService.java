@@ -40,4 +40,3 @@ public abstract class AbstractChangedFacilityService
   protected abstract FacilityDto loadEntityById(ChangedEntityIdentifier identifier);
 
 }
-

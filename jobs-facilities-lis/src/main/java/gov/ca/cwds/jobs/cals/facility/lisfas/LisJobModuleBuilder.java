@@ -20,9 +20,8 @@ public class LisJobModuleBuilder implements JobModuleBuilder {
   @Override
   public JobModule buildJobModule(String[] args, boolean elasticSearchModule) {
     JobOptions jobOptions = JobOptions.parseCommandLine(args);
-    LisFacilityJobConfiguration jobConfiguration = JobConfiguration
-        .getJobsConfiguration(LisFacilityJobConfiguration.class,
-            jobOptions.getConfigFileLocation());
+    LisFacilityJobConfiguration jobConfiguration = JobConfiguration.getJobsConfiguration(
+        LisFacilityJobConfiguration.class, jobOptions.getConfigFileLocation());
     JobModule jobModule = new JobModule(jobOptions.getLastRunLoc());
     ElasticsearchConfiguration elasticsearchConfiguration = jobConfiguration.getElasticsearch();
     elasticsearchConfiguration.setDocumentMapping("facility.mapping.json");
@@ -38,13 +37,11 @@ public class LisJobModuleBuilder implements JobModuleBuilder {
   }
 
   private JobMode getCurrentJobMode(String runDir) {
-    LisJobModeService timestampJobModeService =
-        new LisJobModeService();
+    LisJobModeService timestampJobModeService = new LisJobModeService();
     LicenseNumberSavePointContainerService savePointContainerService =
         new LicenseNumberSavePointContainerService(runDir);
     timestampJobModeService.setSavePointContainerService(savePointContainerService);
     return timestampJobModeService.getCurrentJobMode();
   }
-
 
 }

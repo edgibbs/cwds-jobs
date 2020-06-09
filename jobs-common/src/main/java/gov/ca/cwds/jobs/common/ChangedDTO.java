@@ -10,4 +10,5 @@ public interface ChangedDTO<E> extends Identifiable<String> {
   RecordChangeOperation getRecordChangeOperation();
 
   E getDTO();
+
 }

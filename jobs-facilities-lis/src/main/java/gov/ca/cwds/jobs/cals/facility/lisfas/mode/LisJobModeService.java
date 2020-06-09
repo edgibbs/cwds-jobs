@@ -6,7 +6,6 @@ import gov.ca.cwds.jobs.common.mode.AbstractJobModeService;
 /**
  * Created by Alexander Serbin on 6/29/2018.
  */
-public class LisJobModeService extends
-    AbstractJobModeService<LicenseNumberSavePoint> {
+public class LisJobModeService extends AbstractJobModeService<LicenseNumberSavePoint> {
 
 }

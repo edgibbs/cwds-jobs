@@ -6,13 +6,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 /**
  * Created by Alexander Serbin on 6/19/2018.
  */
-public abstract class TimestampSavePoint<T> implements SavePoint,
-    Comparable<TimestampSavePoint<T>> {
+public abstract class TimestampSavePoint<T>
+    implements SavePoint, Comparable<TimestampSavePoint<T>> {
 
   private T timestamp;
 
-  public TimestampSavePoint() {
-  }
+  public TimestampSavePoint() {}
 
   public TimestampSavePoint(T timestamp) {
     this.timestamp = timestamp;

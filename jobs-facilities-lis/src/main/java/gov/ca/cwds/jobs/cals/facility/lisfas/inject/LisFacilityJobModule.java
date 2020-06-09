@@ -1,9 +1,17 @@
 package gov.ca.cwds.jobs.cals.facility.lisfas.inject;
 
+import java.math.BigInteger;
+
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
+
 import gov.ca.cwds.cals.Constants;
 import gov.ca.cwds.cals.Constants.UnitOfWork;
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
@@ -45,11 +53,6 @@ import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
 import gov.ca.cwds.jobs.common.savepoint.SavePointService;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
-import java.math.BigInteger;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.hibernate.SessionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Alexander Serbin on 3/4/2018.
@@ -66,33 +69,26 @@ public class LisFacilityJobModule extends BaseFacilityJobModule<LisFacilityJobCo
   protected void configure() {
     super.configure();
     configureJobModes();
-    bind(
-        new TypeLiteral<SavePointService<TimestampSavePoint<BigInteger>>>() {
-        }).to(LisTimestampSavePointService.class);
-    bind(
-        new TypeLiteral<SavePointContainerService<TimestampSavePoint<BigInteger>>>() {
-        }).annotatedWith(BaseContainerService.class).to(LisTimestampSavePointContainerService.class);
-    bind(
-        new TypeLiteral<SavePointContainerService<TimestampSavePoint<BigInteger>>>() {
-        }).annotatedWith(PrimaryContainerService.class)
+    bind(new TypeLiteral<SavePointService<TimestampSavePoint<BigInteger>>>() {})
+        .to(LisTimestampSavePointService.class);
+    bind(new TypeLiteral<SavePointContainerService<TimestampSavePoint<BigInteger>>>() {})
+        .annotatedWith(BaseContainerService.class).to(LisTimestampSavePointContainerService.class);
+    bind(new TypeLiteral<SavePointContainerService<TimestampSavePoint<BigInteger>>>() {})
+        .annotatedWith(PrimaryContainerService.class)
         .to(TimestampSavePointContainerServiceDecorator.class);
 
     bind(LisChangedEntitiesIdentifiersService.class)
         .toProvider(LisChangedIdentifiersServiceProvider.class);
     bind(LisFacilityService.class).toProvider(LisFacilityServiceProvider.class);
     bind(FasFacilityService.class).toProvider(FasFacilityServiceProvider.class);
-    bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {
-    }).to(LisChangedFacilityService.class);
-    bind(
-        new TypeLiteral<SavePointService<LicenseNumberSavePoint>>() {
-        }).to(LicenseNumberSavePointService.class);
-    bind(
-        new TypeLiteral<SavePointContainerService<LicenseNumberSavePoint>>() {
-        }).annotatedWith(BaseContainerService.class)
-        .to(LicenseNumberSavePointContainerService.class);
-    bind(
-        new TypeLiteral<SavePointContainerService<LicenseNumberSavePoint>>() {
-        }).annotatedWith(PrimaryContainerService.class)
+    bind(new TypeLiteral<ChangedEntityService<ChangedFacilityDto>>() {})
+        .to(LisChangedFacilityService.class);
+    bind(new TypeLiteral<SavePointService<LicenseNumberSavePoint>>() {})
+        .to(LicenseNumberSavePointService.class);
+    bind(new TypeLiteral<SavePointContainerService<LicenseNumberSavePoint>>() {})
+        .annotatedWith(BaseContainerService.class).to(LicenseNumberSavePointContainerService.class);
+    bind(new TypeLiteral<SavePointContainerService<LicenseNumberSavePoint>>() {})
+        .annotatedWith(PrimaryContainerService.class)
         .to(LicenseNumberSavePointContainerServiceDecorator.class);
     install(new LisDataAccessModule(getJobConfiguration().getLisDataSourceFactory()));
     install(new FasDataAccessModule(getJobConfiguration().getFasDataSourceFactory()));
@@ -105,17 +101,17 @@ public class LisFacilityJobModule extends BaseFacilityJobModule<LisFacilityJobCo
         bind(Job.class).to(LisInitialFacilityJob.class);
         bind(JobModeFinalizer.class).annotatedWith(SecondaryFinalizer.class)
             .to(LisInitialJobModeFinalizer.class);
-        bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).toProvider(
-            getPrimaryJobFinalizerProviderClass());
-        bind(new TypeLiteral<JobBatchIterator<LicenseNumberSavePoint>>() {
-        }).to(LisInitialModeIterator.class);
+        bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class)
+            .toProvider(getPrimaryJobFinalizerProviderClass());
+        bind(new TypeLiteral<JobBatchIterator<LicenseNumberSavePoint>>() {})
+            .to(LisInitialModeIterator.class);
         break;
       case INCREMENTAL_LOAD:
         bind(Job.class).to(LisIncrementalFacilityJob.class);
         bind(JobModeFinalizer.class).annotatedWith(PrimaryFinalizer.class).toInstance(() -> {
         });
-        bind(new TypeLiteral<JobBatchIterator<TimestampSavePoint<BigInteger>>>() {
-        }).to(LisIncrementalModeIterator.class);
+        bind(new TypeLiteral<JobBatchIterator<TimestampSavePoint<BigInteger>>>() {})
+            .to(LisIncrementalModeIterator.class);
         break;
       default:
         throw new IllegalStateException(String.format("Unknown job mode %s", getJobMode()));
@@ -141,15 +137,14 @@ public class LisFacilityJobModule extends BaseFacilityJobModule<LisFacilityJobCo
       @FasFfaSessionFactory SessionFactory fasFfaSessionFactory,
       @CalsnsSessionFactory SessionFactory calsnsDataSourceFactory) {
     try {
-      ImmutableMap<String, SessionFactory> sessionFactories = ImmutableMap.<String, SessionFactory>builder()
-          .put(Constants.UnitOfWork.FAS, fasSessionFactory)
+      ImmutableMap<String, SessionFactory> sessionFactories = ImmutableMap
+          .<String, SessionFactory>builder().put(Constants.UnitOfWork.FAS, fasSessionFactory)
           .put(Constants.UnitOfWork.LIS, lisSessionFactory)
           .put(UnitOfWork.CALSNS, calsnsDataSourceFactory)
-          .put(UnitOfWork.FAS_FFA, fasFfaSessionFactory)
-          .build();
+          .put(UnitOfWork.FAS_FFA, fasFfaSessionFactory).build();
       UnitOfWorkAwareProxyFactory unitOfWorkAwareProxyFactory = new UnitOfWorkAwareProxyFactory();
-      FieldUtils
-          .writeField(unitOfWorkAwareProxyFactory, "sessionFactories", sessionFactories, true);
+      FieldUtils.writeField(unitOfWorkAwareProxyFactory, "sessionFactories", sessionFactories,
+          true);
       return unitOfWorkAwareProxyFactory;
     } catch (IllegalAccessException e) {
       LOG.error("Can't build UnitOfWorkAwareProxyFactory", e);
@@ -157,13 +152,13 @@ public class LisFacilityJobModule extends BaseFacilityJobModule<LisFacilityJobCo
     }
   }
 
-  static class LicenseNumberSavePointContainerServiceDecorator extends
-      IndexAwareSavePointContainerService<LicenseNumberSavePoint> {
+  static class LicenseNumberSavePointContainerServiceDecorator
+      extends IndexAwareSavePointContainerService<LicenseNumberSavePoint> {
 
   }
 
-  static class TimestampSavePointContainerServiceDecorator extends
-      IndexAwareSavePointContainerService<TimestampSavePoint<BigInteger>> {
+  static class TimestampSavePointContainerServiceDecorator
+      extends IndexAwareSavePointContainerService<TimestampSavePoint<BigInteger>> {
 
   }
 

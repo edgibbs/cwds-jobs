@@ -1,19 +1,20 @@
 package gov.ca.cwds.jobs.cals.facility.lisfas;
 
+import org.hibernate.SessionFactory;
+
 import com.google.inject.Inject;
+
 import gov.ca.cwds.cals.inject.CalsnsSessionFactory;
 import gov.ca.cwds.cals.inject.FasSessionFactory;
 import gov.ca.cwds.cals.inject.LisSessionFactory;
 import gov.ca.cwds.jobs.cals.facility.ChangedFacilityDto;
 import gov.ca.cwds.jobs.common.core.JobImpl;
 import gov.ca.cwds.jobs.common.savepoint.SavePoint;
-import org.hibernate.SessionFactory;
 
 /**
  * Created by Alexander Serbin on 3/5/2018.
  */
-public class AbstractLisFacilityJob<S extends SavePoint> extends
-    JobImpl<ChangedFacilityDto, S> {
+public class AbstractLisFacilityJob<S extends SavePoint> extends JobImpl<ChangedFacilityDto, S> {
 
   @Inject
   @FasSessionFactory
@@ -34,4 +35,5 @@ public class AbstractLisFacilityJob<S extends SavePoint> extends
     lisSessionFactory.close();
     calsnsSessionFactory.close();
   }
+
 }

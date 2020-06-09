@@ -157,6 +157,7 @@ public class JobOptions {
       LOGGER.error("Error parsing command line: {}", e.getMessage(), e);
       throw new JobsException("Error parsing command line: " + e.getMessage(), e);
     }
+
     JobOptions jobOptions = new JobOptions(esConfigLoc, lastRunLoc);
     validateJobOptions(jobOptions);
     return jobOptions;

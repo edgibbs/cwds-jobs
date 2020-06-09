@@ -2,12 +2,14 @@ package gov.ca.cwds.jobs.common.inject;
 
 import static gov.ca.cwds.jobs.common.util.SavePointUtil.extractProperty;
 
+import org.elasticsearch.client.RestHighLevelClient;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.AbstractModule;
+
 import gov.ca.cwds.jobs.common.elastic.ElasticApiWrapper;
 import gov.ca.cwds.jobs.common.elastic.ElasticUtils;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchConfiguration;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.slf4j.LoggerFactory;
 import gov.ca.cwds.jobs.common.elastic.ElasticsearchService;
 import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
@@ -17,18 +19,17 @@ import gov.ca.cwds.jobs.common.savepoint.SavePointContainerService;
  */
 public class ElasticSearchModule extends AbstractModule {
 
-  private static final org.slf4j.Logger LOGGER = LoggerFactory
-      .getLogger(ElasticSearchModule.class);
+  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ElasticSearchModule.class);
 
   private final RestHighLevelClient client;
   private ElasticsearchConfiguration configuration;
   private String indexName;
 
-  public ElasticSearchModule(ElasticsearchConfiguration configuration,
-      JobMode jobMode, SavePointContainerService savePointContainerService) {
+  public ElasticSearchModule(ElasticsearchConfiguration configuration, JobMode jobMode,
+      SavePointContainerService savePointContainerService) {
     this.configuration = configuration;
-    this.client = ElasticUtils
-        .createAndConfigureESClient(configuration); //must be closed when the job done
+    this.client = ElasticUtils.createAndConfigureESClient(configuration); // must be closed when the
+                                                                          // job done
     ElasticApiWrapper elasticApiWrapper = new ElasticApiWrapper();
     elasticApiWrapper.setClient(client);
     ElasticsearchService service = new ElasticsearchService();

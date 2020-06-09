@@ -28,14 +28,14 @@ public class TimestampJobBatchIterator<T> implements JobBatchIterator<TimestampS
   @Override
   public JobBatch<TimestampSavePoint<T>> getNextPortion() {
     LOGGER.info("Getting next portion");
-    TimestampSavePoint<T> previousSavePoint = savePointService.loadSavePoint();
+    final TimestampSavePoint<T> previousSavePoint = savePointService.loadSavePoint();
     LOGGER.debug("getNextPortion: previousSavePoint: {}", previousSavePoint);
 
-    Optional<TimestampSavePoint<T>> nextSavePoint =
+    final Optional<TimestampSavePoint<T>> nextSavePoint =
         identifiersService.getNextSavePoint(previousSavePoint);
     LOGGER.debug("getNextPortion: nextSavePoint: {}", nextSavePoint);
 
-    Optional<TimestampSavePoint<T>> firstChangedTimestamp =
+    final Optional<TimestampSavePoint<T>> firstChangedTimestamp =
         nextSavePoint.flatMap(identifiersService::getFirstChangedTimestampAfterSavepoint);
     return new JobBatch<>(
         identifiersService.getIdentifiers(Optional.of(previousSavePoint), firstChangedTimestamp));

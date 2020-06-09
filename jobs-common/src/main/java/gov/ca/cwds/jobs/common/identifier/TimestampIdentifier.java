@@ -1,21 +1,22 @@
 package gov.ca.cwds.jobs.common.identifier;
 
+import java.io.Serializable;
+
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
 import gov.ca.cwds.jobs.common.savepoint.TimestampSavePoint;
-import java.io.Serializable;
 
 /**
  * Created by Alexander Serbin on 6/27/2018.
  */
 public class TimestampIdentifier<T> extends ChangedEntityIdentifier<TimestampSavePoint<T>> {
 
-  public TimestampIdentifier(String id,
-      TimestampSavePoint<T> savePoint) {
+  private static final long serialVersionUID = 1L;
+
+  public TimestampIdentifier(String id, TimestampSavePoint<T> savePoint) {
     super(id, savePoint);
   }
 
-  public TimestampIdentifier(String id,
-      RecordChangeOperation recordChangeOperation,
+  public TimestampIdentifier(String id, RecordChangeOperation recordChangeOperation,
       TimestampSavePoint<T> savePoint) {
     super(id, recordChangeOperation, savePoint);
   }
@@ -29,4 +30,5 @@ public class TimestampIdentifier<T> extends ChangedEntityIdentifier<TimestampSav
   public Serializable getPrimaryKey() {
     return getId();
   }
+
 }

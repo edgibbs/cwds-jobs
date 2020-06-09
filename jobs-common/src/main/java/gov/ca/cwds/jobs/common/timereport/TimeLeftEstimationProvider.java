@@ -1,9 +1,10 @@
 package gov.ca.cwds.jobs.common.timereport;
 
-import gov.ca.cwds.jobs.common.batch.JobBatch;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+
+import gov.ca.cwds.jobs.common.batch.JobBatch;
 
 /**
  * Created by Alexander Serbin on 3/19/2018.

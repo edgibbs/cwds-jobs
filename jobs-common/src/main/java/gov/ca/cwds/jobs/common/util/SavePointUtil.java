@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -14,14 +15,14 @@ import org.json.JSONObject;
  */
 public final class SavePointUtil {
 
-  private SavePointUtil() {
-  }
+  private SavePointUtil() {}
 
   public static String extractProperty(Path savePointFile, String propertyName) {
     try (Reader reader = Files.newBufferedReader(savePointFile)) {
       String savePointContainer = IOUtils.toString(reader);
       JSONObject jsonObject = new JSONObject(savePointContainer);
       String propertyValue = jsonObject.getString(propertyName);
+
       if (StringUtils.isNoneEmpty(propertyValue)) {
         return propertyValue;
       }

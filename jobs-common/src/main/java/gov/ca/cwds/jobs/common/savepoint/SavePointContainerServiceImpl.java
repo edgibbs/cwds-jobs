@@ -69,6 +69,7 @@ public abstract class SavePointContainerServiceImpl<S extends SavePoint>
   public void writeSavePointContainer(SavePointContainer<? extends S> savePointContainer) {
     Objects.requireNonNull(savePointContainer.getJobMode());
     Objects.requireNonNull(savePointContainer.getSavePoint());
+
     try {
       String fileContent = mapper.writeValueAsString(savePointContainer);
       File file = getSavePointFile().toFile();
@@ -87,4 +88,5 @@ public abstract class SavePointContainerServiceImpl<S extends SavePoint>
       throw new ApiException("Can't write save point container ", e);
     }
   }
+
 }

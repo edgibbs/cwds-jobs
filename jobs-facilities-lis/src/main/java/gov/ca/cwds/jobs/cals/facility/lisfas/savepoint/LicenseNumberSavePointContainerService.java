@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.cals.facility.lisfas.savepoint;
 
 import com.google.inject.Inject;
+
 import gov.ca.cwds.jobs.common.inject.LastRunDir;
 import gov.ca.cwds.jobs.common.mode.JobMode;
 import gov.ca.cwds.jobs.common.savepoint.SavePointContainer;
@@ -9,8 +10,8 @@ import gov.ca.cwds.jobs.common.savepoint.SavePointContainerServiceImpl;
 /**
  * Created by Alexander Serbin on 6/29/2018.
  */
-public class LicenseNumberSavePointContainerService extends
-    SavePointContainerServiceImpl<LicenseNumberSavePoint> {
+public class LicenseNumberSavePointContainerService
+    extends SavePointContainerServiceImpl<LicenseNumberSavePoint> {
 
   @Inject
   public LicenseNumberSavePointContainerService(@LastRunDir String outputDir) {
@@ -23,7 +24,7 @@ public class LicenseNumberSavePointContainerService extends
     if (savePointContainerExists()) {
       return super.readSavePointContainer(savePointContainerClass);
     } else {
-      LicenseNumberSavePointContainer container = new LicenseNumberSavePointContainer();
+      final LicenseNumberSavePointContainer container = new LicenseNumberSavePointContainer();
       container.setJobMode(JobMode.INITIAL_LOAD);
       LicenseNumberSavePoint savePoint = new LicenseNumberSavePoint(0);
       container.setSavePoint(savePoint);
@@ -31,4 +32,5 @@ public class LicenseNumberSavePointContainerService extends
     }
 
   }
+
 }
