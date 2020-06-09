@@ -1,11 +1,12 @@
 package gov.ca.cwds.jobs.cals.facility;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 import gov.ca.cwds.cals.service.dto.FacilityDto;
 import gov.ca.cwds.dto.BaseDTO;
 import gov.ca.cwds.jobs.common.ChangedDTO;
 import gov.ca.cwds.jobs.common.RecordChangeOperation;
-import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * @author CWDS TPT-2
@@ -24,7 +25,7 @@ public class ChangedFacilityDto extends BaseDTO implements ChangedDTO<FacilityDt
   }
 
   public ChangedFacilityDto() {
-    //default constructor
+    // default constructor
   }
 
   @Override
@@ -51,12 +52,13 @@ public class ChangedFacilityDto extends BaseDTO implements ChangedDTO<FacilityDt
       return false;
     }
     ChangedFacilityDto that = (ChangedFacilityDto) o;
-    return recordChangeOperation == that.recordChangeOperation && Objects
-        .equals(facilityDto, that.facilityDto);
+    return recordChangeOperation == that.recordChangeOperation
+        && Objects.equals(facilityDto, that.facilityDto);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(facilityDto, recordChangeOperation);
   }
+
 }
