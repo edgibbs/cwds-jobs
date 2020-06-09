@@ -12,7 +12,6 @@ import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 /**
  * @author CWDS TPT-2
  */
-
 public class LisChangedFacilityService extends AbstractChangedFacilityService
     implements ChangedEntityService<ChangedFacilityDto> {
 
