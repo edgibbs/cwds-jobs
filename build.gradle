@@ -2,6 +2,10 @@ buildscript {
     repositories {
         maven {
             url "http://sonar.dev.cwds.io:8081/artifactory/repo"
+            metadataSources {
+              mavenPom()
+              artifact()
+            }             
         }
         jcenter()
         maven {
@@ -13,7 +17,7 @@ buildscript {
 plugins {
     id 'java-library'
     id 'eclipse'
-    id 'org.sonarqube' version '2.6'
+    //id 'org.sonarqube' version '2.6.2'
     id 'com.github.jk1.dependency-license-report' version '1.5'
 }
 
@@ -71,6 +75,10 @@ allprojects {
         mavenLocal()
         maven {
             url artifactoryRepo
+            metadataSources {
+              mavenPom()
+              artifact()
+            }                 
         }
         maven {
             url "https://artifacts.elastic.co/maven"
@@ -84,15 +92,16 @@ subprojects {
 
     dependencies {
         implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+
         testImplementation group: 'junit', name: 'junit', version: jUnitVersion
         testImplementation group: 'org.mockito', name: 'mockito-all', version: '2.0.2-beta'
     }
 
-    sonarqube {
-        properties {
-            property "sonar.jacoco.reportPaths", allTestCoverageFile
-        }
-    }
+    // sonarqube {
+    //     properties {
+    //         property "sonar.jacoco.reportPaths", allTestCoverageFile
+    //     }
+    // }
 }
 
 dependencies {
@@ -116,21 +125,21 @@ tasks.withType(Test) {
     systemProperties project.properties.subMap(["DB_CMS_JDBC_URL", "DB_CMS_PASSWORD", "DB_CMS_SCHEMA", "DB_CMS_REP_SCHEMA", "DB_CMS_USER", "DB_NS_JDBC_URL", "DB_NS_PASSWORD", "DB_NS_SCHEMA", "DB_NS_USER"])
 }
 
-sonarqube {
-  properties {
-      property "sonar.projectKey", "cwds.ca.gov:cwds-jobs"
-      property "sonar.projectName", "cwds-jobs"
-      property "sonar.jacoco.reportPaths",   allTestCoverageFile
-  }
-}
+// sonarqube {
+//   properties {
+//       property "sonar.projectKey", "cwds.ca.gov:cwds-jobs"
+//       property "sonar.projectName", "cwds-jobs"
+//       property "sonar.jacoco.reportPaths",   allTestCoverageFile
+//   }
+// }
 
 task jacocoMergeTest(type: JacocoMerge) {
     destinationFile = file(allTestCoverageFile)
     executionData = project.fileTree(dir: '.', include:'**/build/jacoco/test.exec')
 }
 
-import com.github.jk1.license.render.CsvReportRenderer
+//import com.github.jk1.license.render.CsvReportRenderer
 
-licenseReport {
-  renderers = [new CsvReportRenderer()]
-}
+// licenseReport {
+//   renderers = [new CsvReportRenderer()]
+// }

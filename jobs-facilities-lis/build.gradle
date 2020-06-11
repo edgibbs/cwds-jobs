@@ -38,8 +38,7 @@ dependencies {
     implementation group: 'gov.ca.cwds.api', name: 'legacy-data-access', version: coreApiVersion  
     implementation 'gov.ca.cwds:cals-ns-data-model:3.9.10'  
     implementation 'gov.ca.cwds.cals:cals-api:1.11.2'  
-    implementation 'org.glassfish.jersey.ext:jersey-declarative-linking:2.23.2'  
-    implementation 'org.liquibase:liquibase-core:3.5.3'      
+    implementation 'org.glassfish.jersey.ext:jersey-declarative-linking:2.23.2'       
 
     testImplementation project(':jobs-facilities-common').sourceSets.test.output
     testImplementation(group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion) {
