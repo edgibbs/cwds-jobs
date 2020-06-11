@@ -18,7 +18,7 @@ plugins {
     id 'java-library'
     id 'eclipse'
     id 'org.sonarqube' version '2.7'
-    id 'com.github.jk1.dependency-license-report' version '1.5'
+    id 'com.github.jk1.dependency-license-report' version '1.13'
 }
 
 project.ext {
@@ -138,8 +138,8 @@ task jacocoMergeTest(type: JacocoMerge) {
     executionData = project.fileTree(dir: '.', include:'**/build/jacoco/test.exec')
 }
 
-//import com.github.jk1.license.render.CsvReportRenderer
+import com.github.jk1.license.render.CsvReportRenderer
 
-// licenseReport {
-//   renderers = [new CsvReportRenderer()]
-// }
+licenseReport {
+  renderers = [new CsvReportRenderer()]
+}

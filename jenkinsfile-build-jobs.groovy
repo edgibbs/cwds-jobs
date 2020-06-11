@@ -122,21 +122,21 @@ node ('dora-slave') {
                 updateLicenseReport('master', GITHUB_CREDENTIALS_ID, [runtimeGradle: rtGradle])
             }
         }
-        // if (env.BUILD_JOB_TYPE == 'master' || env.BUILD_JOB_TYPE == 'hotfix') {
-        //     stage('Tag Repo') {
-        //         tagGithubRepo(newTag, GITHUB_CREDENTIALS_ID)
-        //     }
-        //     stage('Push to artifactory') {
-        //         rtGradle.deployer.deployArtifacts = true
-        //         rtGradle.run buildFile: "jobs-${tagPrefix}/build.gradle".toString(), tasks: "publish -DRelease=${releaseProject} -DBuildNumber=${env.BUILD_NUMBER} -DCustomVersion=${overrideVersion} -DnewVersion=${newVersion}".toString()
-        //         rtGradle.deployer.deployArtifacts = false
-        //     }
-        //     stage('Clean WorkSpace') {
-        //         archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
-        //         sh ('docker-compose down -v')
-        //         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
-        //     }
-        // }
+        if (env.BUILD_JOB_TYPE == 'master' || env.BUILD_JOB_TYPE == 'hotfix') {
+            stage('Tag Repo') {
+                tagGithubRepo(newTag, GITHUB_CREDENTIALS_ID)
+            }
+            stage('Push to artifactory') {
+                rtGradle.deployer.deployArtifacts = true
+                rtGradle.run buildFile: "jobs-${tagPrefix}/build.gradle".toString(), tasks: "publish -DRelease=${releaseProject} -DBuildNumber=${env.BUILD_NUMBER} -DCustomVersion=${overrideVersion} -DnewVersion=${newVersion}".toString()
+                rtGradle.deployer.deployArtifacts = false
+            }
+            stage('Clean WorkSpace') {
+                archiveArtifacts artifacts: '**/jobs-*.jar,readme.txt,DocumentIndexerJob-*.jar', fingerprint: true
+                sh ('docker-compose down -v')
+                publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
+            }
+        }
     } catch(Exception e) {
         echo e.message
         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
