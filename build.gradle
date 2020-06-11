@@ -2,21 +2,24 @@ buildscript {
     repositories {
         maven {
             url "http://sonar.dev.cwds.io:8081/artifactory/repo"
+            metadataSources {
+              mavenPom()
+              artifact()
+            }             
         }
         jcenter()
         maven {
             url "https://artifacts.elastic.co/maven"
         }
-    }
+    } 
 }
 
 plugins {
-    id 'org.sonarqube' version '2.6'
-    id 'com.github.jk1.dependency-license-report' version '1.5'
+    id 'java-library'
+    id 'eclipse'
+    id 'org.sonarqube' version '2.7'
+    id 'com.github.jk1.dependency-license-report' version '1.13'
 }
-
-apply plugin: 'java'
-apply plugin: 'eclipse'
 
 project.ext {
     cwdsModelVersion = '3.9.10'
@@ -72,6 +75,10 @@ allprojects {
         mavenLocal()
         maven {
             url artifactoryRepo
+            metadataSources {
+              mavenPom()
+              artifact()
+            }                 
         }
         maven {
             url "https://artifacts.elastic.co/maven"
@@ -84,9 +91,10 @@ subprojects {
     apply plugin: 'java'
 
     dependencies {
-        compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-        testCompile group: 'junit', name: 'junit', version: jUnitVersion
-        testCompile group: 'org.mockito', name: 'mockito-all', version: '2.0.2-beta'
+        implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+
+        testImplementation group: 'junit', name: 'junit', version: jUnitVersion
+        testImplementation group: 'org.mockito', name: 'mockito-all', version: '2.0.2-beta'
     }
 
     sonarqube {
@@ -99,7 +107,7 @@ subprojects {
 dependencies {
 }
 
-task printProps << {
+task printProps doLast {
     println System.properties['DB_CMS_JDBC_URL']
 }
 

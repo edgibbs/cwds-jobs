@@ -3,16 +3,19 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
     }
 }
 
-version = parent.version
+plugins {
+    id 'com.github.johnrengelman.shadow' version '5.2.0'  
+    id 'java-library'
+    id 'eclipse'
+    id 'maven-publish'
+    id 'jacoco'    
+}
 
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'jacoco'
+version = parent.version
 
 sourceCompatibility = 1.8
 
@@ -20,22 +23,27 @@ configurations {
     externalLibs {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
-    testCompile.extendsFrom(externalLibs)
+    testImplementation.extendsFrom(externalLibs)
 }
 
 dependencies {
 
-    compile project(':jobs-facilities-common')
-    compile group: 'org.apache.commons', name: 'commons-text', version: apacheCommonsTextVersion
+    implementation project(':jobs-facilities-common')
+    implementation project(':jobs-common')
+    implementation group: 'gov.ca.cwds.api', name: 'legacy-data-access', version: coreApiVersion
+    implementation group: 'org.apache.commons', name: 'commons-text', version: apacheCommonsTextVersion
+    implementation 'io.dropwizard:dropwizard-hibernate:1.1.0'
+    implementation 'gov.ca.cwds.cals:cals-api:1.11.2'
 
-    testCompile project(':jobs-facilities-common').sourceSets.test.output
-    testCompile(group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion) {
+
+    testImplementation project(':jobs-facilities-common').sourceSets.test.output
+    testImplementation(group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion) {
         exclude group: 'gov.ca.cwds.api'
     }
-    testCompile(group: 'gov.ca.cwds', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true)
-    testCompile group: 'org.skyscreamer', name: 'jsonassert', version: jsonAssertVersion
-    testCompile project(':jobs-facilities-common').sourceSets.test.output
-    testCompile project(':jobs-common').sourceSets.test.output
+    testImplementation(group: 'gov.ca.cwds', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true)
+    testImplementation group: 'org.skyscreamer', name: 'jsonassert', version: jsonAssertVersion
+    testImplementation project(':jobs-facilities-common').sourceSets.test.output
+    testImplementation project(':jobs-common').sourceSets.test.output
 
 }
 
@@ -56,8 +64,8 @@ shadowJar {
 
 publishing {
     publications {
-        shadow(MavenPublication) {
-            from components.shadow
+        shadow(MavenPublication) { publication ->
+            from project.shadow.component(publication)
             groupId 'gov.ca.cwds.jobs'
             artifactId 'jobs-facilities-cws'
         }
