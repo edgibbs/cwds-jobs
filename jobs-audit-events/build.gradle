@@ -3,16 +3,19 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
     }
 }
 
-version = parent.version
+plugins {
+    id 'com.github.johnrengelman.shadow' version '5.2.0'  
+    id 'java-library'
+    id 'eclipse'
+    id 'maven-publish'
+    id 'jacoco'
+}
 
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'jacoco'
+version = parent.version
 
 sourceCompatibility = 1.8
 
@@ -20,22 +23,29 @@ configurations {
     externalLibs {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
-    testCompile.extendsFrom(externalLibs)
+    testImplementation.extendsFrom(externalLibs)
 }
 
 
 dependencies {
 
-    compile project(':jobs-common')
-    compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.26'
-    compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.26'
-    compile (group: 'gov.ca.cwds.api', name: 'perry', version: perryVersion) {
+    implementation project(':jobs-common')
+    implementation group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.26'
+    implementation group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.26'
+    implementation (group: 'gov.ca.cwds.api', name: 'perry', version: perryVersion) {
         exclude group: 'com.zaxxer'
     }
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
-    testCompile project(':jobs-common').sourceSets.test.output
-    testCompile(group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion) {
+
+    implementation 'io.dropwizard:dropwizard-hibernate:1.1.0'
+    implementation 'com.google.inject:guice:4.0'
+    implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:6.8.0'
+    implementation group: 'gov.ca.cwds.api', name: 'api-core-common', version: coreApiVersion
+    implementation group: 'gov.ca.cwds.api', name: 'legacy-data-access', version: coreApiVersion
+
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
+    testImplementation project(':jobs-common').sourceSets.test.output
+    testImplementation(group: 'gov.ca.cwds.api', name: 'api-core-test-support', version: testSupportVersion) {
         exclude group: 'gov.ca.cwds.api'
     }
 
@@ -58,8 +68,8 @@ shadowJar {
 
 publishing {
     publications {
-        shadow(MavenPublication) {
-            from components.shadow
+        shadow(MavenPublication) { publication ->
+            from project.shadow.component(publication)
             groupId 'gov.ca.cwds.jobs'
             artifactId 'jobs-audit-events'
         }

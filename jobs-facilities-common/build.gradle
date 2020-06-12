@@ -1,11 +1,13 @@
-apply plugin: 'jacoco'
+plugins {
+    id 'jacoco'    
+}
 
 dependencies {
 
-    compile project(':jobs-common')
+    implementation project(':jobs-common')
 
     // CALS API for CALS Jobs
-    compile(group: 'gov.ca.cwds.cals', name: 'cals-api', version: calsApiVersion) {
+    implementation(group: 'gov.ca.cwds.cals', name: 'cals-api', version: calsApiVersion) {
         exclude group: 'org.bouncycastle'
         exclude group: 'org.liquibase', module: 'liquibase-core'
         exclude group: 'gov.ca.cwds.api'
@@ -13,15 +15,21 @@ dependencies {
     }
 
     // LOGGING:
-    compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
-    compile group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4jVersion
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4jVersion
 
-    compile group: 'gov.ca.cwds.api', name: 'legacy-data-access-services', version: coreApiVersion
-    testCompile group: 'org.skyscreamer', name: 'jsonassert', version: jsonAssertVersion
-    testCompile project(':jobs-common').sourceSets.test.output
+    implementation group: 'gov.ca.cwds.api', name: 'legacy-data-access-services', version: coreApiVersion
+
+    implementation group: 'gov.ca.cwds.api', name: 'legacy-data-access', version: coreApiVersion
+    implementation group: 'gov.ca.cwds.api', name: 'api-core-common', version: coreApiVersion
+    implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:6.8.0'        
+    
+    testImplementation group: 'org.skyscreamer', name: 'jsonassert', version: jsonAssertVersion
+    testImplementation project(':jobs-common').sourceSets.test.output
+    testImplementation 'org.glassfish.jersey.ext:jersey-declarative-linking:2.23.2'
 
 }
 
