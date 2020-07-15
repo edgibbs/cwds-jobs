@@ -105,12 +105,21 @@ node ('dora-slave') {
         rtGradle.run buildFile: "jobs-${tagPrefix}/build.gradle".toString(), tasks: "jar shadowJar -DRelease=${releaseProject} -D build=${env.BUILD_NUMBER} -DCustomVersion=${overrideVersion} -DnewVersion=${newVersion}".toString()
       }
     }
+	stage('Init CodeClimate') {
+		sh "curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter"
+		sh "chmod +x ./cc-test-reporter"
+		sh "./cc-test-reporter before-build --debug"
+	}
     stage('Tests and Coverage') {
       rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
     }
     stage('SonarQube analysis'){
       lint(rtGradle)
     }
+	stage('Publish Coverage Reports') {
+		sh "chmod 755 code_climate_coverage_branch.sh"
+		output = sh(returnStdout: true, script: './code_climate_coverage_branch.sh').trim()
+	}
     if (env.BUILD_JOB_TYPE == 'master') {
       stage('Update License Report') {
         updateLicenseReport('master', GITHUB_CREDENTIALS_ID, [runtimeGradle: rtGradle])
