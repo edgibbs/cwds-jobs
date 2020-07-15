@@ -45,3 +45,15 @@ dependencies {
     testImplementation 'org.liquibase:liquibase-core:3.5.3' 
     testImplementation 'io.dropwizard:dropwizard-testing:1.1.0' 
 }
+
+test {
+	finalizedBy jacocoTestReport // report is always generated after tests run
+}
+
+jacocoTestReport {
+	reports {
+		xml.enabled true
+		csv.enabled false
+		html.enabled false
+	}
+}
