@@ -91,7 +91,10 @@ node ('dora-slave') {
     }
     if (env.BUILD_JOB_TYPE == 'pull_request') {
       stage('Check for Labels') {
-        checkForLabel('cwds-jobs', tagPrefixes)
+        withCredentials([string(credentialsId: 'c099aece-fa62-4fb6-af4a-64204e436a22', variable: 'accesskey')]) {
+          checkForLabelAsAuthenticatedUser("cwds-jobs", 'cwds-jenkins-dev', accesskey, tagPrefixes)    
+        }      
+
       }
     }
     if (env.BUILD_JOB_TYPE == 'master') {
